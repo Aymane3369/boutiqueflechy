@@ -6,7 +6,6 @@
     <title>StyleShop - Boutique</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* --- STYLES COMPLETS --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body { background: #f8fafc; color: #0f172a; }
         .header {
@@ -24,35 +23,10 @@
         }
         .logo { font-size: 1.6rem; font-weight: 700; color: #0f172a; cursor: pointer; }
         .cart-icon { position: relative; cursor: pointer; font-size: 1.8rem; }
-        .cart-count {
-            position: absolute;
-            top: -8px;
-            right: -12px;
-            background: #3b82f6;
-            color: white;
-            font-size: 0.7rem;
-            font-weight: bold;
-            border-radius: 30px;
-            padding: 2px 6px;
-            min-width: 20px;
-            text-align: center;
-        }
+        .cart-count { position: absolute; top: -8px; right: -12px; background: #3b82f6; color: white; font-size: 0.7rem; font-weight: bold; border-radius: 30px; padding: 2px 6px; min-width: 20px; text-align: center; }
         .container { max-width: 1300px; margin: 0 auto; padding: 2rem; }
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 2rem;
-            margin-top: 1.5rem;
-        }
-        .product-card {
-            background: white;
-            border-radius: 24px;
-            padding: 1.2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-            transition: 0.2s;
-            cursor: pointer;
-        }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 2rem; margin-top: 1.5rem; }
+        .product-card { background: white; border-radius: 24px; padding: 1.2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: 0.2s; cursor: pointer; }
         .product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
         .product-icon { font-size: 3rem; margin-bottom: 0.5rem; }
         .product-title { font-size: 1.2rem; font-weight: 600; }
@@ -61,120 +35,26 @@
         .stock-ok { color: #15803d; }
         .stock-low { color: #b45309; }
         .stock-out { color: #dc2626; }
-        button {
-            background: #0f172a;
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        button { background: #0f172a; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 40px; font-weight: 500; cursor: pointer; transition: 0.2s; }
         button.primary { background: #3b82f6; }
         button.primary:hover { background: #2563eb; }
-        button.outline {
-            background: white;
-            border: 1px solid #cbd5e1;
-            color: #1e293b;
-        }
-        .product-detail {
-            background: white;
-            border-radius: 32px;
-            padding: 2rem;
-            max-width: 700px;
-            margin: 0 auto;
-            border: 1px solid #e2e8f0;
-        }
+        button.outline { background: white; border: 1px solid #cbd5e1; color: #1e293b; }
+        .product-detail { background: white; border-radius: 32px; padding: 2rem; max-width: 700px; margin: 0 auto; border: 1px solid #e2e8f0; }
         .variant-group { margin: 1.2rem 0; }
-        .variant-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        .variant-btn {
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            padding: 0.5rem 1rem;
-            border-radius: 40px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
+        .variant-options { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+        .variant-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.5rem 1rem; border-radius: 40px; cursor: pointer; font-size: 0.9rem; }
         .variant-btn.selected { background: #0f172a; color: white; }
-        .variant-btn.disabled { opacity: 0.4; cursor: not-allowed; text-decoration: line-through; }
         .back-link { display: inline-block; margin-bottom: 1rem; cursor: pointer; color: #3b82f6; }
-        .cart-page {
-            background: white;
-            border-radius: 32px;
-            padding: 1.5rem;
-            border: 1px solid #e2e8f0;
-        }
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
+        .cart-page { background: white; border-radius: 32px; padding: 1.5rem; border: 1px solid #e2e8f0; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #e2e8f0; }
         .cart-item-qty { display: flex; gap: 0.5rem; align-items: center; }
-        .qty-btn {
-            background: #e2e8f0;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-        }
+        .qty-btn { background: #e2e8f0; padding: 0.2rem 0.6rem; border-radius: 20px; font-weight: bold; cursor: pointer; border: none; }
         .summary { margin-top: 1.5rem; text-align: right; }
-        .promo-box {
-            background: #f8fafc;
-            padding: 1rem;
-            border-radius: 20px;
-            margin-top: 1rem;
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-        .promo-box input {
-            padding: 0.5rem;
-            border-radius: 40px;
-            border: 1px solid #cbd5e1;
-            flex: 1;
-            min-width: 150px;
-        }
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #0f172a;
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 40px;
-            z-index: 200;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: white;
-            max-width: 500px;
-            width: 90%;
-            border-radius: 32px;
-            padding: 1.8rem;
-        }
+        .promo-box { background: #f8fafc; padding: 1rem; border-radius: 20px; margin-top: 1rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+        .promo-box input { padding: 0.5rem; border-radius: 40px; border: 1px solid #cbd5e1; flex: 1; min-width: 150px; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: white; padding: 0.8rem 1.5rem; border-radius: 40px; z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; max-width: 500px; width: 90%; border-radius: 32px; padding: 1.8rem; }
         hr { margin: 1rem 0; }
         @media (max-width: 700px) { .container { padding: 1rem; } }
     </style>
@@ -210,22 +90,34 @@
 
     // --- CHARGEMENT DES DONNÉES DEPUIS SUPABASE ---
     async function loadProducts() {
-        const { data, error } = await supabase.from('products').select('*');
-        if (error) {
-            console.error('Erreur chargement produits:', error);
-            showToast('Erreur de chargement des produits');
+        try {
+            const { data, error } = await supabase.from('products').select('*');
+            if (error) {
+                console.error('❌ Erreur chargement produits:', error);
+                showToast('Erreur de chargement des produits');
+                return [];
+            }
+            console.log(`📦 ${data?.length || 0} produits chargés`);
+            return data || [];
+        } catch (e) {
+            console.error('❌ Exception:', e);
             return [];
         }
-        return data || [];
     }
 
     async function loadPromos() {
-        const { data, error } = await supabase.from('promos').select('*');
-        if (error) {
-            console.error('Erreur chargement promos:', error);
+        try {
+            const { data, error } = await supabase.from('promos').select('*');
+            if (error) {
+                console.error('❌ Erreur chargement promos:', error);
+                return [];
+            }
+            console.log(`🏷️ ${data?.length || 0} codes promo chargés`);
+            return data || [];
+        } catch (e) {
+            console.error('❌ Exception:', e);
             return [];
         }
-        return data || [];
     }
 
     // --- PANIER (localStorage) ---
@@ -257,14 +149,6 @@
         if (prod.type === 'simple') return prod.stock || 0;
         const variant = prod.variants?.find(v => v.id === variantId);
         return variant ? variant.stock : 0;
-    }
-
-    function getVariantPrice(productId, variantId) {
-        const prod = products.find(p => p.id === productId);
-        if (!prod) return 0;
-        if (prod.type === 'simple') return prod.price || 0;
-        const variant = prod.variants?.find(v => v.id === variantId);
-        return variant ? variant.price : 0;
     }
 
     function getProductIcon(product) {
@@ -310,7 +194,6 @@
             return;
         }
 
-        // Vérifier si déjà dans le panier
         const existingIndex = cart.findIndex(item => item.productId === productId && item.variantId === variantId);
         if (existingIndex !== -1) {
             const newQty = cart[existingIndex].quantity + quantity;
@@ -393,14 +276,13 @@
         return subtotal - discount;
     }
 
-    // --- SIMULATION PAIEMENT + MISE À JOUR STOCKS SUPABASE ---
+    // --- SIMULATION PAIEMENT ---
     async function simulateCheckout(total) {
         if (cart.length === 0) {
             showToast('Panier vide');
             return;
         }
 
-        // Vérifier les stocks
         for (const item of cart) {
             const stock = getStock(item.productId, item.variantId);
             if (item.quantity > stock) {
@@ -409,7 +291,6 @@
             }
         }
 
-        // Modal de paiement
         const modalHtml = `
             <div class="modal" id="paymentModal">
                 <div class="modal-content">
@@ -430,7 +311,7 @@
         document.getElementById('confirmPayment')?.addEventListener('click', async () => {
             modal.remove();
 
-            // 1. Mettre à jour les stocks dans Supabase
+            // Mise à jour des stocks
             for (const item of cart) {
                 const prod = products.find(p => p.id === item.productId);
                 if (!prod) continue;
@@ -448,7 +329,7 @@
                 }
             }
 
-            // 2. Créer la commande dans Supabase
+            // Création de la commande
             const orderId = 'ORD-' + Math.random().toString(36).substring(2, 8).toUpperCase();
             const now = new Date();
             const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`;
@@ -471,19 +352,13 @@
                 discount: appliedPromo?.discountAmount || 0
             };
 
-            const { error: orderError } = await supabase.from('orders').insert(order);
-            if (orderError) {
-                console.error('Erreur création commande:', orderError);
-                showToast('Erreur lors de la création de la commande');
-                return;
-            }
+            await supabase.from('orders').insert(order);
 
-            // 3. Vider le panier et la promo
+            // Vider le panier
             cart = [];
             appliedPromo = null;
             saveCart();
 
-            // 4. Afficher la confirmation
             const itemsList = order.items.map(i => {
                 const prod = products.find(p => p.id === i.productId);
                 const name = prod ? prod.name : 'Produit';
@@ -506,7 +381,6 @@
                 </div>
             `;
             document.getElementById('app').innerHTML = confirmationHtml;
-
             showToast(`Commande ${orderId} confirmée !`);
         });
     }
@@ -518,6 +392,7 @@
             document.getElementById('app').innerHTML = `
                 <h1>Catalogue</h1>
                 <p style="margin-top: 2rem;">Aucun produit disponible pour le moment.</p>
+                <p style="color: #475569;">Vérifiez que votre base Supabase contient des produits.</p>
             `;
             return;
         }
@@ -616,7 +491,6 @@
         `;
         document.getElementById('app').innerHTML = html;
 
-        // Gestion des variantes
         if (isVariant) {
             const tailleBtns = document.querySelectorAll('#tailleContainer .variant-btn');
             const couleurBtns = document.querySelectorAll('#couleurContainer .variant-btn');
@@ -652,7 +526,6 @@
             });
         }
 
-        // Bouton ajouter au panier
         document.getElementById('addToCartBtn')?.addEventListener('click', () => {
             if (isVariant) {
                 const variantId = selectedVariantCache[productId];
@@ -684,10 +557,7 @@
 
         const itemsHtml = cart.map((item, idx) => {
             const totalItem = item.price * item.quantity;
-            let variantStr = "";
-            if (item.attributes && item.attributes.taille) {
-                variantStr = ` ${item.attributes.taille}/${item.attributes.couleur}`;
-            }
+            let variantStr = item.attributes?.taille ? ` ${item.attributes.taille}/${item.attributes.couleur}` : '';
             return `
                 <div class="cart-item">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -736,7 +606,6 @@
         `;
         document.getElementById('app').innerHTML = html;
 
-        // Événements quantités
         document.querySelectorAll('.qty-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const idx = parseInt(btn.dataset.index);
@@ -750,7 +619,6 @@
             });
         });
 
-        // Événements promo
         document.getElementById('applyPromoBtn')?.addEventListener('click', () => {
             const code = document.getElementById('promoCodeInput').value.trim().toUpperCase();
             if (!code) {
@@ -777,7 +645,6 @@
         if (page === 'product' && productId) {
             currentPage = 'product';
             selectedProductId = productId;
-            // Initialiser la sélection par défaut pour les variantes
             const prod = products.find(p => p.id === productId);
             if (prod && prod.type === 'variants' && !selectedVariantCache[productId]) {
                 const firstAvail = prod.variants?.find(v => v.stock > 0);
@@ -799,35 +666,64 @@
         else renderCatalogue();
     }
 
-    // --- SYNCHRONISATION EN TEMPS RÉEL (REALTIME) ---
+    // --- SYNCHRONISATION EN TEMPS RÉEL ---
     function subscribeToChanges() {
         const channel = supabase.channel('public-changes');
         channel
             .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
-                console.log('🔄 Changement produits détecté, rechargement...');
+                console.log('🔄 Produits mis à jour, rechargement...');
                 products = await loadProducts();
                 if (currentPage !== 'cart') renderCurrentPage();
                 else renderCart();
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'promos' }, async () => {
-                console.log('🔄 Changement promos détecté, rechargement...');
+                console.log('🔄 Promos mises à jour, rechargement...');
                 promos = await loadPromos();
                 if (currentPage === 'cart') renderCart();
             })
             .subscribe((status) => {
-                console.log('📡 Statut Realtime:', status);
+                console.log('📡 Realtime:', status);
             });
     }
 
     // --- INITIALISATION ---
     async function init() {
         console.log('🚀 Initialisation de la boutique...');
-
-        // Charger les données
+        
+        // Charger les données depuis Supabase
         products = await loadProducts();
         promos = await loadPromos();
         loadCart();
 
-        console.log(`📦 ${products.length} produits chargés`);
-        console.log(`🏷️ ${promos.length} codes promo chargés`);
-        console.log(`🛒 ${cart.length} articles dans le panier`
+        console.log(`✅ ${products.length} produits, ${promos.length} promos, ${cart.length} articles`);
+
+        // S'abonner aux changements en temps réel
+        subscribeToChanges();
+
+        // Afficher la page
+        renderCurrentPage();
+
+        // Si aucun produit, afficher un message d'aide
+        if (products.length === 0) {
+            document.getElementById('app').innerHTML = `
+                <div style="text-align: center; padding: 3rem;">
+                    <h2>📦 Aucun produit disponible</h2>
+                    <p style="color: #475569;">Vérifiez que votre base Supabase contient des produits.</p>
+                    <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 1rem;">
+                        Exécutez le script SQL de création des tables dans l'éditeur SQL de Supabase.
+                    </p>
+                </div>
+            `;
+        }
+    }
+
+    // Lancer l'application
+    init();
+
+    // Exposer les fonctions nécessaires
+    window.navigateTo = navigateTo;
+    window.addToCart = addToCart;
+    window.updateCartItem = updateCartItem;
+</script>
+</body>
+</html>
