@@ -77,48 +77,7 @@
 
     <script>
         // ============================================
-        // 1. DONNÉES PAR DÉFAUT
-        // ============================================
-        function getDefaultProducts() {
-            return [
-                { id: "tshirt", name: "T-shirt Classic", description: "Coton bio.", type: "simple", price: 24.90, stock: 12, icon: "👕", images: [], active: true },
-                { id: "sneakers", name: "Sneakers Urban", description: "Semelle EVA.", type: "variants", basePrice: 89.90, icon: "👟", images: [], active: true,
-                    variants: [
-                        { id: "snk_38_blanc", attributes: { taille: "38", couleur: "Blanc" }, stock: 5, price: 89.90 },
-                        { id: "snk_39_blanc", attributes: { taille: "39", couleur: "Blanc" }, stock: 3, price: 89.90 },
-                        { id: "snk_40_blanc", attributes: { taille: "40", couleur: "Blanc" }, stock: 0, price: 89.90 },
-                        { id: "snk_41_blanc", attributes: { taille: "41", couleur: "Blanc" }, stock: 2, price: 89.90 },
-                        { id: "snk_38_noir", attributes: { taille: "38", couleur: "Noir" }, stock: 8, price: 89.90 },
-                        { id: "snk_39_noir", attributes: { taille: "39", couleur: "Noir" }, stock: 4, price: 89.90 },
-                        { id: "snk_40_noir", attributes: { taille: "40", couleur: "Noir" }, stock: 6, price: 89.90 },
-                        { id: "snk_41_noir", attributes: { taille: "41", couleur: "Noir" }, stock: 1, price: 89.90 }
-                    ]
-                },
-                { id: "hoodie", name: "Hoodie Premium", description: "Molleton épais.", type: "variants", basePrice: 59.90, icon: "🧥", images: [], active: true,
-                    variants: [
-                        { id: "hd_s_gris", attributes: { taille: "S", couleur: "Gris" }, stock: 6, price: 59.90 },
-                        { id: "hd_m_gris", attributes: { taille: "M", couleur: "Gris" }, stock: 10, price: 59.90 },
-                        { id: "hd_l_gris", attributes: { taille: "L", couleur: "Gris" }, stock: 3, price: 59.90 },
-                        { id: "hd_s_noir", attributes: { taille: "S", couleur: "Noir" }, stock: 2, price: 59.90 },
-                        { id: "hd_m_noir", attributes: { taille: "M", couleur: "Noir" }, stock: 5, price: 59.90 },
-                        { id: "hd_l_noir", attributes: { taille: "L", couleur: "Noir" }, stock: 1, price: 59.90 }
-                    ]
-                },
-                { id: "casquette", name: "Casquette Logo", description: "Coton bio.", type: "simple", price: 19.90, stock: 2, icon: "🧢", images: [], active: true },
-                { id: "chaussettes", name: "Chaussettes Pack", description: "Lot de 3.", type: "simple", price: 14.90, stock: 0, icon: "🧦", images: [], active: true }
-            ];
-        }
-
-        function getDefaultPromos() {
-            return [
-                { code: "PROMO10", type: "fixed", value: 10, active: true },
-                { code: "BIENVENUE", type: "percent", value: 15, active: true },
-                { code: "SOLDES", type: "fixed", value: 5, active: true }
-            ];
-        }
-
-        // ============================================
-        // 2. CHARGEMENT / SAUVEGARDE LOCALSTORAGE
+        // 1. CHARGEMENT / SAUVEGARDE LOCALSTORAGE
         // ============================================
         function loadProducts() {
             let data = localStorage.getItem('shop_products');
@@ -158,17 +117,55 @@
             localStorage.setItem('shop_promos', JSON.stringify(promos));
         }
 
+        // Données par défaut
+        function getDefaultProducts() {
+            return [
+                { id: "tshirt", name: "T-shirt Classic", description: "Coton bio.", type: "simple", price: 24.90, stock: 12, icon: "👕", images: [], active: true },
+                { id: "sneakers", name: "Sneakers Urban", description: "Semelle EVA.", type: "variants", basePrice: 89.90, icon: "👟", images: [], active: true,
+                    variants: [
+                        { id: "snk_38_blanc", attributes: { taille: "38", couleur: "Blanc" }, stock: 5, price: 89.90 },
+                        { id: "snk_39_blanc", attributes: { taille: "39", couleur: "Blanc" }, stock: 3, price: 89.90 },
+                        { id: "snk_40_blanc", attributes: { taille: "40", couleur: "Blanc" }, stock: 0, price: 89.90 },
+                        { id: "snk_41_blanc", attributes: { taille: "41", couleur: "Blanc" }, stock: 2, price: 89.90 },
+                        { id: "snk_38_noir", attributes: { taille: "38", couleur: "Noir" }, stock: 8, price: 89.90 },
+                        { id: "snk_39_noir", attributes: { taille: "39", couleur: "Noir" }, stock: 4, price: 89.90 },
+                        { id: "snk_40_noir", attributes: { taille: "40", couleur: "Noir" }, stock: 6, price: 89.90 },
+                        { id: "snk_41_noir", attributes: { taille: "41", couleur: "Noir" }, stock: 1, price: 89.90 }
+                    ]
+                },
+                { id: "hoodie", name: "Hoodie Premium", description: "Molleton épais.", type: "variants", basePrice: 59.90, icon: "🧥", images: [], active: true,
+                    variants: [
+                        { id: "hd_s_gris", attributes: { taille: "S", couleur: "Gris" }, stock: 6, price: 59.90 },
+                        { id: "hd_m_gris", attributes: { taille: "M", couleur: "Gris" }, stock: 10, price: 59.90 },
+                        { id: "hd_l_gris", attributes: { taille: "L", couleur: "Gris" }, stock: 3, price: 59.90 },
+                        { id: "hd_s_noir", attributes: { taille: "S", couleur: "Noir" }, stock: 2, price: 59.90 },
+                        { id: "hd_m_noir", attributes: { taille: "M", couleur: "Noir" }, stock: 5, price: 59.90 },
+                        { id: "hd_l_noir", attributes: { taille: "L", couleur: "Noir" }, stock: 1, price: 59.90 }
+                    ]
+                },
+                { id: "casquette", name: "Casquette Logo", description: "Coton bio.", type: "simple", price: 19.90, stock: 2, icon: "🧢", images: [], active: true },
+                { id: "chaussettes", name: "Chaussettes Pack", description: "Lot de 3.", type: "simple", price: 14.90, stock: 0, icon: "🧦", images: [], active: true }
+            ];
+        }
+
+        function getDefaultPromos() {
+            return [
+                { code: "PROMO10", type: "fixed", value: 10, active: true },
+                { code: "BIENVENUE", type: "percent", value: 15, active: true },
+                { code: "SOLDES", type: "fixed", value: 5, active: true }
+            ];
+        }
+
         // ============================================
-        // 3. VARIABLES GLOBALES
+        // 2. VARIABLES GLOBALES
         // ============================================
         let products = loadProducts();
         let orders = loadOrders();
         let promos = loadPromos();
         let currentPage = 'dashboard';
-        let editingProductId = null;
 
         // ============================================
-        // 4. UTILITAIRES
+        // 3. UTILITAIRES
         // ============================================
         function showToast(msg) {
             const toast = document.createElement('div');
@@ -200,6 +197,7 @@
             return { totalStock, ruptures, lowStockItems: low, stockValue };
         }
 
+        // AFFICHAGE ICÔNE : priorité à l'image
         function getDisplayIcon(product) {
             if (product.images && product.images.length > 0) {
                 return `<img src="${product.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
@@ -211,7 +209,7 @@
         }
 
         // ============================================
-        // 5. NAVIGATION
+        // 4. NAVIGATION
         // ============================================
         function attachNavEvents() {
             document.querySelectorAll('.nav-item').forEach(item => {
@@ -231,7 +229,7 @@
         }
 
         // ============================================
-        // 6. DASHBOARD
+        // 5. DASHBOARD
         // ============================================
         function renderDashboard() {
             products = loadProducts();
@@ -271,7 +269,7 @@
         }
 
         // ============================================
-        // 7. GESTION PRODUITS
+        // 6. GESTION PRODUITS
         // ============================================
         function renderProducts() {
             products = loadProducts();
@@ -306,7 +304,7 @@
         }
 
         // ============================================
-        // 8. MODALE PRODUIT (avec upload d'images)
+        // 7. MODALE PRODUIT (avec upload d'images)
         // ============================================
         const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
 
@@ -525,7 +523,7 @@
         }
 
         // ============================================
-        // 9. ACTIONS PRODUITS
+        // 8. ACTIONS PRODUITS
         // ============================================
         window.editProduct = function(id) {
             products = loadProducts();
@@ -542,7 +540,7 @@
         };
 
         // ============================================
-        // 10. GESTION STOCK
+        // 9. GESTION STOCK
         // ============================================
         function renderStock() {
             products = loadProducts();
@@ -610,7 +608,7 @@
         }
 
         // ============================================
-        // 11. GESTION COMMANDES
+        // 10. GESTION COMMANDES
         // ============================================
         function renderOrders() {
             orders = loadOrders();
@@ -671,7 +669,7 @@
         };
 
         // ============================================
-        // 12. GESTION PROMOS
+        // 11. GESTION PROMOS
         // ============================================
         function renderPromos() {
             promos = loadPromos();
@@ -731,7 +729,7 @@
         };
 
         // ============================================
-        // 13. INITIALISATION
+        // 12. INITIALISATION
         // ============================================
         function init() {
             renderDashboard();
