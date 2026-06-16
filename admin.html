@@ -98,9 +98,6 @@
             padding: 0.3rem 0.8rem;
             font-size: 0.8rem;
         }
-        .btn-success {
-            background: #22c55e;
-        }
 
         .stats-grid {
             display: grid;
@@ -358,15 +355,31 @@
         let currentPage = 'dashboard';
 
         // ============================================
-        // 4. CHARGEMENT DES DONNÉES
+        // 4. CHARGEMENT DES DONNÉES (avec conversion des stocks en nombres)
         // ============================================
         async function loadProducts() {
             try {
-                products = await fetchSupabase('products?select=*');
-                if (!Array.isArray(products)) products = [];
+                const data = await fetchSupabase('products?select=*');
+                if (Array.isArray(data)) {
+                    // Convertir les stocks en nombres
+                    data.forEach(p => {
+                        if (p.variants && Array.isArray(p.variants)) {
+                            p.variants.forEach(v => {
+                                v.stock = parseInt(v.stock) || 0;
+                            });
+                        }
+                        if (p.type === 'simple') {
+                            p.stock = parseInt(p.stock) || 0;
+                        }
+                    });
+                    products = data;
+                    console.log('✅ Produits chargés:', products.length);
+                } else {
+                    products = [];
+                }
                 return products;
             } catch (e) {
-                console.error('Erreur produits:', e);
+                console.error('Erreur chargement produits:', e);
                 products = [];
                 return products;
             }
@@ -837,22 +850,42 @@
         };
 
         // ============================================
-        // 11. GESTION STOCK
+        // 11. GESTION STOCK (CORRIGÉE)
         // ============================================
         async function renderStock() {
             await loadProducts();
+            console.log('📦 Produits pour le stock:', products);
+
             let rows = [];
             products.forEach(p => {
                 if (p.type === 'simple') {
-                    rows.push({ name: p.name, variant: 'Simple', stock: p.stock || 0, productId: p.id, variantId: null,
-                        isVariant: false, icon: p.icon, image_url: p.image_url });
+                    rows.push({
+                        name: p.name,
+                        variant: 'Simple',
+                        stock: p.stock || 0,
+                        productId: p.id,
+                        variantId: null,
+                        isVariant: false,
+                        icon: p.icon,
+                        image_url: p.image_url
+                    });
                 } else if (p.variants) {
                     p.variants.forEach(v => {
-                        rows.push({ name: p.name, variant: `${v.attributes?.taille || ''} / ${v.attributes?.couleur || ''}`,
-                            stock: v.stock || 0, productId: p.id, variantId: v.id, isVariant: true, icon: p.icon, image_url: p.image_url });
+                        rows.push({
+                            name: p.name,
+                            variant: `${v.attributes?.taille || ''} / ${v.attributes?.couleur || ''}`,
+                            stock: v.stock || 0,
+                            productId: p.id,
+                            variantId: v.id,
+                            isVariant: true,
+                            icon: p.icon,
+                            image_url: p.image_url
+                        });
                     });
                 }
             });
+
+            console.log('📊 Rows du stock:', rows);
 
             const html = `
                     <div class="page-header"><h1>📦 Gestion du stock</h1></div>
@@ -888,6 +921,7 @@
                 `;
             document.getElementById('mainContent').innerHTML = html;
 
+            // Gestion des clics sur + et -
             document.querySelectorAll('.stock-down, .stock-up').forEach(btn => {
                 btn.onclick = async () => {
                     const delta = btn.classList.contains('stock-up') ? 1 : -1;
@@ -895,25 +929,45 @@
                     const vid = btn.dataset.vid;
                     const isVar = btn.dataset.isvar === 'true';
                     const prod = products.find(p => p.id === pid);
-                    if (!prod) return;
 
-                    if (!isVar && prod.type === 'simple') {
-                        prod.stock = Math.max(0, (prod.stock || 0) + delta);
-                        await fetchSupabase(`products?id=eq.${pid}`, {
-                            method: 'PATCH',
-                            body: JSON.stringify({ stock: prod.stock })
-                        });
-                    } else if (isVar && prod.variants) {
-                        const variant = prod.variants.find(v => v.id === vid);
-                        if (variant) {
-                            variant.stock = Math.max(0, variant.stock + delta);
+                    if (!prod) {
+                        console.error('❌ Produit non trouvé pour pid:', pid);
+                        showToast('Erreur: produit non trouvé');
+                        return;
+                    }
+
+                    try {
+                        if (!isVar && prod.type === 'simple') {
+                            const newStock = Math.max(0, (prod.stock || 0) + delta);
+                            prod.stock = newStock;
+                            console.log('📝 Mise à jour stock simple:', prod.stock);
                             await fetchSupabase(`products?id=eq.${pid}`, {
                                 method: 'PATCH',
-                                body: JSON.stringify({ variants: prod.variants })
+                                body: JSON.stringify({ stock: prod.stock })
                             });
+                        } else if (isVar && prod.variants) {
+                            const variant = prod.variants.find(v => v.id === vid);
+                            if (variant) {
+                                const newStock = Math.max(0, (variant.stock || 0) + delta);
+                                variant.stock = newStock;
+                                console.log('📝 Nouveau stock variante:', variant.stock);
+                                await fetchSupabase(`products?id=eq.${pid}`, {
+                                    method: 'PATCH',
+                                    body: JSON.stringify({ variants: prod.variants })
+                                });
+                            } else {
+                                console.error('❌ Variante non trouvée pour vid:', vid);
+                                showToast('Erreur: variante non trouvée');
+                                return;
+                            }
                         }
+                        // Recharger la page stock après mise à jour
+                        await renderStock();
+                        showToast('✅ Stock mis à jour');
+                    } catch (e) {
+                        console.error('❌ Erreur mise à jour stock:', e);
+                        showToast('❌ Erreur: ' + e.message);
                     }
-                    await renderStock();
                 };
             });
             attachNavEvents();
