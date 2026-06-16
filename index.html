@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StyleShop - Boutique</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* (identique à votre version précédente) */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body { background: #f8fafc; color: #0f172a; }
         .header { background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
@@ -64,82 +66,17 @@
 
     <script>
         // ============================================
-        // 1. DONNÉES PAR DÉFAUT
+        // 1. CONFIGURATION SUPABASE
         // ============================================
-        function getDefaultProducts() {
-            return [
-                { id: "tshirt", name: "T-shirt Classic", description: "Coton bio.", type: "simple", price: 24.90, stock: 12, icon: "👕", images: [], active: true },
-                { id: "sneakers", name: "Sneakers Urban", description: "Semelle EVA.", type: "variants", basePrice: 89.90, icon: "👟", images: [], active: true,
-                    variants: [
-                        { id: "snk_38_blanc", attributes: { taille: "38", couleur: "Blanc" }, stock: 5, price: 89.90 },
-                        { id: "snk_39_blanc", attributes: { taille: "39", couleur: "Blanc" }, stock: 3, price: 89.90 },
-                        { id: "snk_40_blanc", attributes: { taille: "40", couleur: "Blanc" }, stock: 0, price: 89.90 },
-                        { id: "snk_41_blanc", attributes: { taille: "41", couleur: "Blanc" }, stock: 2, price: 89.90 },
-                        { id: "snk_38_noir", attributes: { taille: "38", couleur: "Noir" }, stock: 8, price: 89.90 },
-                        { id: "snk_39_noir", attributes: { taille: "39", couleur: "Noir" }, stock: 4, price: 89.90 },
-                        { id: "snk_40_noir", attributes: { taille: "40", couleur: "Noir" }, stock: 6, price: 89.90 },
-                        { id: "snk_41_noir", attributes: { taille: "41", couleur: "Noir" }, stock: 1, price: 89.90 }
-                    ]
-                },
-                { id: "hoodie", name: "Hoodie Premium", description: "Molleton épais.", type: "variants", basePrice: 59.90, icon: "🧥", images: [], active: true,
-                    variants: [
-                        { id: "hd_s_gris", attributes: { taille: "S", couleur: "Gris" }, stock: 6, price: 59.90 },
-                        { id: "hd_m_gris", attributes: { taille: "M", couleur: "Gris" }, stock: 10, price: 59.90 },
-                        { id: "hd_l_gris", attributes: { taille: "L", couleur: "Gris" }, stock: 3, price: 59.90 },
-                        { id: "hd_s_noir", attributes: { taille: "S", couleur: "Noir" }, stock: 2, price: 59.90 },
-                        { id: "hd_m_noir", attributes: { taille: "M", couleur: "Noir" }, stock: 5, price: 59.90 },
-                        { id: "hd_l_noir", attributes: { taille: "L", couleur: "Noir" }, stock: 1, price: 59.90 }
-                    ]
-                },
-                { id: "casquette", name: "Casquette Logo", description: "Coton bio.", type: "simple", price: 19.90, stock: 2, icon: "🧢", images: [], active: true },
-                { id: "chaussettes", name: "Chaussettes Pack", description: "Lot de 3.", type: "simple", price: 14.90, stock: 0, icon: "🧦", images: [], active: true }
-            ];
-        }
-
-        function getDefaultPromos() {
-            return [
-                { code: "PROMO10", type: "fixed", value: 10, active: true },
-                { code: "BIENVENUE", type: "percent", value: 15, active: true },
-                { code: "SOLDES", type: "fixed", value: 5, active: true }
-            ];
-        }
+        const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // ============================================
-        // 2. CHARGEMENT / SAUVEGARDE LOCALSTORAGE
+        // 2. VARIABLES GLOBALES
         // ============================================
-        function loadProducts() {
-            let data = localStorage.getItem('shop_products');
-            if (!data) {
-                const def = getDefaultProducts();
-                localStorage.setItem('shop_products', JSON.stringify(def));
-                return def;
-            }
-            try { return JSON.parse(data); } catch(e) { return getDefaultProducts(); }
-        }
-
-        function saveProducts(products) {
-            localStorage.setItem('shop_products', JSON.stringify(products));
-        }
-
-        function loadPromos() {
-            let data = localStorage.getItem('shop_promos');
-            if (!data) {
-                const def = getDefaultPromos();
-                localStorage.setItem('shop_promos', JSON.stringify(def));
-                return def;
-            }
-            try { return JSON.parse(data); } catch(e) { return getDefaultPromos(); }
-        }
-
-        function savePromos(promos) {
-            localStorage.setItem('shop_promos', JSON.stringify(promos));
-        }
-
-        // ============================================
-        // 3. VARIABLES GLOBALES
-        // ============================================
-        let products = loadProducts();
-        let promos = loadPromos();
+        let products = [];
+        let promos = [];
         let cart = [];
         let appliedPromo = null;
         let currentPage = 'catalogue';
@@ -147,15 +84,15 @@
         let selectedVariantCache = {};
 
         // ============================================
-        // 4. PANIER
+        // 3. PANIER (localStorage)
         // ============================================
         function saveCart() {
-            localStorage.setItem('shop_cart', JSON.stringify(cart));
+            localStorage.setItem('styleShopCart', JSON.stringify(cart));
             updateCartCount();
         }
 
         function loadCart() {
-            const stored = localStorage.getItem('shop_cart');
+            const stored = localStorage.getItem('styleShopCart');
             if (stored) {
                 try { cart = JSON.parse(stored); if (!Array.isArray(cart)) cart = []; } catch(e){ cart = []; }
             } else { cart = []; }
@@ -169,7 +106,24 @@
         }
 
         // ============================================
-        // 5. UTILITAIRES
+        // 4. CHARGEMENT DES DONNÉES
+        // ============================================
+        async function loadProducts() {
+            const { data, error } = await supabase.from('products').select('*');
+            if (!error && data) products = data;
+            else console.error(error);
+            return products;
+        }
+
+        async function loadPromos() {
+            const { data, error } = await supabase.from('promos').select('*');
+            if (!error && data) promos = data.filter(p => p.active);
+            else console.error(error);
+            return promos;
+        }
+
+        // ============================================
+        // 5. UTILITAIRES (image prioritaire)
         // ============================================
         function getStock(productId, variantId) {
             const prod = products.find(p => p.id === productId);
@@ -187,10 +141,9 @@
             setTimeout(() => toast.remove(), 2000);
         }
 
-        // --- Affichage : image prioritaire ---
         function getProductDisplayIcon(product) {
-            if (product.images && product.images.length > 0) {
-                return `<img src="${product.images[0]}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">`;
+            if (product.image_url) {
+                return `<img src="${product.image_url}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">`;
             } else if (product.icon) {
                 return `<span style="font-size:3rem;">${product.icon}</span>`;
             } else {
@@ -199,8 +152,8 @@
         }
 
         function getProductDetailIcon(product) {
-            if (product.images && product.images.length > 0) {
-                return `<img src="${product.images[0]}" style="width:100px;height:100px;object-fit:cover;border-radius:12px;">`;
+            if (product.image_url) {
+                return `<img src="${product.image_url}" style="width:100px;height:100px;object-fit:cover;border-radius:12px;">`;
             } else if (product.icon) {
                 return `<span style="font-size:4rem;">${product.icon}</span>`;
             } else {
@@ -243,7 +196,7 @@
                     quantity,
                     attributes,
                     imageIcon: product.icon || '📦',
-                    imageUrl: (product.images && product.images.length > 0) ? product.images[0] : null
+                    imageUrl: product.image_url || null
                 });
             }
             saveCart();
@@ -315,7 +268,7 @@
         }
 
         // ============================================
-        // 9. RENDU CATALOGUE
+        // 9. RENDU CATALOGUE (avec stock total pour variantes)
         // ============================================
         function renderCatalogue() {
             const app = document.getElementById('app');
@@ -343,7 +296,7 @@
                             <div class="product-card" onclick="navigateTo('product','${p.id}')">
                                 <div class="product-icon">${getProductDisplayIcon(p)}</div>
                                 <div class="product-title">${p.name}</div>
-                                <div class="product-price">${p.type === 'simple' ? (p.price||0).toFixed(2) : (p.basePrice||0).toFixed(2)} €</div>
+                                <div class="product-price">${p.type === 'simple' ? (p.price||0).toFixed(2) : (p.base_price||0).toFixed(2)} €</div>
                                 <div class="stock-badge ${badgeClass}">${badgeText}</div>
                             </div>
                         `;
@@ -364,7 +317,7 @@
             const isVariant = product.type === 'variants';
             let selectedVariantId = selectedVariantCache[productId] || null;
             let selectedVariant = null;
-            let currentPrice = isVariant ? (product.basePrice || 0) : (product.price || 0);
+            let currentPrice = isVariant ? (product.base_price || 0) : (product.price || 0);
             let currentStock = isVariant ? 0 : (product.stock || 0);
             let canAdd = false;
             if (isVariant && selectedVariantId) {
@@ -515,7 +468,7 @@
         // ============================================
         // 12. SIMULATION PAIEMENT
         // ============================================
-        function simulateCheckout() {
+        async function simulateCheckout() {
             if (!cart || cart.length === 0) { showToast('Panier vide'); return; }
             for (const item of cart) {
                 const stock = getStock(item.productId, item.variantId);
@@ -526,6 +479,7 @@
             const now = new Date();
             const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`;
 
+            // Créer la commande
             const order = {
                 id: orderId,
                 client: clientEmail,
@@ -539,29 +493,29 @@
                 })),
                 total: total,
                 status: 'Payée',
-                adminFollowup: 'À traiter',
-                promoCode: appliedPromo?.code || null,
+                admin_followup: 'À traiter',
+                promo_code: appliedPromo?.code || null,
                 discount: appliedPromo?.discountAmount || 0
             };
 
-            let orders = localStorage.getItem('shop_orders');
-            if (orders) {
-                try { orders = JSON.parse(orders); if (!Array.isArray(orders)) orders = []; } catch(e){ orders = []; }
-            } else { orders = []; }
-            orders.unshift(order);
-            localStorage.setItem('shop_orders', JSON.stringify(orders));
+            // Insérer dans Supabase
+            await supabase.from('orders').insert(order);
 
+            // Mise à jour des stocks
             for (const item of cart) {
                 const prod = products.find(p => p.id === item.productId);
                 if (!prod) continue;
                 if (prod.type === 'simple') {
                     prod.stock = Math.max(0, (prod.stock || 0) - (item.quantity || 0));
+                    await supabase.from('products').update({ stock: prod.stock }).eq('id', prod.id);
                 } else {
                     const variant = prod.variants?.find(v => v.id === item.variantId);
-                    if (variant) variant.stock = Math.max(0, (variant.stock || 0) - (item.quantity || 0));
+                    if (variant) {
+                        variant.stock = Math.max(0, (variant.stock || 0) - (item.quantity || 0));
+                        await supabase.from('products').update({ variants: prod.variants }).eq('id', prod.id);
+                    }
                 }
             }
-            saveProducts(products);
 
             const itemsList = cart.map(i => `${i.name} ${i.attributes?.taille ? `(${i.attributes.taille}/${i.attributes.couleur})` : ''} x${i.quantity}`).join(', ');
             cart = []; appliedPromo = null; saveCart();
@@ -582,8 +536,6 @@
         // 13. RENDU PAGE COURANTE
         // ============================================
         function renderCurrentPage() {
-            products = loadProducts();
-            promos = loadPromos();
             if (currentPage === 'catalogue') renderCatalogue();
             else if (currentPage === 'product' && selectedProductId) renderProductDetail(selectedProductId);
             else if (currentPage === 'cart') renderCart();
@@ -591,31 +543,42 @@
         }
 
         // ============================================
-        // 14. EXPOSER LES FONCTIONS
+        // 14. SYNCHRONISATION REALTIME
         // ============================================
+        function subscribeToRealtime() {
+            const channel = supabase.channel('public-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
+                    console.log('🔄 Produits mis à jour');
+                    await loadProducts();
+                    if (currentPage !== 'cart') renderCurrentPage();
+                    else renderCart(); // pour mettre à jour les prix
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'promos' }, async () => {
+                    console.log('🔄 Promos mises à jour');
+                    await loadPromos();
+                    if (currentPage === 'cart') renderCart(); // mettre à jour l'affichage promo
+                })
+                .subscribe();
+        }
+
+        // ============================================
+        // 15. INITIALISATION
+        // ============================================
+        async function init() {
+            await loadProducts();
+            await loadPromos();
+            loadCart();
+            renderCurrentPage();
+            subscribeToRealtime();
+        }
+
+        // Exposer les fonctions
         window.navigateTo = navigateTo;
         window.addToCart = addToCart;
         window.updateCartItem = updateCartItem;
         window.simulateCheckout = simulateCheckout;
 
-        // ============================================
-        // 15. SYNCHRONISATION INTER-ONGLETS
-        // ============================================
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'shop_products' || e.key === 'shop_promos' || e.key === 'shop_cart' || e.key === 'shop_orders') {
-                console.log('🔄 Changement détecté sur', e.key);
-                products = loadProducts();
-                promos = loadPromos();
-                if (e.key === 'shop_cart') loadCart();
-                renderCurrentPage();
-            }
-        });
-
-        // ============================================
-        // 16. INITIALISATION
-        // ============================================
-        loadCart();
-        renderCurrentPage();
+        init();
     </script>
 </body>
 </html>
