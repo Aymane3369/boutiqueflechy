@@ -2,258 +2,50 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>StyleShop - Boutique en ligne</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyleShop - Boutique</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, 'Segoe UI', 'Inter', sans-serif;
-        }
-        body {
-            background: #f8fafc;
-            color: #0f172a;
-        }
-        .header {
-            background: white;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(8px);
-            background: rgba(255,255,255,0.95);
-        }
-        .logo {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #0f172a;
-            cursor: pointer;
-        }
-        .cart-icon {
-            position: relative;
-            cursor: pointer;
-            font-size: 1.8rem;
-        }
-        .cart-count {
-            position: absolute;
-            top: -8px;
-            right: -12px;
-            background: #3b82f6;
-            color: white;
-            font-size: 0.7rem;
-            font-weight: bold;
-            border-radius: 30px;
-            padding: 2px 6px;
-            min-width: 20px;
-            text-align: center;
-        }
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 2rem;
-            margin-top: 1.5rem;
-        }
-        .product-card {
-            background: white;
-            border-radius: 24px;
-            padding: 1.2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-            transition: 0.2s;
-            cursor: pointer;
-        }
-        .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-        }
-        .product-icon {
-            font-size: 3rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 0.5rem;
-        }
-        .product-icon img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        .product-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            text-align: center;
-        }
-        .product-type {
-            font-size: 0.75rem;
-            color: #475569;
-            margin: 0.25rem 0;
-            text-align: center;
-        }
-        .product-price {
-            font-weight: 700;
-            font-size: 1.2rem;
-            margin-top: 0.5rem;
-            text-align: center;
-        }
-        .stock-badge {
-            font-size: 0.7rem;
-            margin-top: 0.5rem;
-            text-align: center;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
+        body { background: #f8fafc; color: #0f172a; }
+        .header { background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.6rem; font-weight: 700; cursor: pointer; }
+        .cart-icon { position: relative; cursor: pointer; font-size: 1.8rem; }
+        .cart-count { position: absolute; top: -8px; right: -12px; background: #3b82f6; color: white; font-size: 0.7rem; border-radius: 30px; padding: 2px 6px; min-width: 20px; text-align: center; }
+        .container { max-width: 1300px; margin: 0 auto; padding: 2rem; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 2rem; margin-top: 1.5rem; }
+        .product-card { background: white; border-radius: 24px; padding: 1.2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: 0.2s; cursor: pointer; }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .product-icon { font-size: 3rem; display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; }
+        .product-icon img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+        .product-title { font-size: 1.2rem; font-weight: 600; text-align: center; }
+        .product-price { font-weight: 700; font-size: 1.2rem; margin-top: 0.5rem; text-align: center; }
+        .stock-badge { font-size: 0.7rem; margin-top: 0.5rem; text-align: center; }
         .stock-ok { color: #15803d; }
         .stock-warning { color: #b45309; }
         .stock-out { color: #dc2626; }
-        button {
-            background: #0f172a;
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-        }
+        button { background: #0f172a; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 40px; font-weight: 500; cursor: pointer; }
         button.primary { background: #3b82f6; }
         button.primary:hover { background: #2563eb; }
-        button.outline {
-            background: white;
-            border: 1px solid #cbd5e1;
-            color: #1e293b;
-        }
-        .product-detail {
-            background: white;
-            border-radius: 32px;
-            padding: 2rem;
-            max-width: 700px;
-            margin: 0 auto;
-            border: 1px solid #e2e8f0;
-        }
-        .product-detail .product-icon {
-            font-size: 4rem;
-        }
-        .product-detail .product-icon img {
-            width: 100px;
-            height: 100px;
-        }
+        button.outline { background: white; border: 1px solid #cbd5e1; color: #1e293b; }
+        .product-detail { background: white; border-radius: 32px; padding: 2rem; max-width: 700px; margin: 0 auto; border: 1px solid #e2e8f0; }
         .variant-group { margin: 1.2rem 0; }
-        .variant-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        .variant-btn {
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            padding: 0.5rem 1rem;
-            border-radius: 40px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        .variant-btn.selected {
-            background: #0f172a;
-            color: white;
-            border-color: #0f172a;
-        }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            color: #3b82f6;
-        }
-        .cart-page {
-            background: white;
-            border-radius: 32px;
-            padding: 1.5rem;
-            border: 1px solid #e2e8f0;
-        }
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .cart-item-info { flex: 2; }
-        .cart-item-qty {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        .qty-btn {
-            background: #e2e8f0;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-        }
-        .summary {
-            margin-top: 1.5rem;
-            text-align: right;
-        }
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #0f172a;
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 40px;
-            z-index: 200;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: white;
-            max-width: 500px;
-            width: 90%;
-            border-radius: 32px;
-            padding: 1.8rem;
-        }
+        .variant-options { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+        .variant-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.5rem 1rem; border-radius: 40px; cursor: pointer; font-size: 0.9rem; }
+        .variant-btn.selected { background: #0f172a; color: white; border-color: #0f172a; }
+        .back-link { display: inline-block; margin-bottom: 1rem; cursor: pointer; color: #3b82f6; }
+        .cart-page { background: white; border-radius: 32px; padding: 1.5rem; border: 1px solid #e2e8f0; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #e2e8f0; }
+        .cart-item-qty { display: flex; gap: 0.5rem; align-items: center; }
+        .qty-btn { background: #e2e8f0; padding: 0.2rem 0.6rem; border-radius: 20px; font-weight: bold; cursor: pointer; border: none; }
+        .summary { margin-top: 1.5rem; text-align: right; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: white; padding: 0.8rem 1.5rem; border-radius: 40px; z-index: 200; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; max-width: 500px; width: 90%; border-radius: 32px; padding: 1.8rem; }
         hr { margin: 1rem 0; }
-        .promo-box {
-            background: #f8fafc;
-            padding: 1rem;
-            border-radius: 20px;
-            margin-top: 1rem;
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-        .promo-box input {
-            padding: 0.5rem;
-            border-radius: 40px;
-            border: 1px solid #cbd5e1;
-            flex: 1;
-            min-width: 150px;
-        }
-        @media (max-width: 700px) {
-            .container { padding: 1rem; }
-        }
+        .promo-box { background: #f8fafc; padding: 1rem; border-radius: 20px; margin-top: 1rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+        .promo-box input { padding: 0.5rem; border-radius: 40px; border: 1px solid #cbd5e1; flex: 1; min-width: 150px; }
+        .product-detail .product-icon img { width: 100px; height: 100px; }
+        @media (max-width: 700px) { .container { padding: 1rem; } }
     </style>
 </head>
 <body>
@@ -272,62 +64,81 @@
 
     <script>
         // ============================================
-        // 1. CONFIGURATION SUPABASE
+        // 1. DONNÉES PAR DÉFAUT (si localStorage vide)
         // ============================================
-        const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
+        function getDefaultProducts() {
+            return [
+                { id: "tshirt", name: "T-shirt Classic", description: "Coton bio, coupe confortable.", type: "simple", price: 24.90, stock: 12, icon: "👕", images: [], active: true },
+                { id: "sneakers", name: "Sneakers Urban", description: "Sneakers légères, semelle EVA.", type: "variants", basePrice: 89.90, icon: "👟", images: [], active: true,
+                    variants: [
+                        { id: "snk_38_blanc", attributes: { taille: "38", couleur: "Blanc" }, stock: 5, price: 89.90 },
+                        { id: "snk_39_blanc", attributes: { taille: "39", couleur: "Blanc" }, stock: 3, price: 89.90 },
+                        { id: "snk_40_blanc", attributes: { taille: "40", couleur: "Blanc" }, stock: 0, price: 89.90 },
+                        { id: "snk_41_blanc", attributes: { taille: "41", couleur: "Blanc" }, stock: 2, price: 89.90 },
+                        { id: "snk_38_noir", attributes: { taille: "38", couleur: "Noir" }, stock: 8, price: 89.90 },
+                        { id: "snk_39_noir", attributes: { taille: "39", couleur: "Noir" }, stock: 4, price: 89.90 },
+                        { id: "snk_40_noir", attributes: { taille: "40", couleur: "Noir" }, stock: 6, price: 89.90 },
+                        { id: "snk_41_noir", attributes: { taille: "41", couleur: "Noir" }, stock: 1, price: 89.90 }
+                    ]
+                },
+                { id: "hoodie", name: "Hoodie Premium", description: "Molleton épais, capuche ajustable.", type: "variants", basePrice: 59.90, icon: "🧥", images: [], active: true,
+                    variants: [
+                        { id: "hd_s_gris", attributes: { taille: "S", couleur: "Gris" }, stock: 6, price: 59.90 },
+                        { id: "hd_m_gris", attributes: { taille: "M", couleur: "Gris" }, stock: 10, price: 59.90 },
+                        { id: "hd_l_gris", attributes: { taille: "L", couleur: "Gris" }, stock: 3, price: 59.90 },
+                        { id: "hd_s_noir", attributes: { taille: "S", couleur: "Noir" }, stock: 2, price: 59.90 },
+                        { id: "hd_m_noir", attributes: { taille: "M", couleur: "Noir" }, stock: 5, price: 59.90 },
+                        { id: "hd_l_noir", attributes: { taille: "L", couleur: "Noir" }, stock: 1, price: 59.90 }
+                    ]
+                },
+                { id: "casquette", name: "Casquette Logo", description: "Coton bio, ajustable.", type: "simple", price: 19.90, stock: 2, icon: "🧢", images: [], active: true },
+                { id: "chaussettes", name: "Chaussettes Pack", description: "Lot de 3 paires.", type: "simple", price: 14.90, stock: 0, icon: "🧦", images: [], active: true }
+            ];
+        }
 
-        // ============================================
-        // 2. FONCTIONS FETCH
-        // ============================================
-        async function fetchSupabase(endpoint) {
-            try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                if (!response.ok) {
-                    const error = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${error}`);
-                }
-                return response.json();
-            } catch (e) {
-                console.error('❌ Fetch error:', e);
-                return [];
-            }
+        function getDefaultPromos() {
+            return [
+                { code: "PROMO10", type: "fixed", value: 10, active: true },
+                { code: "BIENVENUE", type: "percent", value: 15, active: true },
+                { code: "SOLDES", type: "fixed", value: 5, active: true }
+            ];
         }
 
         // ============================================
-        // 3. UTILITAIRE AFFICHAGE ICÔNE / IMAGE
+        // 2. CHARGEMENT / SAUVEGARDE LOCALSTORAGE
         // ============================================
-        function getProductDisplayIcon(product) {
-            if (product.image_url) {
-                return `<img src="${product.image_url}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">`;
-            } else if (product.icon) {
-                return `<span style="font-size:3rem;">${product.icon}</span>`;
+        function loadData() {
+            let products = localStorage.getItem('shop_products');
+            if (!products) {
+                products = getDefaultProducts();
+                localStorage.setItem('shop_products', JSON.stringify(products));
             } else {
-                return `<span style="font-size:3rem;">📦</span>`;
+                products = JSON.parse(products);
             }
-        }
-
-        function getProductDetailIcon(product) {
-            if (product.image_url) {
-                return `<img src="${product.image_url}" style="width:100px;height:100px;object-fit:cover;border-radius:12px;">`;
-            } else if (product.icon) {
-                return `<span style="font-size:4rem;">${product.icon}</span>`;
+            let promos = localStorage.getItem('shop_promos');
+            if (!promos) {
+                promos = getDefaultPromos();
+                localStorage.setItem('shop_promos', JSON.stringify(promos));
             } else {
-                return `<span style="font-size:4rem;">📦</span>`;
+                promos = JSON.parse(promos);
             }
+            return { products, promos };
+        }
+
+        function saveProducts(products) {
+            localStorage.setItem('shop_products', JSON.stringify(products));
+        }
+
+        function savePromos(promos) {
+            localStorage.setItem('shop_promos', JSON.stringify(promos));
         }
 
         // ============================================
-        // 4. VARIABLES GLOBALES
+        // 3. VARIABLES GLOBALES
         // ============================================
-        let products = [];
-        let promos = [];
+        let data = loadData();
+        let products = data.products;
+        let promos = data.promos;
         let cart = [];
         let appliedPromo = null;
         let currentPage = 'catalogue';
@@ -335,75 +146,29 @@
         let selectedVariantCache = {};
 
         // ============================================
-        // 5. PANIER (localStorage)
+        // 4. PANIER
         // ============================================
         function saveCart() {
-            try {
-                localStorage.setItem('styleShopCart', JSON.stringify(cart));
-            } catch (e) {}
+            localStorage.setItem('shop_cart', JSON.stringify(cart));
             updateCartCount();
         }
 
         function loadCart() {
-            try {
-                const stored = localStorage.getItem('styleShopCart');
-                if (stored) {
-                    cart = JSON.parse(stored);
-                    if (!Array.isArray(cart)) cart = [];
-                } else {
-                    cart = [];
-                }
-            } catch (e) {
-                cart = [];
-            }
+            const stored = localStorage.getItem('shop_cart');
+            if (stored) {
+                try { cart = JSON.parse(stored); if (!Array.isArray(cart)) cart = []; } catch(e){ cart = []; }
+            } else { cart = []; }
             updateCartCount();
         }
 
         function updateCartCount() {
-            const totalItems = Array.isArray(cart) ? cart.reduce((sum, item) => sum + (item.quantity || 0), 0) : 0;
-            const countElement = document.getElementById('cartCount');
-            if (countElement) countElement.innerText = totalItems;
+            const total = cart.reduce((s, i) => s + (i.quantity || 0), 0);
+            const el = document.getElementById('cartCount');
+            if (el) el.innerText = total;
         }
 
         // ============================================
-        // 6. CHARGEMENT DES DONNÉES
-        // ============================================
-        async function loadProducts() {
-            try {
-                const data = await fetchSupabase('products?select=*');
-                if (Array.isArray(data)) {
-                    products = data;
-                    console.log('✅ Produits chargés:', products.length);
-                } else {
-                    products = [];
-                }
-                return products;
-            } catch (e) {
-                console.error('Erreur chargement produits:', e);
-                products = [];
-                return products;
-            }
-        }
-
-        async function loadPromos() {
-            try {
-                const data = await fetchSupabase('promos?select=*');
-                if (Array.isArray(data)) {
-                    promos = data.filter(p => p.active === true);
-                    console.log('🏷️ Promos actives chargées:', promos.length);
-                } else {
-                    promos = [];
-                }
-                return promos;
-            } catch (e) {
-                console.error('Erreur chargement promos:', e);
-                promos = [];
-                return promos;
-            }
-        }
-
-        // ============================================
-        // 7. UTILITAIRES
+        // 5. UTILITAIRES
         // ============================================
         function getStock(productId, variantId) {
             const prod = products.find(p => p.id === productId);
@@ -421,140 +186,113 @@
             setTimeout(() => toast.remove(), 2000);
         }
 
+        function getProductDisplayIcon(product) {
+            if (product.images && product.images.length > 0) {
+                return `<img src="${product.images[0]}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">`;
+            } else if (product.icon) {
+                return `<span style="font-size:3rem;">${product.icon}</span>`;
+            } else {
+                return `<span style="font-size:3rem;">📦</span>`;
+            }
+        }
+
+        function getProductDetailIcon(product) {
+            if (product.images && product.images.length > 0) {
+                return `<img src="${product.images[0]}" style="width:100px;height:100px;object-fit:cover;border-radius:12px;">`;
+            } else if (product.icon) {
+                return `<span style="font-size:4rem;">${product.icon}</span>`;
+            } else {
+                return `<span style="font-size:4rem;">📦</span>`;
+            }
+        }
+
         // ============================================
-        // 8. AJOUT AU PANIER
+        // 6. AJOUT / MODIFICATION PANIER
         // ============================================
         function addToCart(productId, variantId, quantity = 1) {
             const product = products.find(p => p.id === productId);
-            if (!product) {
-                showToast('Produit non trouvé');
-                return false;
-            }
-
-            let availableStock = 0;
-            let price = 0;
-            let attributes = {};
-
+            if (!product) { showToast('Produit non trouvé'); return false; }
+            let available = 0, price = 0, attributes = {};
             if (product.type === 'simple') {
-                availableStock = product.stock || 0;
+                available = product.stock || 0;
                 price = product.price || 0;
             } else {
                 const variant = product.variants?.find(v => v.id === variantId);
-                if (!variant) {
-                    showToast('Variante non trouvée');
-                    return false;
-                }
-                availableStock = variant.stock || 0;
+                if (!variant) { showToast('Variante non trouvée'); return false; }
+                available = variant.stock || 0;
                 price = variant.price || 0;
                 attributes = variant.attributes || {};
             }
-
-            if (availableStock < quantity) {
-                showToast(`Stock insuffisant (${availableStock} disponible(s))`);
+            if (available < quantity) {
+                showToast(`Stock insuffisant (${available})`);
                 return false;
             }
-
-            const existingIndex = cart.findIndex(item => item.productId === productId && item.variantId === variantId);
-            if (existingIndex !== -1) {
-                const newQty = cart[existingIndex].quantity + quantity;
-                if (newQty > availableStock) {
-                    showToast(`Impossible, dépassement du stock (max ${availableStock})`);
-                    return false;
-                }
-                cart[existingIndex].quantity = newQty;
+            const idx = cart.findIndex(i => i.productId === productId && i.variantId === variantId);
+            if (idx !== -1) {
+                const newQty = cart[idx].quantity + quantity;
+                if (newQty > available) { showToast(`Max ${available}`); return false; }
+                cart[idx].quantity = newQty;
             } else {
                 cart.push({
                     productId,
                     variantId: variantId || null,
                     name: product.name,
-                    price: price,
-                    quantity: quantity,
-                    attributes: attributes,
+                    price,
+                    quantity,
+                    attributes,
                     imageIcon: product.icon || '📦',
-                    imageUrl: product.image_url || null
+                    imageUrl: (product.images && product.images.length > 0) ? product.images[0] : null
                 });
             }
             saveCart();
             const variantStr = attributes.taille ? ` ${attributes.taille}/${attributes.couleur}` : '';
-            showToast(`Ajouté au panier (${product.name}${variantStr})`);
+            showToast(`Ajouté : ${product.name}${variantStr}`);
             renderCurrentPage();
             return true;
         }
 
-        // ============================================
-        // 9. MODIFICATION PANIER
-        // ============================================
         function updateCartItem(index, newQuantity) {
-            if (!Array.isArray(cart) || index < 0 || index >= cart.length) return;
-
+            if (!cart || index < 0 || index >= cart.length) return;
             if (newQuantity <= 0) {
                 cart.splice(index, 1);
-                saveCart();
                 if (cart.length === 0) appliedPromo = null;
+                saveCart();
                 renderCurrentPage();
                 return;
             }
-
             const item = cart[index];
             const stock = getStock(item.productId, item.variantId);
-            if (newQuantity > stock) {
-                showToast(`Stock insuffisant, maximum ${stock}`);
-                return;
-            }
+            if (newQuantity > stock) { showToast(`Stock max ${stock}`); return; }
             item.quantity = newQuantity;
             saveCart();
             renderCurrentPage();
         }
 
         // ============================================
-        // 10. GESTION DES CODES PROMO
+        // 7. CODES PROMO
         // ============================================
         function getSubtotal() {
-            return Array.isArray(cart) ? cart.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0) : 0;
+            return cart.reduce((s, i) => s + (i.price || 0) * (i.quantity || 0), 0);
         }
 
         function applyPromoCode(code) {
-            const promo = promos.find(p => p.code === code && p.active === true);
-            if (!promo) {
-                return { success: false, message: 'Code invalide ou expiré' };
-            }
-
+            const promo = promos.find(p => p.code === code && p.active);
+            if (!promo) return { success: false, message: 'Code invalide ou expiré' };
             const subtotal = getSubtotal();
-            if (subtotal <= 0) {
-                return { success: false, message: 'Panier vide' };
-            }
-
+            if (subtotal <= 0) return { success: false, message: 'Panier vide' };
             let discount = 0;
-            if (promo.type === 'fixed') {
-                discount = Math.min(promo.value, subtotal);
-            } else if (promo.type === 'percent') {
-                discount = subtotal * (promo.value / 100);
-            } else {
-                return { success: false, message: 'Type de promo inconnu' };
-            }
+            if (promo.type === 'fixed') discount = Math.min(promo.value, subtotal);
+            else discount = subtotal * (promo.value / 100);
             discount = parseFloat(discount.toFixed(2));
-
-            appliedPromo = {
-                code: promo.code,
-                type: promo.type,
-                value: promo.value,
-                discountAmount: discount
-            };
-            return { success: true, message: `Code ${code} appliqué : -${discount}€` };
+            appliedPromo = { code: promo.code, type: promo.type, value: promo.value, discountAmount: discount };
+            return { success: true, message: `-${discount}€ appliqué` };
         }
 
-        function removePromo() {
-            appliedPromo = null;
-        }
-
-        function getTotal() {
-            const subtotal = getSubtotal();
-            const discount = appliedPromo ? appliedPromo.discountAmount : 0;
-            return subtotal - discount;
-        }
+        function removePromo() { appliedPromo = null; }
+        function getTotal() { return getSubtotal() - (appliedPromo?.discountAmount || 0); }
 
         // ============================================
-        // 11. NAVIGATION
+        // 8. NAVIGATION
         // ============================================
         function navigateTo(page, productId = null) {
             if (page === 'product' && productId) {
@@ -562,8 +300,8 @@
                 selectedProductId = productId;
                 const prod = products.find(p => p.id === productId);
                 if (prod && prod.type === 'variants' && !selectedVariantCache[productId]) {
-                    const firstAvailable = prod.variants?.find(v => v.stock > 0);
-                    selectedVariantCache[productId] = firstAvailable ? firstAvailable.id : null;
+                    const firstAvail = prod.variants?.find(v => v.stock > 0);
+                    selectedVariantCache[productId] = firstAvail ? firstAvail.id : null;
                 }
             } else if (page === 'cart') {
                 currentPage = 'cart';
@@ -575,38 +313,29 @@
         }
 
         // ============================================
-        // 12. RENDU CATALOGUE
+        // 9. RENDU CATALOGUE
         // ============================================
         function renderCatalogue() {
             const app = document.getElementById('app');
             if (!app) return;
-
-            if (!Array.isArray(products) || products.length === 0) {
-                app.innerHTML = `
-                    <div style="text-align:center; padding:3rem;">
-                        <h2>📦 Aucun produit disponible</h2>
-                        <p style="color: #475569;">Vérifiez votre base Supabase.</p>
-                    </div>
-                `;
+            const active = products.filter(p => p.active !== false);
+            if (active.length === 0) {
+                app.innerHTML = `<div style="text-align:center;padding:3rem;"><h2>📦 Aucun produit</h2></div>`;
                 return;
             }
-
-            const activeProducts = products.filter(p => p.active !== false);
             const html = `
-                <h1 style="margin-bottom: 1rem;">Catalogue</h1>
-                <p style="margin-bottom: 1.5rem; color: #475569;">Cliquez sur un produit pour voir les détails</p>
+                <h1>Catalogue</h1>
                 <div class="products-grid">
-                    ${activeProducts.map(p => `
+                    ${active.map(p => `
                         <div class="product-card" onclick="navigateTo('product','${p.id}')">
                             <div class="product-icon">${getProductDisplayIcon(p)}</div>
                             <div class="product-title">${p.name}</div>
-                            <div class="product-type">${p.type === 'simple' ? 'Produit simple' : 'Avec variantes'}</div>
-                            <div class="product-price">${p.type === 'simple' ? (p.price || 0).toFixed(2) : (p.base_price || 0).toFixed(2)} € ${p.type === 'variants' ? '+' : ''}</div>
+                            <div class="product-price">${p.type === 'simple' ? (p.price||0).toFixed(2) : (p.basePrice||0).toFixed(2)} €</div>
                             <div class="stock-badge">
-                                ${p.type === 'simple' ? 
-                                    (p.stock === 0 ? '<span class="stock-out">Rupture</span>' : 
-                                    (p.stock <= 2 ? `<span class="stock-warning">Derniers (${p.stock})</span>` : 
-                                    `<span class="stock-ok">En stock</span>`)) : 
+                                ${p.type === 'simple' ?
+                                    (p.stock === 0 ? '<span class="stock-out">Rupture</span>' :
+                                    (p.stock <= 2 ? `<span class="stock-warning">Derniers (${p.stock})</span>` :
+                                    `<span class="stock-ok">En stock</span>`)) :
                                     `<span class="stock-ok">En stock</span>`}
                             </div>
                         </div>
@@ -617,393 +346,204 @@
         }
 
         // ============================================
-        // 13. RENDU FICHE PRODUIT
+        // 10. RENDU FICHE PRODUIT
         // ============================================
         function renderProductDetail(productId) {
             const app = document.getElementById('app');
             if (!app) return;
-
             const product = products.find(p => p.id === productId);
-            if (!product) {
-                renderCatalogue();
-                return;
-            }
-
-            const isVariantProduct = product.type === 'variants';
+            if (!product) { renderCatalogue(); return; }
+            const isVariant = product.type === 'variants';
             let selectedVariantId = selectedVariantCache[productId] || null;
             let selectedVariant = null;
-            let currentPrice = product.type === 'simple' ? (product.price || 0) : (product.base_price || 0);
-            let currentStock = product.type === 'simple' ? (product.stock || 0) : 0;
+            let currentPrice = isVariant ? (product.basePrice || 0) : (product.price || 0);
+            let currentStock = isVariant ? 0 : (product.stock || 0);
             let canAdd = false;
-
-            if (isVariantProduct && selectedVariantId) {
+            if (isVariant && selectedVariantId) {
                 selectedVariant = product.variants?.find(v => v.id === selectedVariantId);
                 if (selectedVariant) {
                     currentPrice = selectedVariant.price || 0;
                     currentStock = selectedVariant.stock || 0;
                     canAdd = currentStock > 0;
                 }
-            } else if (!isVariantProduct) {
-                canAdd = (product.stock || 0) > 0;
+            } else if (!isVariant) canAdd = (product.stock || 0) > 0;
+            let tailleOptions = [], couleurOptions = [];
+            if (isVariant && product.variants) {
+                tailleOptions = [...new Set(product.variants.map(v => v.attributes?.taille).filter(Boolean))];
+                couleurOptions = [...new Set(product.variants.map(v => v.attributes?.couleur).filter(Boolean))];
             }
-
-            let tailleOptions = [],
-                couleurOptions = [];
-            if (isVariantProduct && product.variants) {
-                const tailles = [...new Set(product.variants.map(v => v.attributes?.taille).filter(Boolean))];
-                const couleurs = [...new Set(product.variants.map(v => v.attributes?.couleur).filter(Boolean))];
-                tailleOptions = tailles;
-                couleurOptions = couleurs;
-            }
-
             const currentTaille = selectedVariant?.attributes?.taille || (tailleOptions[0] || '');
             const currentCouleur = selectedVariant?.attributes?.couleur || (couleurOptions[0] || '');
-
-            const detailHtml = `
-                <div class="back-link" onclick="navigateTo('catalogue')">← Retour au catalogue</div>
+            const html = `
+                <div class="back-link" onclick="navigateTo('catalogue')">← Retour</div>
                 <div class="product-detail">
                     <div class="product-icon">${getProductDetailIcon(product)}</div>
                     <h2>${product.name}</h2>
-                    <p style="margin: 0.5rem 0; color: #334155;">${product.description || ''}</p>
-                    ${isVariantProduct ? `
-                        <div class="variant-group">
-                            <strong>TAILLE</strong>
-                            <div class="variant-options" id="tailleContainer">
-                                ${tailleOptions.map(t => `
-                                    <div class="variant-btn ${currentTaille === t ? 'selected' : ''}" data-type="taille" data-value="${t}">${t}</div>
-                                `).join('')}
-                            </div>
-                        </div>
-                        <div class="variant-group">
-                            <strong>COULEUR</strong>
-                            <div class="variant-options" id="couleurContainer">
-                                ${couleurOptions.map(c => `
-                                    <div class="variant-btn ${currentCouleur === c ? 'selected' : ''}" data-type="couleur" data-value="${c}">${c}</div>
-                                `).join('')}
-                            </div>
-                        </div>
+                    <p>${product.description || ''}</p>
+                    ${isVariant ? `
+                        <div class="variant-group"><strong>TAILLE</strong><div class="variant-options" id="tailleContainer">
+                            ${tailleOptions.map(t => `<div class="variant-btn ${currentTaille === t ? 'selected' : ''}" data-type="taille" data-value="${t}">${t}</div>`).join('')}
+                        </div></div>
+                        <div class="variant-group"><strong>COULEUR</strong><div class="variant-options" id="couleurContainer">
+                            ${couleurOptions.map(c => `<div class="variant-btn ${currentCouleur === c ? 'selected' : ''}" data-type="couleur" data-value="${c}">${c}</div>`).join('')}
+                        </div></div>
                     ` : ''}
-                    <div class="product-price" style="font-size: 2rem;">${currentPrice.toFixed(2)} €</div>
-                    <div style="margin: 1rem 0;">
-                        ${currentStock > 0 ? `<span style="color: #15803d;">✅ En stock (${currentStock})</span>` : `<span style="color: #dc2626;">❌ Rupture de stock</span>`}
-                    </div>
-                    <button class="primary" id="addToCartBtn" ${!canAdd ? 'disabled style="opacity:0.5;"' : ''}>
-                        ${canAdd ? 'Ajouter au panier' : 'Indisponible'}
-                    </button>
-                    <p style="font-size: 0.7rem; margin-top: 1rem;">Prix calculé côté backend uniquement</p>
+                    <div style="font-size:2rem;margin:1rem 0;">${currentPrice.toFixed(2)} €</div>
+                    <div>${currentStock > 0 ? `✅ En stock (${currentStock})` : '❌ Rupture'}</div>
+                    <button class="primary" id="addToCartBtn" ${!canAdd ? 'disabled' : ''}>${canAdd ? 'Ajouter au panier' : 'Indisponible'}</button>
                 </div>
             `;
-            app.innerHTML = detailHtml;
-
-            if (isVariantProduct) {
+            app.innerHTML = html;
+            if (isVariant) {
                 const tailleBtns = document.querySelectorAll('#tailleContainer .variant-btn');
                 const couleurBtns = document.querySelectorAll('#couleurContainer .variant-btn');
-
-                function updateSelectedVariant() {
-                    const selectedTaille = document.querySelector('#tailleContainer .variant-btn.selected')?.dataset.value;
-                    const selectedCouleur = document.querySelector('#couleurContainer .variant-btn.selected')?.dataset.value;
-                    if (selectedTaille && selectedCouleur) {
-                        const foundVariant = product.variants?.find(v => v.attributes?.taille === selectedTaille && v.attributes?.couleur === selectedCouleur);
-                        if (foundVariant) {
-                            selectedVariantCache[productId] = foundVariant.id;
-                            renderProductDetail(productId);
-                        } else {
-                            selectedVariantCache[productId] = null;
-                            renderProductDetail(productId);
-                        }
+                function update() {
+                    const t = document.querySelector('#tailleContainer .variant-btn.selected')?.dataset.value;
+                    const c = document.querySelector('#couleurContainer .variant-btn.selected')?.dataset.value;
+                    if (t && c) {
+                        const found = product.variants?.find(v => v.attributes?.taille === t && v.attributes?.couleur === c);
+                        if (found) { selectedVariantCache[productId] = found.id; renderProductDetail(productId); }
+                        else { selectedVariantCache[productId] = null; renderProductDetail(productId); }
                     }
                 }
-
-                tailleBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        tailleBtns.forEach(b => b.classList.remove('selected'));
-                        btn.classList.add('selected');
-                        updateSelectedVariant();
-                    });
-                });
-                couleurBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        couleurBtns.forEach(b => b.classList.remove('selected'));
-                        btn.classList.add('selected');
-                        updateSelectedVariant();
-                    });
-                });
+                tailleBtns.forEach(btn => btn.onclick = () => { tailleBtns.forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); update(); });
+                couleurBtns.forEach(btn => btn.onclick = () => { couleurBtns.forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); update(); });
             }
-
-            const addBtn = document.getElementById('addToCartBtn');
-            if (addBtn && canAdd) {
-                addBtn.addEventListener('click', () => {
-                    if (isVariantProduct) {
-                        const variantId = selectedVariantCache[productId];
-                        if (!variantId) {
-                            showToast('Veuillez sélectionner une variante disponible');
-                            return;
-                        }
-                        addToCart(productId, variantId, 1);
-                    } else {
-                        addToCart(productId, null, 1);
-                    }
-                });
-            }
+            document.getElementById('addToCartBtn')?.addEventListener('click', () => {
+                if (isVariant) {
+                    const vid = selectedVariantCache[productId];
+                    if (!vid) { showToast('Choisissez une variante'); return; }
+                    addToCart(productId, vid, 1);
+                } else addToCart(productId, null, 1);
+            });
         }
 
         // ============================================
-        // 14. RENDU PANIER (avec code promo)
+        // 11. RENDU PANIER
         // ============================================
         function renderCart() {
             const app = document.getElementById('app');
             if (!app) return;
-
-            if (!Array.isArray(cart) || cart.length === 0) {
+            if (!cart || cart.length === 0) {
                 appliedPromo = null;
-                app.innerHTML = `
-                    <div style="text-align:center; padding:2rem;">
-                        <h2>Panier vide</h2>
-                        <button class="outline" onclick="navigateTo('catalogue')">Continuer mes achats</button>
-                    </div>
-                `;
+                app.innerHTML = `<div style="text-align:center;padding:2rem;"><h2>Panier vide</h2><button class="outline" onclick="navigateTo('catalogue')">Continuer</button></div>`;
                 return;
             }
-
             const subtotal = getSubtotal();
-            const discount = appliedPromo ? appliedPromo.discountAmount : 0;
+            const discount = appliedPromo?.discountAmount || 0;
             const total = subtotal - discount;
-
             const itemsHtml = cart.map((item, idx) => {
                 const totalItem = (item.price || 0) * (item.quantity || 0);
-                let variantStr = '';
-                if (item.attributes && item.attributes.taille) variantStr = ` ${item.attributes.taille}/${item.attributes.couleur}`;
+                let variantStr = item.attributes?.taille ? ` ${item.attributes.taille}/${item.attributes.couleur}` : '';
                 let iconHtml = item.imageUrl ? `<img src="${item.imageUrl}" style="width:30px;height:30px;object-fit:cover;border-radius:4px;margin-right:8px;">` :
                                 (item.imageIcon ? `<span style="font-size:1.5rem;margin-right:8px;">${item.imageIcon}</span>` : '');
                 return `
                     <div class="cart-item">
-                        <div class="cart-item-info" style="display:flex;align-items:center;">
+                        <div style="display:flex;align-items:center;flex:2;">
                             ${iconHtml}
-                            <div>
-                                <strong>${item.name}${variantStr}</strong><br>
-                                ${(item.price || 0).toFixed(2)} €
-                            </div>
+                            <div><strong>${item.name}${variantStr}</strong><br>${(item.price||0).toFixed(2)} €</div>
                         </div>
                         <div class="cart-item-qty">
-                            <button class="qty-btn" data-index="${idx}" data-delta="-1">-</button>
+                            <button class="qty-btn" data-idx="${idx}" data-delta="-1">-</button>
                             <span>${item.quantity || 0}</span>
-                            <button class="qty-btn" data-index="${idx}" data-delta="1">+</button>
-                            <button class="qty-btn" data-index="${idx}" data-delta="-999" style="background:#ef4444;">🗑️</button>
+                            <button class="qty-btn" data-idx="${idx}" data-delta="1">+</button>
+                            <button class="qty-btn" data-idx="${idx}" data-delta="-999" style="background:#ef4444;">🗑️</button>
                         </div>
                         <div>${totalItem.toFixed(2)} €</div>
                     </div>
                 `;
             }).join('');
-
             let promoHtml = `
                 <div class="promo-box">
-                    <input type="text" id="promoCodeInput" placeholder="Code promo (ex: PROMO10)" style="flex:1;">
+                    <input type="text" id="promoCodeInput" placeholder="Code promo">
                     <button class="outline" id="applyPromoBtn">Appliquer</button>
             `;
             if (appliedPromo) {
-                promoHtml += `
-                    <button class="outline" id="removePromoBtn" style="background:#ef4444; color:white;">Supprimer</button>
-                    <span style="font-weight: 600; color: #15803d;">💰 ${appliedPromo.code} : -${appliedPromo.discountAmount}€</span>
-                `;
+                promoHtml += `<button class="outline" id="removePromoBtn" style="background:#ef4444;color:white;">Supprimer</button>
+                    <span style="font-weight:600;color:#15803d;">💰 ${appliedPromo.code} : -${discount}€</span>`;
             }
             promoHtml += `</div>`;
-
             const html = `
                 <div class="cart-page">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display:flex;justify-content:space-between;">
                         <h2>Mon panier</h2>
-                        <button class="outline" onclick="navigateTo('catalogue')">Continuer mes achats</button>
+                        <button class="outline" onclick="navigateTo('catalogue')">Continuer</button>
                     </div>
-                    <hr>
-                    ${itemsHtml}
-                    <hr>
-                    ${promoHtml}
+                    <hr>${itemsHtml}<hr>${promoHtml}
                     <div class="summary">
                         <p>Sous-total : ${subtotal.toFixed(2)} €</p>
                         ${appliedPromo ? `<p>Réduction : -${discount.toFixed(2)} €</p>` : ''}
                         <h3>Total : ${total.toFixed(2)} €</h3>
-                        <button class="primary" id="checkoutBtn" style="margin-top:1rem;">Procéder au paiement</button>
-                        <p style="font-size:0.7rem; margin-top:0.5rem;">Le total sera re-calculé et validé par le backend</p>
+                        <button class="primary" id="checkoutBtn">Procéder au paiement</button>
                     </div>
                 </div>
             `;
             app.innerHTML = html;
-
             document.querySelectorAll('.qty-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const idx = parseInt(btn.dataset.index);
+                btn.onclick = () => {
+                    const idx = parseInt(btn.dataset.idx);
                     const delta = parseInt(btn.dataset.delta);
-                    const item = cart[idx];
-                    if (delta === -999) {
-                        updateCartItem(idx, 0);
-                    } else {
-                        const newQty = (item.quantity || 0) + delta;
+                    if (delta === -999) updateCartItem(idx, 0);
+                    else {
+                        const newQty = (cart[idx].quantity || 0) + delta;
                         if (newQty >= 1) updateCartItem(idx, newQty);
                     }
-                });
+                };
             });
-
-            const applyBtn = document.getElementById('applyPromoBtn');
-            const inputCode = document.getElementById('promoCodeInput');
-            if (applyBtn && inputCode) {
-                applyBtn.addEventListener('click', () => {
-                    const code = inputCode.value.trim().toUpperCase();
-                    if (!code) {
-                        showToast('Veuillez saisir un code');
-                        return;
-                    }
-                    const result = applyPromoCode(code);
-                    showToast(result.message);
-                    if (result.success) renderCart();
-                });
-                inputCode.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        applyBtn.click();
-                    }
-                });
-            }
-
-            const removeBtn = document.getElementById('removePromoBtn');
-            if (removeBtn) {
-                removeBtn.addEventListener('click', () => {
-                    removePromo();
-                    renderCart();
-                });
-            }
-
-            document.getElementById('checkoutBtn')?.addEventListener('click', () => simulateCheckout(total));
+            document.getElementById('applyPromoBtn')?.addEventListener('click', () => {
+                const code = document.getElementById('promoCodeInput').value.trim().toUpperCase();
+                if (!code) { showToast('Saisissez un code'); return; }
+                const result = applyPromoCode(code);
+                showToast(result.message);
+                if (result.success) renderCart();
+            });
+            document.getElementById('removePromoBtn')?.addEventListener('click', () => {
+                removePromo();
+                renderCart();
+            });
+            document.getElementById('checkoutBtn')?.addEventListener('click', simulateCheckout);
         }
 
         // ============================================
-        // 15. SIMULATION PAIEMENT
+        // 12. SIMULATION PAIEMENT
         // ============================================
-        async function simulateCheckout(total) {
-            if (!Array.isArray(cart) || cart.length === 0) {
-                showToast('Panier vide');
-                return;
-            }
-
+        function simulateCheckout() {
+            if (!cart || cart.length === 0) { showToast('Panier vide'); return; }
             for (const item of cart) {
-                const currentStock = getStock(item.productId, item.variantId);
-                if ((item.quantity || 0) > currentStock) {
-                    showToast(`Stock dépassé pour ${item.name} : disponible ${currentStock}`);
-                    return;
+                const stock = getStock(item.productId, item.variantId);
+                if ((item.quantity || 0) > stock) { showToast(`Stock dépassé pour ${item.name}`); return; }
+            }
+            // Simuler paiement
+            const total = getTotal();
+            const orderId = 'ORD-' + Math.random().toString(36).substring(2,8).toUpperCase();
+            const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`;
+            // Mise à jour des stocks
+            for (const item of cart) {
+                const prod = products.find(p => p.id === item.productId);
+                if (!prod) continue;
+                if (prod.type === 'simple') {
+                    prod.stock = Math.max(0, (prod.stock || 0) - (item.quantity || 0));
+                } else {
+                    const variant = prod.variants?.find(v => v.id === item.variantId);
+                    if (variant) variant.stock = Math.max(0, (variant.stock || 0) - (item.quantity || 0));
                 }
             }
-
-            const modalHtml = `
-                <div class="modal" id="paymentModal">
-                    <div class="modal-content">
-                        <h3>🔐 Paiement sécurisé (simulation)</h3>
-                        <p>Montant total : ${total.toFixed(2)} €</p>
-                        ${appliedPromo ? `<p style="color:#15803d;">Code promo ${appliedPromo.code} : -${appliedPromo.discountAmount}€</p>` : ''}
-                        <p style="font-size:0.8rem;">Cette démo simule Stripe. Cliquez sur "Payer" pour confirmer.</p>
-                        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                            <button class="outline" id="cancelPayment">Annuler</button>
-                            <button class="primary" id="confirmPayment">Payer</button>
-                        </div>
-                    </div>
+            saveProducts(products);
+            const itemsList = cart.map(i => `${i.name} ${i.attributes?.taille ? `(${i.attributes.taille}/${i.attributes.couleur})` : ''} x${i.quantity}`).join(', ');
+            cart = []; appliedPromo = null; saveCart();
+            document.getElementById('app').innerHTML = `
+                <div style="background:white;border-radius:32px;padding:2rem;text-align:center;">
+                    <h2>✅ Commande confirmée !</h2>
+                    <p>N° commande : ${orderId}</p>
+                    <p>Total payé : ${total.toFixed(2)} €</p>
+                    <p>Articles : ${itemsList}</p>
+                    <button class="primary" onclick="navigateTo('catalogue')">Nouvelle commande</button>
                 </div>
             `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-            const modal = document.getElementById('paymentModal');
-            document.getElementById('cancelPayment')?.addEventListener('click', () => modal.remove());
-
-            document.getElementById('confirmPayment')?.addEventListener('click', async () => {
-                modal.remove();
-
-                for (const item of cart) {
-                    const product = products.find(p => p.id === item.productId);
-                    if (!product) continue;
-
-                    if (product.type === 'simple') {
-                        const newStock = Math.max(0, (product.stock || 0) - (item.quantity || 0));
-                        await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${product.id}`, {
-                            method: 'PATCH',
-                            headers: {
-                                'apikey': SUPABASE_KEY,
-                                'Authorization': `Bearer ${SUPABASE_KEY}`,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ stock: newStock })
-                        });
-                        product.stock = newStock;
-                    } else if (product.variants) {
-                        const variant = product.variants.find(v => v.id === item.variantId);
-                        if (variant) {
-                            variant.stock = Math.max(0, (variant.stock || 0) - (item.quantity || 0));
-                            await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${product.id}`, {
-                                method: 'PATCH',
-                                headers: {
-                                    'apikey': SUPABASE_KEY,
-                                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({ variants: product.variants })
-                            });
-                        }
-                    }
-                }
-
-                const orderId = 'ORD-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-                const now = new Date();
-                const clientEmail = `client${Math.floor(Math.random() * 1000)}@email.com`;
-                const totalPaid = total;
-
-                const order = {
-                    id: orderId,
-                    client: clientEmail,
-                    date: now.toISOString().slice(0, 10),
-                    time: now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-                    items: cart.map(i => ({
-                        productId: i.productId,
-                        variantId: i.variantId,
-                        qty: i.quantity,
-                        price: i.price
-                    })),
-                    total: totalPaid,
-                    status: 'Payée',
-                    admin_followup: 'À traiter',
-                    promo_code: appliedPromo ? appliedPromo.code : null,
-                    discount: appliedPromo ? appliedPromo.discountAmount : 0
-                };
-
-                await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(order)
-                });
-
-                const itemsList = cart.map(i =>
-                    `${i.name} ${i.attributes?.taille ? `(${i.attributes.taille}/${i.attributes.couleur})` : ''} x${i.quantity}`
-                ).join(', ');
-                cart = [];
-                appliedPromo = null;
-                saveCart();
-
-                const confirmationHtml = `
-                    <div style="background: white; border-radius: 32px; padding: 2rem; text-align: center;">
-                        <h2>✅ Commande confirmée !</h2>
-                        <p>Email de confirmation envoyé via EmailJS</p>
-                        <p><strong>N° commande</strong><br>${orderId}</p>
-                        <p><strong>Statut</strong><br>Payée</p>
-                        ${order.promo_code ? `<p><strong>Code promo</strong> ${order.promo_code} : -${order.discount}€</p>` : ''}
-                        <p><strong>Articles</strong><br>${itemsList}</p>
-                        <p><strong>Total payé</strong><br>${totalPaid.toFixed(2)} €</p>
-                        <p style="font-size:0.8rem;">Email envoyé via EmailJS à ${clientEmail}</p>
-                        <button class="primary" onclick="navigateTo('catalogue')">Nouvelle commande</button>
-                    </div>
-                `;
-                document.getElementById('app').innerHTML = confirmationHtml;
-            });
         }
 
         // ============================================
-        // 16. RENDU PAGE COURANTE
+        // 13. RENDU PAGE COURANTE
         // ============================================
         function renderCurrentPage() {
             if (currentPage === 'catalogue') renderCatalogue();
@@ -1013,7 +553,7 @@
         }
 
         // ============================================
-        // 17. EXPOSER LES FONCTIONS
+        // 14. EXPOSER LES FONCTIONS
         // ============================================
         window.navigateTo = navigateTo;
         window.addToCart = addToCart;
@@ -1021,29 +561,10 @@
         window.simulateCheckout = simulateCheckout;
 
         // ============================================
-        // 18. INITIALISATION
+        // 15. INITIALISATION
         // ============================================
-        async function init() {
-            console.log('🚀 Initialisation...');
-            await loadProducts();
-            await loadPromos();
-            loadCart();
-
-            if (!Array.isArray(products)) products = [];
-            renderCurrentPage();
-
-            if (products.length === 0) {
-                document.getElementById('app').innerHTML = `
-                    <div style="text-align:center; padding:3rem;">
-                        <h2>📦 Aucun produit disponible</h2>
-                        <p style="color: #475569;">Vérifiez votre base Supabase.</p>
-                    </div>
-                `;
-            }
-        }
-
-        init();
+        loadCart();
+        renderCurrentPage();
     </script>
-
 </body>
 </html>
