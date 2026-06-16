@@ -202,6 +202,7 @@
             return { totalStock, ruptures, lowStockItems: low, stockValue, productRuptures };
         }
 
+        // Affichage : image prioritaire
         function getDisplayIcon(product) {
             if (product.images && product.images.length > 0) {
                 return `<img src="${product.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
@@ -310,7 +311,7 @@
         }
 
         // ============================================
-        // 7. MODALE PRODUIT (identique)
+        // 7. MODALE PRODUIT
         // ============================================
         const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
 
@@ -614,7 +615,7 @@
         }
 
         // ============================================
-        // 10. GESTION COMMANDES (avec modale détaillée)
+        // 10. GESTION COMMANDES
         // ============================================
         function renderOrders() {
             orders = loadOrders();
@@ -678,18 +679,16 @@
         }
 
         // ============================================
-        // 11. VUE DÉTAILLÉE D'UNE COMMANDE (modale)
+        // 11. VUE DÉTAILLÉE D'UNE COMMANDE
         // ============================================
         window.viewOrder = function(id) {
             const order = orders.find(o => o.id === id);
             if (!order) return;
 
-            // Calcul du sous-total
             const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const reduction = order.discount || 0;
             const totalPaye = order.total || 0;
 
-            // Construction de la liste des articles
             const itemsList = order.items.map(item => {
                 const product = products.find(p => p.id === item.productId);
                 const name = product ? product.name : 'Produit inconnu';
@@ -703,7 +702,6 @@
                 return `${name}${variantStr} × ${item.qty} = ${(item.price * item.qty).toFixed(2)} €`;
             }).join('<br>');
 
-            // Création de la modale
             const modal = document.createElement('div');
             modal.className = 'modal';
             modal.innerHTML = `
@@ -806,7 +804,24 @@
         };
 
         // ============================================
-        // 14. INITIALISATION
+        // 14. SYNCHRONISATION INTER-ONGLETS
+        // ============================================
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'shop_products' || e.key === 'shop_promos' || e.key === 'shop_orders' || e.key === 'shop_cart') {
+                console.log('🔄 Changement détecté sur', e.key);
+                products = loadProducts();
+                orders = loadOrders();
+                promos = loadPromos();
+                if (currentPage === 'dashboard') renderDashboard();
+                else if (currentPage === 'products') renderProducts();
+                else if (currentPage === 'stock') renderStock();
+                else if (currentPage === 'orders') renderOrders();
+                else if (currentPage === 'promos') renderPromos();
+            }
+        });
+
+        // ============================================
+        // 15. INITIALISATION
         // ============================================
         function init() {
             renderDashboard();
