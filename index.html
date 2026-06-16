@@ -28,26 +28,207 @@
         button.primary { background: #3b82f6; }
         button.primary:hover { background: #2563eb; }
         button.outline { background: white; border: 1px solid #cbd5e1; color: #1e293b; }
-        .product-detail { background: white; border-radius: 32px; padding: 2rem; max-width: 700px; margin: 0 auto; border: 1px solid #e2e8f0; }
-        .variant-group { margin: 1.2rem 0; }
-        .variant-options { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
-        .variant-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.5rem 1rem; border-radius: 40px; cursor: pointer; font-size: 0.9rem; }
-        .variant-btn.selected { background: #0f172a; color: white; border-color: #0f172a; }
-        .back-link { display: inline-block; margin-bottom: 1rem; cursor: pointer; color: #3b82f6; }
-        .cart-page { background: white; border-radius: 32px; padding: 1.5rem; border: 1px solid #e2e8f0; }
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #e2e8f0; }
+        
+        /* === FICHE PRODUIT AMÉLIORÉE === */
+        .product-detail {
+            background: white;
+            border-radius: 32px;
+            padding: 2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .product-detail .product-icon {
+            font-size: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            min-height: 250px;
+        }
+        .product-detail .product-icon img {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            background: white;
+            padding: 10px;
+        }
+        .product-detail .product-icon span {
+            font-size: 6rem;
+        }
+        .product-detail h2 {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        .product-detail .description {
+            color: #475569;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+        }
+        .product-detail .price {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 1rem 0;
+            color: #0f172a;
+        }
+        .product-detail .stock-info {
+            text-align: center;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+        .product-detail .add-btn {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            font-size: 1.1rem;
+            border-radius: 40px;
+        }
+        .variant-group {
+            margin: 1.2rem 0;
+        }
+        .variant-group strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+        .variant-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            justify-content: center;
+        }
+        .variant-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.15s;
+        }
+        .variant-btn:hover {
+            background: #e2e8f0;
+        }
+        .variant-btn.selected {
+            background: #0f172a;
+            color: white;
+            border-color: #0f172a;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            color: #3b82f6;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .cart-page {
+            background: white;
+            border-radius: 32px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
         .cart-item-info { flex: 2; }
-        .cart-item-qty { display: flex; gap: 0.5rem; align-items: center; }
-        .qty-btn { background: #e2e8f0; padding: 0.2rem 0.6rem; border-radius: 20px; font-weight: bold; cursor: pointer; border: none; }
-        .summary { margin-top: 1.5rem; text-align: right; }
-        .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: white; padding: 0.8rem 1.5rem; border-radius: 40px; z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; max-width: 500px; width: 90%; border-radius: 32px; padding: 1.8rem; }
+        .cart-item-qty {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .qty-btn {
+            background: #e2e8f0;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        .summary {
+            margin-top: 1.5rem;
+            text-align: right;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #0f172a;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 40px;
+            z-index: 200;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            max-width: 500px;
+            width: 90%;
+            border-radius: 32px;
+            padding: 1.8rem;
+        }
         hr { margin: 1rem 0; }
-        .promo-box { background: #f8fafc; padding: 1rem; border-radius: 20px; margin-top: 1rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-        .promo-box input { padding: 0.5rem; border-radius: 40px; border: 1px solid #cbd5e1; flex: 1; min-width: 150px; }
-        .product-detail .product-icon img { width: 100px; height: 100px; }
-        @media (max-width: 700px) { .container { padding: 1rem; } }
+        .promo-box {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 20px;
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .promo-box input {
+            padding: 0.5rem;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            flex: 1;
+            min-width: 150px;
+        }
+        @media (max-width: 700px) {
+            .container { padding: 1rem; }
+            .product-detail .product-icon {
+                min-height: 180px;
+                padding: 1rem;
+            }
+            .product-detail .product-icon img {
+                width: 140px;
+                height: 140px;
+            }
+            .product-detail .product-icon span {
+                font-size: 4rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -86,7 +267,6 @@
                     headers: { ...defaultHeaders, ...options.headers }
                 });
 
-                // Si le statut est 204 (No Content) ou 201 (Created), retourner null
                 if (response.status === 204 || response.status === 201) {
                     return null;
                 }
@@ -201,6 +381,7 @@
             setTimeout(() => toast.remove(), 2000);
         }
 
+        // === AFFICHAGE ICÔNES / IMAGES ===
         function getProductDisplayIcon(product) {
             if (product.image_url) {
                 return `<img src="${product.image_url}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">`;
@@ -211,13 +392,14 @@
             }
         }
 
+        // === FICHE DÉTAIL : IMAGE AGRANDIE ===
         function getProductDetailIcon(product) {
             if (product.image_url) {
-                return `<img src="${product.image_url}" style="width:100px;height:100px;object-fit:cover;border-radius:12px;">`;
+                return `<img src="${product.image_url}" style="width:200px;height:200px;object-fit:contain;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.08);background:white;padding:10px;">`;
             } else if (product.icon) {
-                return `<span style="font-size:4rem;">${product.icon}</span>`;
+                return `<span style="font-size:6rem;">${product.icon}</span>`;
             } else {
-                return `<span style="font-size:4rem;">📦</span>`;
+                return `<span style="font-size:6rem;">📦</span>`;
             }
         }
 
@@ -367,7 +549,7 @@
         }
 
         // ============================================
-        // 11. RENDU FICHE PRODUIT
+        // 11. RENDU FICHE PRODUIT (AMÉLIORÉ)
         // ============================================
         function renderProductDetail(productId) {
             const app = document.getElementById('app');
@@ -395,26 +577,43 @@
             }
             const currentTaille = selectedVariant?.attributes?.taille || (tailleOptions[0] || '');
             const currentCouleur = selectedVariant?.attributes?.couleur || (couleurOptions[0] || '');
-            const html = `
-                <div class="back-link" onclick="navigateTo('catalogue')">← Retour</div>
+
+            const detailHtml = `
+                <div class="back-link" onclick="navigateTo('catalogue')">← Retour au catalogue</div>
                 <div class="product-detail">
                     <div class="product-icon">${getProductDetailIcon(product)}</div>
                     <h2>${product.name}</h2>
-                    <p>${product.description || ''}</p>
+                    <p class="description">${product.description || ''}</p>
                     ${isVariant ? `
-                        <div class="variant-group"><strong>TAILLE</strong><div class="variant-options" id="tailleContainer">
-                            ${tailleOptions.map(t => `<div class="variant-btn ${currentTaille === t ? 'selected' : ''}" data-type="taille" data-value="${t}">${t}</div>`).join('')}
-                        </div></div>
-                        <div class="variant-group"><strong>COULEUR</strong><div class="variant-options" id="couleurContainer">
-                            ${couleurOptions.map(c => `<div class="variant-btn ${currentCouleur === c ? 'selected' : ''}" data-type="couleur" data-value="${c}">${c}</div>`).join('')}
-                        </div></div>
+                        <div class="variant-group">
+                            <strong>TAILLE</strong>
+                            <div class="variant-options" id="tailleContainer">
+                                ${tailleOptions.map(t => `
+                                    <div class="variant-btn ${currentTaille === t ? 'selected' : ''}" data-type="taille" data-value="${t}">${t}</div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="variant-group">
+                            <strong>COULEUR</strong>
+                            <div class="variant-options" id="couleurContainer">
+                                ${couleurOptions.map(c => `
+                                    <div class="variant-btn ${currentCouleur === c ? 'selected' : ''}" data-type="couleur" data-value="${c}">${c}</div>
+                                `).join('')}
+                            </div>
+                        </div>
                     ` : ''}
-                    <div style="font-size:2rem;margin:1rem 0;">${currentPrice.toFixed(2)} €</div>
-                    <div>${currentStock > 0 ? `✅ En stock (${currentStock})` : '❌ Rupture'}</div>
-                    <button class="primary" id="addToCartBtn" ${!canAdd ? 'disabled' : ''}>${canAdd ? 'Ajouter au panier' : 'Indisponible'}</button>
+                    <div class="price">${currentPrice.toFixed(2)} €</div>
+                    <div class="stock-info">
+                        ${currentStock > 0 ? `<span style="color: #15803d;">✅ En stock (${currentStock})</span>` : `<span style="color: #dc2626;">❌ Rupture de stock</span>`}
+                    </div>
+                    <button class="primary add-btn" id="addToCartBtn" ${!canAdd ? 'disabled style="opacity:0.5;"' : ''}>
+                        ${canAdd ? 'Ajouter au panier' : 'Indisponible'}
+                    </button>
+                    <p style="font-size: 0.7rem; text-align:center; margin-top:1rem; color:#94a3b8;">Prix calculé côté backend</p>
                 </div>
             `;
-            app.innerHTML = html;
+            app.innerHTML = detailHtml;
+
             if (isVariant) {
                 const tailleBtns = document.querySelectorAll('#tailleContainer .variant-btn');
                 const couleurBtns = document.querySelectorAll('#couleurContainer .variant-btn');
@@ -557,13 +756,8 @@
                 discount: appliedPromo?.discountAmount || 0
             };
 
-            // Insérer la commande
-            await fetchSupabase('orders', {
-                method: 'POST',
-                body: JSON.stringify(order)
-            });
+            await fetchSupabase('orders', { method: 'POST', body: JSON.stringify(order) });
 
-            // Mettre à jour les stocks
             for (const item of cart) {
                 const prod = products.find(p => p.id === item.productId);
                 if (!prod) continue;
