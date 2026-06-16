@@ -638,13 +638,13 @@
                 removePromo();
                 renderCart();
             });
-            document.getElementById('checkoutBtn')?.addEventListener('click', simulateCheckout);
+            document.getElementById('checkoutBtn')?.addEventListener('click', stripeCheckout);
         }
 
         // ============================================
         // 13. SIMULATION PAIEMENT (sans email réel)
         // ============================================
-        async function simulateCheckout() {
+        async function stripeCheckout() {
             if (!Array.isArray(cart) || cart.length === 0) { showToast('Panier vide'); return; }
             for (const item of cart) {
                 const stock = getStock(item.productId, item.variantId);
@@ -761,7 +761,16 @@
             loadCart();
             renderCurrentPage();
         }
-        init();
+        init()
+            const params = new URLSearchParams(window.location.search);
+
+if (params.get("success")) {
+    showToast("Paiement réussi ✅");
+}
+
+if (params.get("cancel")) {
+    showToast("Paiement annulé ❌");
+};
     </script>
 </body>
 </html>
