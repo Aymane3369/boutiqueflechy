@@ -174,44 +174,34 @@
             setTimeout(() => toast.remove(), 2500);
         }
 
-        // Calcul des statistiques de stock
         function getStockStats() {
             let totalStock = 0, ruptures = 0, low = 0, stockValue = 0;
-            let productRuptures = 0; // produits (entiers) en rupture
+            let productRuptures = 0;
 
             products.forEach(p => {
-                let totalQty = 0;
                 if (p.type === 'simple') {
                     const qty = p.stock || 0;
-                    totalQty = qty;
                     totalStock += qty;
                     if (qty === 0) ruptures++;
                     else if (qty <= 2) low++;
                     stockValue += qty * (p.price || 0);
+                    if (qty === 0) productRuptures++;
                 } else if (p.variants) {
                     let hasStock = false;
                     p.variants.forEach(v => {
                         const qty = v.stock || 0;
-                        totalQty += qty;
                         totalStock += qty;
                         if (qty === 0) ruptures++;
                         else if (qty <= 2) low++;
                         stockValue += qty * (v.price || p.basePrice || 0);
                         if (qty > 0) hasStock = true;
                     });
-                    // Si aucune variante n'a de stock, ce produit est en rupture
                     if (!hasStock) productRuptures++;
-                } else {
-                    // cas improbable
                 }
-                // Pour les produits simples, on compte comme produit en rupture si stock = 0
-                if (p.type === 'simple' && (p.stock || 0) === 0) productRuptures++;
             });
-
             return { totalStock, ruptures, lowStockItems: low, stockValue, productRuptures };
         }
 
-        // Affichage icône (image prioritaire)
         function getDisplayIcon(product) {
             if (product.images && product.images.length > 0) {
                 return `<img src="${product.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
@@ -243,7 +233,7 @@
         }
 
         // ============================================
-        // 5. DASHBOARD (avec produits en rupture)
+        // 5. DASHBOARD
         // ============================================
         function renderDashboard() {
             products = loadProducts();
@@ -285,7 +275,7 @@
         }
 
         // ============================================
-        // 6. GESTION PRODUITS (inchangé)
+        // 6. GESTION PRODUITS
         // ============================================
         function renderProducts() {
             products = loadProducts();
@@ -556,7 +546,7 @@
         };
 
         // ============================================
-        // 9. GESTION STOCK (inchangé)
+        // 9. GESTION STOCK
         // ============================================
         function renderStock() {
             products = loadProducts();
@@ -624,7 +614,7 @@
         }
 
         // ============================================
-        // 10. GESTION COMMANDES (avec promo et prix original)
+        // 10. GESTION COMMANDES (avec modale détaillée)
         // ============================================
         function renderOrders() {
             orders = loadOrders();
@@ -687,61 +677,66 @@
             attachNavEvents();
         }
 
-window.viewOrder = function(id) {
-    const order = orders.find(o => o.id === id);
-    if (!order) return;
+        // ============================================
+        // 11. VUE DÉTAILLÉE D'UNE COMMANDE (modale)
+        // ============================================
+        window.viewOrder = function(id) {
+            const order = orders.find(o => o.id === id);
+            if (!order) return;
 
-    // Calcul du sous-total (somme des prix × quantités)
-    const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    const reduction = order.discount || 0;
-    const totalPaye = order.total || 0;
+            // Calcul du sous-total
+            const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const reduction = order.discount || 0;
+            const totalPaye = order.total || 0;
 
-    // Construction de la liste des articles
-    const itemsList = order.items.map(item => {
-        const product = products.find(p => p.id === item.productId);
-        const name = product ? product.name : 'Produit inconnu';
-        let variantStr = '';
-        if (item.variantId && product && product.variants) {
-            const variant = product.variants.find(v => v.id === item.variantId);
-            if (variant) {
-                variantStr = ` (${variant.attributes.taille}/${variant.attributes.couleur})`;
-            }
-        }
-        return `${name}${variantStr} × ${item.qty} = ${(item.price * item.qty).toFixed(2)} €`;
-    }).join('<br>');
+            // Construction de la liste des articles
+            const itemsList = order.items.map(item => {
+                const product = products.find(p => p.id === item.productId);
+                const name = product ? product.name : 'Produit inconnu';
+                let variantStr = '';
+                if (item.variantId && product && product.variants) {
+                    const variant = product.variants.find(v => v.id === item.variantId);
+                    if (variant) {
+                        variantStr = ` (${variant.attributes.taille}/${variant.attributes.couleur})`;
+                    }
+                }
+                return `${name}${variantStr} × ${item.qty} = ${(item.price * item.qty).toFixed(2)} €`;
+            }).join('<br>');
 
-    // Création de la modale
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <h2 style="margin-bottom:1rem;">📋 Détail de la commande</h2>
-            <p><strong>N° commande :</strong> ${order.id}</p>
-            <p><strong>Client :</strong> ${order.client}</p>
-            <p><strong>Date :</strong> ${order.date || 'non renseignée'} ${order.time ? 'à ' + order.time : ''}</p>
-            <p><strong>Statut :</strong> ${order.status}</p>
-            <p><strong>Suivi admin :</strong> ${order.adminFollowup || 'À traiter'}</p>
-            <p><strong>Code promo :</strong> ${order.promoCode ? `<span class="badge badge-success">${order.promoCode}</span>` : 'Aucun'}</p>
-            <hr>
-            <p><strong>Articles :</strong></p>
-            <div style="background:#f8fafc;padding:0.5rem;border-radius:8px;margin:0.5rem 0;">
-                ${itemsList}
-            </div>
-            <hr>
-            <p><strong>Sous-total :</strong> ${subtotal.toFixed(2)} €</p>
-            ${reduction > 0 ? `<p><strong>Réduction :</strong> -${reduction.toFixed(2)} €</p>` : ''}
-            <p><strong>Total payé :</strong> ${totalPaye.toFixed(2)} €</p>
-            <div style="margin-top:1.5rem;text-align:right;">
-                <button class="btn-outline" id="closeOrderModal">Fermer</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    document.getElementById('closeOrderModal').onclick = () => modal.remove();
-    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
-};
+            // Création de la modale
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h2 style="margin-bottom:1rem;">📋 Détail de la commande</h2>
+                    <p><strong>N° commande :</strong> ${order.id}</p>
+                    <p><strong>Client :</strong> ${order.client}</p>
+                    <p><strong>Date :</strong> ${order.date || 'non renseignée'} ${order.time ? 'à ' + order.time : ''}</p>
+                    <p><strong>Statut :</strong> ${order.status}</p>
+                    <p><strong>Suivi admin :</strong> ${order.adminFollowup || 'À traiter'}</p>
+                    <p><strong>Code promo :</strong> ${order.promoCode ? `<span class="badge badge-success">${order.promoCode}</span>` : 'Aucun'}</p>
+                    <hr>
+                    <p><strong>Articles :</strong></p>
+                    <div style="background:#f8fafc;padding:0.5rem;border-radius:8px;margin:0.5rem 0;">
+                        ${itemsList}
+                    </div>
+                    <hr>
+                    <p><strong>Sous-total :</strong> ${subtotal.toFixed(2)} €</p>
+                    ${reduction > 0 ? `<p><strong>Réduction :</strong> -${reduction.toFixed(2)} €</p>` : ''}
+                    <p><strong>Total payé :</strong> ${totalPaye.toFixed(2)} €</p>
+                    <div style="margin-top:1.5rem;text-align:right;">
+                        <button class="btn-outline" id="closeOrderModal">Fermer</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('closeOrderModal').onclick = () => modal.remove();
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
         };
 
+        // ============================================
+        // 12. SUPPRIMER UNE COMMANDE
+        // ============================================
         window.deleteOrder = function(id) {
             if (!confirm('Supprimer cette commande ?')) return;
             orders = orders.filter(o => o.id !== id);
@@ -751,7 +746,7 @@ window.viewOrder = function(id) {
         };
 
         // ============================================
-        // 11. GESTION PROMOS (inchangé)
+        // 13. GESTION PROMOS
         // ============================================
         function renderPromos() {
             promos = loadPromos();
@@ -811,7 +806,7 @@ window.viewOrder = function(id) {
         };
 
         // ============================================
-        // 12. INITIALISATION
+        // 14. INITIALISATION
         // ============================================
         function init() {
             renderDashboard();
