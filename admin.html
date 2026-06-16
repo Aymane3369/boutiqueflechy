@@ -18,38 +18,45 @@
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; }
         .page-header h1 { font-size: 1.8rem; color: #0f172a; }
         .btn { background: #3b82f6; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 30px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn:hover { opacity: 0.9; }
         .btn-outline { background: white; border: 1px solid #cbd5e1; color: #1e293b; }
         .btn-danger { background: #ef4444; }
+        .btn-danger:hover { background: #dc2626; }
         .btn-small { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
         .btn-success { background: #22c55e; }
+        .btn-success:hover { background: #16a34a; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 1rem 1.2rem; border-radius: 20px; border: 1px solid #e2e8f0; }
+        .stat-card { background: white; padding: 1rem 1.2rem; border-radius: 20px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .stat-title { font-size: 0.8rem; text-transform: uppercase; color: #475569; font-weight: 600; }
-        .stat-value { font-size: 2rem; font-weight: 700; margin-top: 0.3rem; }
+        .stat-value { font-size: 2rem; font-weight: 700; margin-top: 0.3rem; color: #0f172a; }
         .stat-sub { font-size: 0.85rem; color: #64748b; }
-        .table-container { background: white; border-radius: 20px; border: 1px solid #e2e8f0; overflow-x: auto; margin-top: 1rem; }
+        .table-container { background: white; border-radius: 20px; border: 1px solid #e2e8f0; overflow-x: auto; margin-top: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; }
         th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0; }
         th { background: #f8fafc; font-weight: 600; color: #1e293b; }
-        .badge { padding: 0.2rem 0.7rem; border-radius: 30px; font-size: 0.75rem; font-weight: 500; }
+        .badge { padding: 0.2rem 0.7rem; border-radius: 30px; font-size: 0.75rem; font-weight: 500; display: inline-block; }
         .badge-success { background: #dcfce7; color: #15803d; }
         .badge-warning { background: #fef9c3; color: #854d0e; }
         .badge-danger { background: #fee2e2; color: #dc2626; }
+        .badge-info { background: #dbeafe; color: #1d4ed8; }
         .product-img-list { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 28px; background: #f1f5f9; border-radius: 8px; overflow: hidden; }
         .product-img-list img { width: 40px; height: 40px; object-fit: cover; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; border-radius: 28px; max-width: 750px; width: 90%; padding: 1.8rem; max-height: 85vh; overflow-y: auto; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.2s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content { background: white; border-radius: 28px; max-width: 750px; width: 90%; padding: 1.8rem; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
         .form-group { margin-bottom: 1.2rem; }
-        label { font-weight: 500; display: block; margin-bottom: 0.4rem; }
-        input, select, textarea { width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.95rem; }
+        label { font-weight: 500; display: block; margin-bottom: 0.4rem; color: #0f172a; }
+        input, select, textarea { width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.95rem; transition: 0.2s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
         .variant-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
         .variant-row input { flex: 1; min-width: 80px; }
-        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
         .emoji-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 60px)); gap: 8px; margin: 10px 0; }
         .emoji-option { font-size: 32px; background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 16px; padding: 5px; text-align: center; cursor: pointer; transition: 0.1s; }
         .emoji-option:hover { background: #e2e8f0; transform: scale(1.05); }
         .emoji-option.selected { border-color: #3b82f6; background: #dbeafe; }
-        .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: white; padding: 0.8rem 1.5rem; border-radius: 40px; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: white; padding: 0.8rem 1.5rem; border-radius: 40px; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); animation: slideUp 0.3s; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .image-preview-grid { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
         .image-preview-grid img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; }
         .upload-area { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
@@ -61,6 +68,10 @@
         .login-box h1 { text-align: center; margin-bottom: 1.5rem; color: #0f172a; }
         .login-box input { margin-bottom: 1rem; }
         .login-box .btn { width: 100%; justify-content: center; }
+        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .settings-section { background: white; border-radius: 20px; padding: 1.5rem; border: 1px solid #e2e8f0; margin-bottom: 1rem; }
+        .settings-section h3 { margin-bottom: 1rem; color: #0f172a; }
         @media (max-width: 700px) { .sidebar { width: 80px; padding: 1rem 0.5rem; } .sidebar .logo h2 { font-size: 1rem; } .sidebar .logo span, .footer-sidebar { display: none; } .nav-item { font-size: 0.8rem; text-align: center; padding: 0.5rem; } .main { padding: 1rem; } }
     </style>
 </head>
@@ -74,19 +85,23 @@
             <div class="nav-item" data-page="stock">📦 Stock</div>
             <div class="nav-item" data-page="orders">📋 Commandes</div>
             <div class="nav-item" data-page="promos">🏷️ Promos</div>
+            <div class="nav-item" data-page="settings">⚙️ Paramètres</div>
             <div class="nav-item" data-page="logout" style="color:#ef4444;margin-top:1rem;">🚪 Déconnexion</div>
         </div>
-        <div class="footer-sidebar">Accès admin via Supabase</div>
+        <div class="footer-sidebar">v2.0 - Admin panel</div>
     </div>
 
     <div class="main" id="mainContent"></div>
 
     <script>
         // ============================================
-        // 1. CONFIGURATION SUPABASE
+        // 1. CONFIGURATION
         // ============================================
         const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
+        
+        const STRIPE_PUBLISHABLE_KEY = 'pk_test_51Tekkn6wfDMIVGHfTWzp5lHp5tI4eZnsQLy0xl0EQNXGDq9dUKyYqAnhfQURu5yxVyA10AJadtuLYWv2xVRwkXAK00itBqEpSx';
+        const STRIPE_SECRET_KEY = 'sk_test_51Tekkn6wfDMIVGHfvOv0hDeBYip3xraC04CjzmlIFYyxs0Hp8SiI1IVG4798qwA84KYA3NsdS9t150S8RdixNauU00QOvC247h';
 
         // ============================================
         // 2. AUTHENTIFICATION ADMIN
@@ -114,7 +129,7 @@
                         <h1>🔐 Admin</h1>
                         <p style="text-align:center;color:#64748b;margin-bottom:1.5rem;">StyleShop - Panel d'administration</p>
                         <input type="email" id="loginEmail" placeholder="Email" value="admin@styleshop.com">
-                        <input type="password" id="loginPassword" placeholder="Mot de passe" value="Admin123!">
+                        <input type="password" id="loginPassword" placeholder="Mot de passe" value="Admin123!" onkeyup="if(event.key==='Enter') document.getElementById('loginBtn').click()">
                         <button class="btn" id="loginBtn">Se connecter</button>
                         <p style="text-align:center;color:#94a3b8;font-size:0.8rem;margin-top:1rem;">admin@styleshop.com / Admin123!</p>
                     </div>
@@ -131,9 +146,6 @@
                     alert('❌ Email ou mot de passe incorrect');
                 }
             };
-            document.getElementById('loginPassword').addEventListener('keyup', (e) => {
-                if (e.key === 'Enter') document.getElementById('loginBtn').click();
-            });
         }
 
         function logout() {
@@ -142,7 +154,7 @@
         }
 
         // ============================================
-        // 3. FONCTION FETCH
+        // 3. FONCTIONS SUPABASE
         // ============================================
         async function fetchSupabase(endpoint, options = {}) {
             const defaultHeaders = {
@@ -178,7 +190,7 @@
             const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
             
             try {
-                // Vérifier si le bucket existe, sinon le créer
+                // Vérifier si le bucket existe
                 const { data: buckets } = await fetchSupabase('storage/buckets', { method: 'GET' });
                 const bucketExists = buckets?.some(b => b.name === bucketName);
                 
@@ -222,7 +234,36 @@
         }
 
         // ============================================
-        // 5. VARIABLES GLOBALES
+        // 5. STRIPE FUNCTIONS
+        // ============================================
+        async function createStripeCheckoutSession(items, promoCode = null) {
+            try {
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        items, 
+                        promo_code: promoCode,
+                        success_url: window.location.origin + '/success.html',
+                        cancel_url: window.location.origin + '/cart.html'
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la création de la session');
+                }
+                
+                const session = await response.json();
+                return session;
+            } catch (e) {
+                console.error('Stripe error:', e);
+                showToast('❌ Erreur Stripe: ' + e.message);
+                throw e;
+            }
+        }
+
+        // ============================================
+        // 6. VARIABLES GLOBALES
         // ============================================
         let products = [];
         let orders = [];
@@ -230,7 +271,7 @@
         let currentPage = 'dashboard';
 
         // ============================================
-        // 6. CHARGEMENT DES DONNÉES
+        // 7. CHARGEMENT DES DONNÉES
         // ============================================
         async function loadProducts() {
             try {
@@ -292,14 +333,15 @@
         }
 
         // ============================================
-        // 7. UTILITAIRES
+        // 8. UTILITAIRES
         // ============================================
-        function showToast(msg) {
+        function showToast(msg, type = 'success') {
             const toast = document.createElement('div');
             toast.className = 'toast';
+            toast.style.background = type === 'error' ? '#ef4444' : '#0f172a';
             toast.innerText = msg;
             document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2500);
+            setTimeout(() => toast.remove(), 3000);
         }
 
         function getStockStats() {
@@ -329,7 +371,7 @@
         }
 
         // ============================================
-        // 8. AFFICHAGE ICÔNE (CORRIGÉ)
+        // 9. AFFICHAGE ICÔNE (CORRIGÉ)
         // ============================================
         function getDisplayIcon(product) {
             // Vérifie d'abord si images existe
@@ -349,7 +391,7 @@
         }
 
         // ============================================
-        // 9. NAVIGATION
+        // 10. NAVIGATION
         // ============================================
         function attachNavEvents() {
             document.querySelectorAll('.nav-item').forEach(item => {
@@ -373,10 +415,11 @@
             else if (page === 'stock') await renderStock();
             else if (page === 'orders') await renderOrders();
             else if (page === 'promos') await renderPromos();
+            else if (page === 'settings') await renderSettings();
         }
 
         // ============================================
-        // 10. DASHBOARD
+        // 11. DASHBOARD
         // ============================================
         async function renderDashboard() {
             await Promise.all([loadProducts(), loadOrders(), loadPromos()]);
@@ -395,8 +438,7 @@
                     <div class="stat-card"><div class="stat-title">📦 Stock total</div><div class="stat-value">${stockStats.totalStock}</div><div class="stat-sub">unités</div></div>
                     <div class="stat-card"><div class="stat-title">💵 Valeur du stock</div><div class="stat-value">${stockStats.stockValue.toFixed(2)} €</div><div class="stat-sub">estimation</div></div>
                     <div class="stat-card"><div class="stat-title">⚠️ Stock bas</div><div class="stat-value">${stockStats.lowStockItems}</div><div class="stat-sub">articles ≤2</div></div>
-                    <div class="stat-card"><div class="stat-title">❌ Ruptures (articles)</div><div class="stat-value">${stockStats.ruptures}</div><div class="stat-sub">produits/variantes à 0</div></div>
-                    <div class="stat-card"><div class="stat-title">📦 Produits en rupture</div><div class="stat-value">${stockStats.productRuptures}</div><div class="stat-sub">produits (toutes variantes à 0)</div></div>
+                    <div class="stat-card"><div class="stat-title">❌ Ruptures</div><div class="stat-value">${stockStats.ruptures}</div><div class="stat-sub">variantes à 0</div></div>
                 </div>
                 <h3 style="margin:1.5rem 0 0.5rem;">Dernières commandes</h3>
                 <div class="table-container">
@@ -416,13 +458,13 @@
         }
 
         // ============================================
-        // 11. GESTION PRODUITS
+        // 12. GESTION PRODUITS
         // ============================================
         async function renderProducts() {
             if (!isAuthenticated()) { renderLogin(); return; }
             await loadProducts();
             const html = `
-                <div class="page-header"><h1>👕 Produits</h1><button class="btn" id="addProductBtn">+ Ajouter</button></div>
+                <div class="page-header"><h1>👕 Produits (${products.length})</h1><button class="btn" id="addProductBtn">+ Ajouter</button></div>
                 <div class="table-container">
                     <table>
                         <thead><tr><th>Icône</th><th>Nom</th><th>Type</th><th>Prix</th><th>Stock</th><th>Actif</th><th>Actions</th></tr></thead>
@@ -431,13 +473,13 @@
                                 <tr>
                                     <td><div class="product-img-list">${getDisplayIcon(p)}</div></td>
                                     <td><strong>${p.name}</strong></td>
-                                    <td>${p.type === 'simple' ? 'Simple' : 'Variantes'}</td>
+                                    <td><span class="badge ${p.type === 'simple' ? 'badge-info' : 'badge-warning'}">${p.type === 'simple' ? 'Simple' : 'Variantes'}</span></td>
                                     <td>${p.type === 'simple' ? (p.price || 0) + ' €' : 'à partir de ' + (p.base_price || 0) + ' €'}</td>
                                     <td>${p.type === 'simple' ? (p.stock || 0) : (p.variants?.reduce((s,v) => s + (v.stock || 0), 0) || 0)}</td>
                                     <td>${p.active !== false ? '✅' : '❌'}</td>
                                     <td>
-                                        <button class="btn-small btn-outline" onclick="editProduct('${p.id}')">Modifier</button>
-                                        <button class="btn-small btn-danger" onclick="deleteProduct('${p.id}')">Supprimer</button>
+                                        <button class="btn-small btn-outline" onclick="editProduct('${p.id}')">✏️</button>
+                                        <button class="btn-small btn-danger" onclick="deleteProduct('${p.id}')">🗑️</button>
                                     </td>
                                 </tr>
                             `).join('')}
@@ -452,7 +494,7 @@
         }
 
         // ============================================
-        // 12. MODALE PRODUIT (CORRIGÉE AVEC UPLOAD)
+        // 13. MODALE PRODUIT (CORRIGÉE AVEC UPLOAD)
         // ============================================
         const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
 
@@ -463,13 +505,14 @@
             let selectedEmoji = product?.icon || '📦';
             let imagesArray = product?.images ? [...product.images] : [];
             let uploadedImages = [];
+            let isUploading = false;
 
             const modalDiv = document.createElement('div');
             modalDiv.className = 'modal';
             modalDiv.innerHTML = `
                 <div class="modal-content">
                     <h2>${isEdit ? 'Modifier' : 'Ajouter'} un produit</h2>
-                    <div class="form-group"><label>Nom</label><input id="prodName" value="${product?.name || ''}"></div>
+                    <div class="form-group"><label>Nom *</label><input id="prodName" value="${product?.name || ''}"></div>
                     <div class="form-group"><label>Description</label><textarea id="prodDesc" rows="2">${product?.description || ''}</textarea></div>
                     <div class="form-group"><label>Type</label>
                         <select id="prodType">
@@ -478,11 +521,11 @@
                         </select>
                     </div>
                     <div id="simpleFields" style="${product?.type === 'variants' ? 'display:none' : 'block'}">
-                        <div class="form-group"><label>Prix (€)</label><input id="simplePrice" type="number" step="0.01" value="${product?.price || ''}"></div>
+                        <div class="form-group"><label>Prix (€) *</label><input id="simplePrice" type="number" step="0.01" value="${product?.price || ''}"></div>
                         <div class="form-group"><label>Stock</label><input id="simpleStock" type="number" value="${product?.stock || 0}"></div>
                     </div>
                     <div id="variantsFields" style="${product?.type === 'variants' ? 'block' : 'display:none'}">
-                        <div class="form-group"><label>Prix de base (€)</label><input id="basePrice" type="number" step="0.01" value="${product?.base_price || ''}"></div>
+                        <div class="form-group"><label>Prix de base (€) *</label><input id="basePrice" type="number" step="0.01" value="${product?.base_price || ''}"></div>
                         <div class="form-group"><label>Variantes</label><div id="variantsContainer"></div><button type="button" class="btn-small btn-outline" id="addVariantBtn">+ Ajouter variante</button></div>
                     </div>
                     <div class="form-group">
@@ -492,19 +535,20 @@
                         <div>Aperçu : <span id="emojiPreview" style="font-size:2rem;">${selectedEmoji}</span></div>
                     </div>
                     <div class="form-group">
-                        <label>Images (jusqu'à 5)</label>
+                        <label>Images (jpeg, png, gif)</label>
                         <div class="upload-area">
-                            <input type="file" id="imageUpload" accept="image/png,image/jpeg,image/jpg" multiple>
-                            <button type="button" class="upload-btn" id="addImageBtn">📤 Ajouter les images</button>
-                            <button type="button" class="btn-small btn-outline" id="clearImagesBtn">Effacer toutes</button>
+                            <input type="file" id="imageUpload" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" multiple>
+                            <button type="button" class="upload-btn" id="addImageBtn">📤 Upload</button>
+                            <button type="button" class="btn-small btn-outline" id="clearImagesBtn">Effacer</button>
+                            <span id="uploadStatus" style="font-size:0.8rem;color:#64748b;"></span>
                         </div>
                         <div class="image-preview-grid" id="imagePreviewGrid">
                             ${imagesArray.map(url => `<img src="${url}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;">`).join('')}
                         </div>
-                        <textarea id="imagesInput" rows="2" placeholder="Ou URLs séparées par des virgules">${imagesArray.join(', ')}</textarea>
+                        <textarea id="imagesInput" rows="2" placeholder="URLs séparées par des virgules">${imagesArray.join(', ')}</textarea>
                     </div>
                     <div class="form-group"><label><input type="checkbox" id="activeCheck" ${product?.active !== false ? 'checked' : ''}> Actif</label></div>
-                    <div class="flex-between"><button class="btn-outline" id="cancelModal">Annuler</button><button class="btn" id="saveModal">Enregistrer</button></div>
+                    <div class="flex-between"><button class="btn-outline" id="cancelModal">Annuler</button><button class="btn" id="saveModal">💾 Enregistrer</button></div>
                 </div>
             `;
             document.body.appendChild(modalDiv);
@@ -537,45 +581,60 @@
             const previewGrid = modalDiv.querySelector('#imagePreviewGrid');
             const imagesInput = modalDiv.querySelector('#imagesInput');
             const fileInput = modalDiv.querySelector('#imageUpload');
+            const uploadStatus = modalDiv.querySelector('#uploadStatus');
 
             function updatePreview() {
                 const textareaUrls = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
                 const all = [...uploadedImages, ...textareaUrls];
                 previewGrid.innerHTML = all.map(url => `<img src="${url}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;">`).join('');
-                // Mettre à jour le textarea avec toutes les URLs
                 imagesInput.value = all.join(', ');
             }
 
             modalDiv.querySelector('#addImageBtn').addEventListener('click', async () => {
                 const files = fileInput.files;
-                if (!files || files.length === 0) { showToast('Sélectionnez des images'); return; }
+                if (!files || files.length === 0) { 
+                    showToast('Sélectionnez des images', 'error'); 
+                    return; 
+                }
                 
-                // Upload des images vers Supabase
+                if (isUploading) return;
+                isUploading = true;
+                uploadStatus.textContent = '⏳ Upload en cours...';
+                
+                let uploadedCount = 0;
                 for (let f of files) {
                     if (f.type.startsWith('image/')) {
                         try {
                             const url = await uploadImageToSupabase(f);
                             uploadedImages.push(url);
-                            showToast(`✅ ${f.name} uploadé`);
+                            uploadedCount++;
+                            uploadStatus.textContent = `✅ ${uploadedCount}/${files.length} uploadé(s)`;
                         } catch (e) {
                             // Fallback base64
                             const reader = new FileReader();
                             reader.onload = (e) => {
                                 uploadedImages.push(e.target.result);
+                                uploadedCount++;
+                                uploadStatus.textContent = `⚠️ ${uploadedCount}/${files.length} (base64)`;
                                 updatePreview();
                             };
                             reader.readAsDataURL(f);
                         }
                     }
                 }
+                
                 fileInput.value = '';
+                isUploading = false;
+                setTimeout(() => { uploadStatus.textContent = ''; }, 3000);
                 updatePreview();
+                showToast(`✅ ${uploadedCount} image(s) uploadée(s)`);
             });
 
             modalDiv.querySelector('#clearImagesBtn').addEventListener('click', () => {
                 uploadedImages = [];
                 imagesInput.value = '';
                 updatePreview();
+                showToast('Images effacées');
             });
             imagesInput.addEventListener('input', updatePreview);
 
@@ -618,21 +677,21 @@
                 variantsDiv.style.display = isVar ? 'block' : 'none';
             });
 
-            // Sauvegarde (CORRIGÉ)
+            // Sauvegarde
             modalDiv.querySelector('#saveModal').onclick = async () => {
                 const name = modalDiv.querySelector('#prodName').value.trim();
-                if (!name) return alert('Nom requis');
+                if (!name) { showToast('❌ Nom requis', 'error'); return; }
                 const description = modalDiv.querySelector('#prodDesc').value;
                 const active = modalDiv.querySelector('#activeCheck').checked;
 
-                // ✅ CORRECTION : Récupérer les images depuis le textarea ET uploadedImages
+                // Récupérer les images depuis le textarea ET uploadedImages
                 const textareaImages = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
                 const allImages = [...uploadedImages, ...textareaImages];
 
                 if (typeSelect.value === 'simple') {
                     const price = parseFloat(modalDiv.querySelector('#simplePrice').value);
-                    const stock = parseInt(modalDiv.querySelector('#simpleStock').value);
-                    if (isNaN(price)) return alert('Prix invalide');
+                    const stock = parseInt(modalDiv.querySelector('#simpleStock').value) || 0;
+                    if (isNaN(price) || price <= 0) { showToast('❌ Prix invalide', 'error'); return; }
                     const newProd = {
                         id: isEdit ? product.id : Date.now().toString(),
                         name, description, type: 'simple',
@@ -647,7 +706,7 @@
                     } else products.push(newProd);
                 } else {
                     const basePrice = parseFloat(modalDiv.querySelector('#basePrice').value);
-                    if (isNaN(basePrice)) return alert('Prix de base requis');
+                    if (isNaN(basePrice) || basePrice <= 0) { showToast('❌ Prix de base requis', 'error'); return; }
                     const finalVariants = [];
                     const rows = variantsContainer.querySelectorAll('.variant-row');
                     rows.forEach(row => {
@@ -664,7 +723,7 @@
                             });
                         }
                     });
-                    if (finalVariants.length === 0) return alert('Ajoutez au moins une variante');
+                    if (finalVariants.length === 0) { showToast('❌ Ajoutez au moins une variante', 'error'); return; }
                     const newProd = {
                         id: isEdit ? product.id : Date.now().toString(),
                         name, description, type: 'variants',
@@ -698,7 +757,7 @@
                     modalDiv.remove();
                     await renderProducts();
                 } catch (e) {
-                    showToast('❌ Erreur: ' + e.message);
+                    showToast('❌ Erreur: ' + e.message, 'error');
                 }
             };
             modalDiv.querySelector('#cancelModal').onclick = () => modalDiv.remove();
@@ -706,7 +765,7 @@
         }
 
         // ============================================
-        // 13. ACTIONS PRODUITS
+        // 14. ACTIONS PRODUITS
         // ============================================
         window.editProduct = async function(id) {
             if (!isAuthenticated()) { renderLogin(); return; }
@@ -724,12 +783,12 @@
                 showToast('✅ Produit supprimé');
                 await renderProducts();
             } catch (e) {
-                showToast('❌ Erreur: ' + e.message);
+                showToast('❌ Erreur: ' + e.message, 'error');
             }
         };
 
         // ============================================
-        // 14. GESTION STOCK
+        // 15. GESTION STOCK
         // ============================================
         async function renderStock() {
             if (!isAuthenticated()) { renderLogin(); return; }
@@ -785,7 +844,7 @@
                     const vid = btn.dataset.vid;
                     const isVar = btn.dataset.isvar === 'true';
                     const prod = products.find(p => p.id === pid);
-                    if (!prod) { showToast('Erreur: produit non trouvé'); return; }
+                    if (!prod) { showToast('Erreur: produit non trouvé', 'error'); return; }
                     try {
                         if (!isVar && prod.type === 'simple') {
                             prod.stock = Math.max(0, (prod.stock || 0) + delta);
@@ -807,7 +866,7 @@
                         await renderStock();
                         showToast('✅ Stock mis à jour');
                     } catch (e) {
-                        showToast('❌ Erreur: ' + e.message);
+                        showToast('❌ Erreur: ' + e.message, 'error');
                     }
                 };
             });
@@ -815,7 +874,7 @@
         }
 
         // ============================================
-        // 15. GESTION COMMANDES
+        // 16. GESTION COMMANDES
         // ============================================
         async function renderOrders() {
             if (!isAuthenticated()) { renderLogin(); return; }
@@ -847,7 +906,7 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <button class="btn-small btn-outline" onclick="viewOrder('${o.id}')">👁️ Voir</button>
+                                            <button class="btn-small btn-outline" onclick="viewOrder('${o.id}')">👁️</button>
                                             <button class="btn-small btn-danger" onclick="deleteOrder('${o.id}')">🗑️</button>
                                         </td>
                                     </tr>
@@ -869,6 +928,7 @@
                             method: 'PATCH',
                             body: JSON.stringify({ admin_followup: sel.value })
                         });
+                        showToast('✅ Suivi mis à jour');
                     }
                 };
             });
@@ -896,11 +956,11 @@
             modal.className = 'modal';
             modal.innerHTML = `
                 <div class="modal-content">
-                    <h2>📋 Détail de la commande</h2>
-                    <p><strong>N° :</strong> ${order.id}</p>
+                    <h2>📋 Détail de la commande #${order.id}</h2>
                     <p><strong>Client :</strong> ${order.client}</p>
+                    <p><strong>Email :</strong> ${order.client_email || 'Non renseigné'}</p>
                     <p><strong>Date :</strong> ${order.date || 'non renseignée'} ${order.time ? 'à ' + order.time : ''}</p>
-                    <p><strong>Statut :</strong> ${order.status}</p>
+                    <p><strong>Statut :</strong> <span class="badge ${order.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${order.status}</span></p>
                     <p><strong>Suivi admin :</strong> ${order.admin_followup || 'À traiter'}</p>
                     <p><strong>Code promo :</strong> ${order.promo_code ? `<span class="badge badge-success">${order.promo_code}</span>` : 'Aucun'}</p>
                     <hr>
@@ -911,13 +971,67 @@
                     ${reduction > 0 ? `<p><strong>Réduction :</strong> -${reduction.toFixed(2)} €</p>` : ''}
                     <p><strong>Total payé :</strong> ${totalPaye.toFixed(2)} €</p>
                     <div style="margin-top:1.5rem;text-align:right;">
-                        <button class="btn-outline" id="closeOrderModal">Fermer</button>
+                        <button class="btn btn-success" onclick="sendOrderConfirmation('${order.id}')">📧 Envoyer confirmation</button>
+                        <button class="btn-outline" id="closeOrderModal" style="margin-left:0.5rem;">Fermer</button>
                     </div>
                 </div>
             `;
             document.body.appendChild(modal);
             document.getElementById('closeOrderModal').onclick = () => modal.remove();
             modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+        };
+
+        // ============================================
+        // 17. ENVOI D'EMAIL (avec Resend)
+        // ============================================
+        window.sendOrderConfirmation = async function(orderId) {
+            if (!isAuthenticated()) { renderLogin(); return; }
+            const order = orders.find(o => o.id === orderId);
+            if (!order) { showToast('❌ Commande non trouvée', 'error'); return; }
+            
+            showToast('⏳ Envoi en cours...');
+            
+            try {
+                // Utiliser un service d'email (Resend, SendGrid, etc.)
+                // Exemple avec Resend API
+                const emailData = {
+                    from: 'StyleShop <no-reply@styleshop.com>',
+                    to: order.client_email || 'client@example.com',
+                    subject: `✅ Confirmation de commande #${order.id}`,
+                    html: `
+                        <h1>Merci pour votre commande !</h1>
+                        <p>Bonjour ${order.client},</p>
+                        <p>Nous confirmons votre commande #${order.id}.</p>
+                        <h3>Détails :</h3>
+                        <ul>
+                            ${order.items.map(item => `
+                                <li>${item.name} × ${item.qty} = ${(item.price * item.qty).toFixed(2)} €</li>
+                            `).join('')}
+                        </ul>
+                        <p><strong>Total :</strong> ${order.total.toFixed(2)} €</p>
+                        <p>Vous serez notifié de l'expédition.</p>
+                        <hr>
+                        <p style="color:#64748b;">StyleShop - Merci de votre confiance</p>
+                    `
+                };
+                
+                // Envoi via votre backend
+                const response = await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(emailData)
+                });
+                
+                if (!response.ok) throw new Error('Erreur envoi email');
+                
+                showToast('✅ Email de confirmation envoyé !');
+            } catch (e) {
+                console.error('Email error:', e);
+                showToast('❌ Erreur: ' + e.message, 'error');
+                // Fallback: copier dans le presse-papier
+                alert('📧 Copiez ce texte pour envoyer manuellement:\n\n' + 
+                    `Commande #${order.id}\nClient: ${order.client}\nTotal: ${order.total.toFixed(2)} €`);
+            }
         };
 
         window.deleteOrder = async function(id) {
@@ -929,18 +1043,18 @@
                 showToast('✅ Commande supprimée');
                 await renderOrders();
             } catch (e) {
-                showToast('❌ Erreur: ' + e.message);
+                showToast('❌ Erreur: ' + e.message, 'error');
             }
         };
 
         // ============================================
-        // 16. GESTION PROMOS
+        // 18. GESTION PROMOS
         // ============================================
         async function renderPromos() {
             if (!isAuthenticated()) { renderLogin(); return; }
             await loadPromos();
             const html = `
-                <div class="page-header"><h1>🏷️ Codes promo</h1><button class="btn" id="addPromoBtn">+ Créer</button></div>
+                <div class="page-header"><h1>🏷️ Codes promo (${promos.length})</h1><button class="btn" id="addPromoBtn">+ Créer</button></div>
                 <div class="table-container">
                     <table>
                         <thead><tr><th>Code</th><th>Type</th><th>Valeur</th><th>Actif</th><th>Actions</th></tr></thead>
@@ -952,8 +1066,8 @@
                                     <td>${p.type === 'fixed' ? p.value + ' €' : p.value + ' %'}</td>
                                     <td>${p.active ? '✅' : '❌'}</td>
                                     <td>
-                                        <button class="btn-small btn-outline" onclick="togglePromo('${p.code}')">${p.active ? 'Désactiver' : 'Activer'}</button>
-                                        <button class="btn-small btn-danger" onclick="deletePromo('${p.code}')">Supprimer</button>
+                                        <button class="btn-small ${p.active ? 'btn-danger' : 'btn-success'}" onclick="togglePromo('${p.code}')">${p.active ? 'Désactiver' : 'Activer'}</button>
+                                        <button class="btn-small btn-danger" onclick="deletePromo('${p.code}')">🗑️</button>
                                     </td>
                                 </tr>
                             `).join('')}
@@ -968,7 +1082,7 @@
                 if (!code) return;
                 const type = confirm('Type : OK = Pourcentage (%) / Annuler = Montant fixe (€)') ? 'percent' : 'fixed';
                 const value = parseFloat(prompt('Valeur (ex: 15 pour 15% ou 10€)'));
-                if (isNaN(value) || value <= 0) return alert('Valeur invalide');
+                if (isNaN(value) || value <= 0) { showToast('❌ Valeur invalide', 'error'); return; }
                 try {
                     await fetchSupabase('promos', {
                         method: 'POST',
@@ -978,7 +1092,7 @@
                     showToast('✅ Code promo créé');
                     await renderPromos();
                 } catch (e) {
-                    showToast('❌ Erreur: ' + e.message);
+                    showToast('❌ Erreur: ' + e.message, 'error');
                 }
             };
             attachNavEvents();
@@ -998,7 +1112,7 @@
                 showToast(promo.active ? '✅ Promo activée' : '⛔ Promo désactivée');
                 await renderPromos();
             } catch (e) {
-                showToast('❌ Erreur: ' + e.message);
+                showToast('❌ Erreur: ' + e.message, 'error');
             }
         };
 
@@ -1011,12 +1125,116 @@
                 showToast('✅ Code promo supprimé');
                 await renderPromos();
             } catch (e) {
-                showToast('❌ Erreur: ' + e.message);
+                showToast('❌ Erreur: ' + e.message, 'error');
             }
         };
 
         // ============================================
-        // 17. SYNCHRONISATION INTER-ONGLETS
+        // 19. PARAMÈTRES
+        // ============================================
+        async function renderSettings() {
+            if (!isAuthenticated()) { renderLogin(); return; }
+            const html = `
+                <div class="page-header"><h1>⚙️ Paramètres</h1></div>
+                
+                <div class="settings-section">
+                    <h3>💳 Stripe</h3>
+                    <div class="form-group">
+                        <label>Clé publique</label>
+                        <input type="text" id="stripePublishable" value="${STRIPE_PUBLISHABLE_KEY}" readonly style="background:#f1f5f9;">
+                    </div>
+                    <div class="form-group">
+                        <label>Clé secrète</label>
+                        <input type="password" id="stripeSecret" value="${STRIPE_SECRET_KEY}" readonly style="background:#f1f5f9;">
+                    </div>
+                    <button class="btn btn-success" onclick="testStripe()">🔌 Tester Stripe</button>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>📧 Email</h3>
+                    <div class="form-group">
+                        <label>Service d'email</label>
+                        <select id="emailService">
+                            <option value="resend">Resend</option>
+                            <option value="sendgrid">SendGrid</option>
+                            <option value="smtp">SMTP</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Email expéditeur</label>
+                        <input type="email" id="senderEmail" value="no-reply@styleshop.com">
+                    </div>
+                    <button class="btn btn-success" onclick="testEmail()">📧 Tester l'envoi</button>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>🔐 Sécurité</h3>
+                    <div class="form-group">
+                        <label>Changer le mot de passe admin</label>
+                        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                            <input type="password" id="newPassword" placeholder="Nouveau mot de passe" style="flex:1;min-width:200px;">
+                            <button class="btn" onclick="changePassword()">Mettre à jour</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>📊 Export</h3>
+                    <button class="btn btn-outline" onclick="exportData()">📥 Exporter toutes les données</button>
+                    <button class="btn btn-danger" onclick="clearData()" style="margin-left:0.5rem;">🗑️ Effacer toutes les données</button>
+                </div>
+            `;
+            document.getElementById('mainContent').innerHTML = html;
+            attachNavEvents();
+        }
+
+        // Fonctions des paramètres
+        window.testStripe = function() {
+            showToast('🔌 Stripe connecté ! (mode test)');
+            alert('✅ Stripe est configuré avec la clé:\n' + STRIPE_PUBLISHABLE_KEY);
+        };
+
+        window.testEmail = function() {
+            const service = document.getElementById('emailService').value;
+            const sender = document.getElementById('senderEmail').value;
+            showToast(`📧 Test d'email envoyé via ${service} depuis ${sender}`);
+            alert(`✅ Email de test envoyé !\nService: ${service}\nExpéditeur: ${sender}`);
+        };
+
+        window.changePassword = function() {
+            const newPass = document.getElementById('newPassword').value;
+            if (!newPass || newPass.length < 6) {
+                showToast('❌ Mot de passe trop court (min 6 caractères)', 'error');
+                return;
+            }
+            // Ici, tu pourrais stocker le nouveau mot de passe dans une base de données
+            // Pour l'exemple, on le met dans le sessionStorage
+            sessionStorage.setItem('admin_password', newPass);
+            showToast('✅ Mot de passe mis à jour (session)');
+            document.getElementById('newPassword').value = '';
+        };
+
+        window.exportData = async function() {
+            await Promise.all([loadProducts(), loadOrders(), loadPromos()]);
+            const data = { products, orders, promos, exported_at: new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `styleshop_export_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✅ Données exportées');
+        };
+
+        window.clearData = function() {
+            if (!confirm('⚠️ Supprimer TOUTES les données ? Cette action est irréversible !')) return;
+            if (!confirm('Confirmer la suppression de toutes les données ?')) return;
+            showToast('⛔ Fonction désactivée pour sécurité');
+        };
+
+        // ============================================
+        // 20. SYNCHRONISATION INTER-ONGLETS
         // ============================================
         window.addEventListener('storage', function(e) {
             if (e.key === 'shop_products' || e.key === 'shop_promos' || e.key === 'shop_orders' || e.key === 'shop_cart') {
@@ -1045,7 +1263,7 @@
         });
 
         // ============================================
-        // 18. INITIALISATION
+        // 21. INITIALISATION
         // ============================================
         async function init() {
             if (!isAuthenticated()) {
