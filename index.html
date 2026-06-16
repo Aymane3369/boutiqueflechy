@@ -326,6 +326,15 @@
         // ============================================
         // 5. CHARGEMENT DES DONNÉES
         // ============================================
+        function getProductDisplayIcon(product) {
+    if (product.image_url) {
+        return `<img src="${product.image_url}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">`;
+    } else if (product.icon) {
+        return `<span style="font-size: 3rem;">${product.icon}</span>`;
+    } else {
+        return `<span style="font-size: 3rem;">📦</span>`;
+    }
+}
         async function loadProducts() {
             try {
                 const data = await fetchSupabase('products?select=*');
@@ -556,7 +565,7 @@
                 <div class="products-grid">
                     ${activeProducts.map(p => `
                         <div class="product-card" onclick="navigateTo('product','${p.id}')">
-                            <div class="product-icon">${p.icon || '📦'}</div>
+                       <div class="product-icon">${getProductDisplayIcon(p)}</div>
                             <div class="product-title">${p.name}</div>
                             <div class="product-type">${p.type === 'simple' ? 'Produit simple' : 'Avec variantes'}</div>
                             <div class="product-price">${p.type === 'simple' ? (p.price || 0).toFixed(2) : (p.base_price || 0).toFixed(2)} € ${p.type === 'variants' ? '+' : ''}</div>
@@ -620,7 +629,7 @@
             const detailHtml = `
                 <div class="back-link" onclick="navigateTo('catalogue')">← Retour au catalogue</div>
                 <div class="product-detail">
-                    <div style="font-size: 3rem;">${product.icon || '📦'}</div>
+                   <div style="font-size: 3rem;">${getProductDisplayIcon(product)}</div>
                     <h2>${product.name}</h2>
                     <p style="margin: 0.5rem 0; color: #334155;">${product.description || ''}</p>
                     ${isVariantProduct ? `
