@@ -6,7 +6,6 @@
     <title>StyleShop - Boutique en ligne</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Vos styles existants (inchangés) */
         * {
             margin: 0;
             padding: 0;
@@ -34,7 +33,6 @@
             font-size: 1.6rem;
             font-weight: 700;
             color: #0f172a;
-            text-decoration: none;
             cursor: pointer;
         }
         .cart-icon {
@@ -100,6 +98,8 @@
         .stock-badge {
             font-size: 0.7rem;
             margin-top: 0.5rem;
+        }
+        .stock-ok {
             color: #15803d;
         }
         .stock-warning {
@@ -116,7 +116,6 @@
             border-radius: 40px;
             font-weight: 500;
             cursor: pointer;
-            transition: 0.2s;
         }
         button.primary {
             background: #3b82f6;
@@ -158,11 +157,6 @@
             background: #0f172a;
             color: white;
             border-color: #0f172a;
-        }
-        .variant-btn.disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            text-decoration: line-through;
         }
         .back-link {
             display: inline-block;
@@ -212,7 +206,6 @@
             padding: 0.8rem 1.5rem;
             border-radius: 40px;
             z-index: 200;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
         .modal {
             position: fixed;
@@ -251,13 +244,11 @@
     </div>
 </div>
 
-<div id="app" class="container">
-    <!-- Le contenu sera injecté dynamiquement -->
-</div>
+<div id="app" class="container"></div>
 
 <script>
     // ============================================
-    // 1. CONNEXION À SUPABASE (AJOUTÉ)
+    // 1. CONFIGURATION SUPABASE
     // ============================================
     const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
@@ -273,26 +264,26 @@
     let selectedVariantCache = {};
 
     // ============================================
-    // 3. CHARGEMENT DES PRODUITS DEPUIS SUPABASE
+    // 3. CHARGEMENT DES PRODUITS
     // ============================================
     async function loadProductsFromSupabase() {
         try {
             const { data, error } = await supabase.from('products').select('*');
             if (error) {
-                console.error('❌ Erreur Supabase:', error);
+                console.error('Erreur Supabase:', error);
                 showToast('Erreur de chargement des produits');
                 return [];
             }
-            console.log('✅ Produits chargés depuis Supabase:', data?.length || 0);
+            console.log('✅ Produits chargés:', data?.length || 0);
             return data || [];
         } catch (e) {
-            console.error('❌ Exception:', e);
+            console.error('Exception:', e);
             return [];
         }
     }
 
     // ============================================
-    // 4. PANIER (localStorage)
+    // 4. PANIER
     // ============================================
     function saveCart() {
         localStorage.setItem("styleShopCart", JSON.stringify(cart));
@@ -305,7 +296,8 @@
     }
     function updateCartCount() {
         const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        document.getElementById("cartCount").innerText = totalItems;
+        const countElement = document.getElementById("cartCount");
+        if(countElement) countElement.innerText = totalItems;
     }
 
     // ============================================
@@ -398,7 +390,7 @@
     }
 
     // ============================================
-    // 7. NAVIGATION ET RENDU
+    // 7. NAVIGATION
     // ============================================
     function navigateTo(page, productId = null) {
         if(page === "product" && productId) {
@@ -432,9 +424,9 @@
     function renderCatalogue() {
         if(products.length === 0) {
             document.getElementById("app").innerHTML = `
-                <div style="text-align: center; padding: 3rem;">
-                    <h2>📦 Chargement des produits...</h2>
-                    <p style="color: #475569; margin-top: 1rem;">Vérifiez que votre base Supabase contient des produits.</p>
+                <div style="text-align:center; padding:2rem;">
+                    <h2>📦 Aucun produit disponible</h2>
+                    <p style="color: #475569;">Vérifiez votre base Supabase.</p>
                 </div>
             `;
             return;
@@ -450,8 +442,12 @@
                         <div class="product-title">${p.name}</div>
                         <div class="product-type">${p.type === "simple" ? "Produit simple" : "Avec variantes"}</div>
                         <div class="product-price">${p.type === "simple" ? (p.price || 0).toFixed(2) : (p.base_price || 0).toFixed(2)} € ${p.type === "variants" ? "+" : ""}</div>
-                        <div class="stock-badge ${p.type === "simple" ? (p.stock === 0 ? "stock-out" : (p.stock <= 2 ? "stock-warning" : "")) : ""}">
-                            ${p.type === "simple" ? (p.stock === 0 ? "Rupture" : (p.stock <= 2 ? `Derniers (${p.stock})` : "En stock")) : "En stock"}
+                        <div class="stock-badge">
+                            ${p.type === "simple" ? 
+                                (p.stock === 0 ? '<span class="stock-out">Rupture</span>' : 
+                                (p.stock <= 2 ? `<span class="stock-warning">Derniers (${p.stock})</span>` : 
+                                `<span class="stock-ok">En stock</span>`)) : 
+                                `<span class="stock-ok">En stock</span>`}
                         </div>
                     </div>
                 `).join('')}
@@ -658,11 +654,12 @@
     }
 
     // ============================================
-    // 11. SIMULATION PAIEMENT AVEC SUPABASE
+    // 11. SIMULATION PAIEMENT
     // ============================================
     async function simulateCheckout() {
         if(cart.length === 0) return showToast("Panier vide");
 
+        // Vérification des stocks
         for(const item of cart) {
             const currentStock = getStock(item.productId, item.variantId);
             if(item.quantity > currentStock) {
@@ -709,7 +706,7 @@
                 }
             }
 
-            // Création commande dans Supabase
+            // Création de la commande
             const orderId = "ORD-" + Math.random().toString(36).substring(2,8).toUpperCase();
             const now = new Date();
             const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`;
@@ -739,7 +736,6 @@
             cart = [];
             saveCart();
 
-            // Confirmation
             const confirmationHtml = `
                 <div style="background: white; border-radius: 32px; padding: 2rem; text-align: center;">
                     <h2>✅ Commande confirmée !</h2>
@@ -766,14 +762,12 @@
         renderCurrentPage();
     }
 
-    // Exposer les fonctions
     window.navigateTo = navigateTo;
     window.addToCart = addToCart;
     window.updateCartItem = updateCartItem;
     window.simulateCheckout = simulateCheckout;
 
-    // Lancer l'application
     init();
 </script>
 </body>
-</html> 
+</html>
