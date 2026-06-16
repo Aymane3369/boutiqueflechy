@@ -66,13 +66,13 @@
 
     <script>
         // ============================================
-        // 1. CONFIGURATION SUPABASE (fetch direct)
+        // 1. CONFIGURATION SUPABASE
         // ============================================
         const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
 
         // ============================================
-        // 2. FONCTIONS FETCH
+        // 2. FONCTION FETCH (avec gestion des réponses vides)
         // ============================================
         async function fetchSupabase(endpoint, options = {}) {
             const defaultHeaders = {
@@ -80,15 +80,29 @@
                 'Authorization': `Bearer ${SUPABASE_KEY}`,
                 'Content-Type': 'application/json'
             };
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
-                ...options,
-                headers: { ...defaultHeaders, ...options.headers }
-            });
-            if (!response.ok) {
-                const error = await response.text();
-                throw new Error(`HTTP ${response.status}: ${error}`);
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+                    ...options,
+                    headers: { ...defaultHeaders, ...options.headers }
+                });
+
+                // Si le statut est 204 (No Content) ou 201 (Created), retourner null
+                if (response.status === 204 || response.status === 201) {
+                    return null;
+                }
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${error}`);
+                }
+
+                const text = await response.text();
+                if (!text) return null;
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('Fetch error:', e);
+                return null;
             }
-            return response.json();
         }
 
         // ============================================
@@ -125,19 +139,17 @@
         }
 
         // ============================================
-        // 5. CHARGEMENT DES DONNÉES (fetch)
+        // 5. CHARGEMENT DES DONNÉES
         // ============================================
         async function loadProducts() {
             try {
                 const data = await fetchSupabase('products?select=*');
                 if (Array.isArray(data)) {
-                    // Convertir les stocks en nombres
                     data.forEach(p => {
                         if (p.variants && Array.isArray(p.variants)) {
                             p.variants.forEach(v => { v.stock = parseInt(v.stock) || 0; });
                         }
                         if (p.type === 'simple') p.stock = parseInt(p.stock) || 0;
-                        // S'assurer que image_url est bien une chaîne
                         if (typeof p.image_url !== 'string') p.image_url = null;
                     });
                     products = data;
@@ -148,7 +160,6 @@
                 return products;
             } catch (e) {
                 console.error('Erreur chargement produits:', e);
-                showToast('Erreur de chargement des produits');
                 products = [];
                 return products;
             }
@@ -172,7 +183,7 @@
         }
 
         // ============================================
-        // 6. UTILITAIRES (image prioritaire)
+        // 6. UTILITAIRES
         // ============================================
         function getStock(productId, variantId) {
             const prod = products.find(p => p.id === productId);
@@ -515,7 +526,7 @@
         }
 
         // ============================================
-        // 13. SIMULATION PAIEMENT (avec fetch)
+        // 13. SIMULATION PAIEMENT
         // ============================================
         async function simulateCheckout() {
             if (!Array.isArray(cart) || cart.length === 0) { showToast('Panier vide'); return; }
@@ -546,7 +557,7 @@
                 discount: appliedPromo?.discountAmount || 0
             };
 
-            // Insérer la commande dans Supabase
+            // Insérer la commande
             await fetchSupabase('orders', {
                 method: 'POST',
                 body: JSON.stringify(order)
@@ -605,17 +616,13 @@
         window.addEventListener('storage', function(e) {
             if (e.key === 'shop_products' || e.key === 'shop_promos' || e.key === 'shop_cart' || e.key === 'shop_orders') {
                 console.log('🔄 Changement détecté sur', e.key);
-                // Recharger les données depuis le localStorage (ou depuis Supabase si besoin)
-                // Ici on recharge depuis Supabase pour être sûr d'avoir les dernières données
-                if (e.key === 'shop_products' || e.key === 'shop_promos') {
-                    loadProducts().then(() => {
-                        if (currentPage !== 'cart') renderCurrentPage();
-                        else renderCart();
-                    });
-                    loadPromos().then(() => {
-                        if (currentPage === 'cart') renderCart();
-                    });
-                }
+                loadProducts().then(() => {
+                    if (currentPage !== 'cart') renderCurrentPage();
+                    else renderCart();
+                });
+                loadPromos().then(() => {
+                    if (currentPage === 'cart') renderCart();
+                });
                 if (e.key === 'shop_cart') {
                     loadCart();
                     renderCart();
