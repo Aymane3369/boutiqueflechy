@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StyleShop - Administration</title>
-    <!-- Chargement de Supabase JS pour le storage -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
@@ -86,14 +85,14 @@
 
     <script>
         // ============================================
-        // 1. CONFIGURATION SUPABASE (inclut Storage)
+        // 1. CONFIGURATION SUPABASE
         // ============================================
         const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // ============================================
-        // 2. FONCTIONS FETCH (REST)
+        // 2. FONCTIONS FETCH
         // ============================================
         async function fetchSupabase(endpoint, options = {}) {
             const defaultHeaders = {
@@ -159,7 +158,6 @@
         async function loadProducts() {
             const data = await fetchSupabase('products?select=*');
             products = Array.isArray(data) ? data : [];
-            // Nettoyage des images
             products.forEach(p => {
                 if (typeof p.images === 'string') {
                     try { p.images = JSON.parse(p.images); } catch(e){ p.images = []; }
@@ -224,12 +222,10 @@
         function getDisplayIcon(product) {
             if (product.images && product.images.length > 0) {
                 return `<img src="${product.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
-            } else if (product.image_url) {
-                return `<img src="${product.image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
             } else if (product.icon) {
                 return `<span style="font-size:28px;">${product.icon}</span>`;
             } else {
-                return `<span style="font-size:28px;">📦</span>`;
+                return `<span style="font-size:28px;">📦</span>';
             }
         }
 
@@ -329,7 +325,7 @@
         }
 
         // ============================================
-        // 10. MODALE PRODUIT (avec upload Storage)
+        // 10. MODALE PRODUIT
         // ============================================
         const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
 
@@ -338,7 +334,7 @@
             let variantsArray = product?.variants ? [...product.variants] : [];
             let selectedEmoji = product?.icon || '📦';
             let imagesArray = product?.images ? [...product.images] : [];
-            let uploadedImages = []; // pour stocker les URLs des images uploadées (via storage)
+            let uploadedImages = [];
 
             const modalDiv = document.createElement('div');
             modalDiv.className = 'modal';
@@ -366,7 +362,7 @@
                         <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:0.5rem;">
                             <label><input type="radio" name="imgType" value="emoji" ${(!product?.images || product.images.length === 0) ? 'checked' : ''}> Émoji</label>
                             <label><input type="radio" name="imgType" value="upload" ${product?.images && product.images.length > 0 ? 'checked' : ''}> Télécharger (PNG/JPG)</label>
-                            <label><input type="radio" name="imgType" value="none" ${(!product?.images || product.images.length === 0) ? '' : ''}> Pas d'icône</label>
+                            <label><input type="radio" name="imgType" value="none"> Pas d'icône</label>
                         </div>
                         <div id="emojiSelector" style="${product?.images && product.images.length > 0 ? 'display:none' : 'block'}">
                             <div class="emoji-grid" id="emojiGrid"></div>
@@ -447,7 +443,7 @@
             radioNone.addEventListener('change', toggleFields);
             toggleFields();
 
-            // Upload d'images vers Storage
+            // Upload images
             const fileInput = modalDiv.querySelector('#imageUpload');
             const previewGrid = modalDiv.querySelector('#imagePreviewGrid');
             const imagesInput = modalDiv.querySelector('#imagesInput');
@@ -465,7 +461,6 @@
                     showToast('Sélectionnez des images');
                     return;
                 }
-                // Upload vers Supabase Storage
                 const uploadedUrls = await uploadImagesToSupabase(files);
                 uploadedImages = uploadedImages.concat(uploadedUrls);
                 updatePreview();
@@ -527,7 +522,6 @@
                 const description = modalDiv.querySelector('#prodDesc').value;
                 const active = modalDiv.querySelector('#activeCheck').checked;
 
-                // Récupérer les images (uploadées + URLs)
                 let allImages = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
                 allImages = [...new Set(allImages)];
 
@@ -628,18 +622,35 @@
         };
 
         // ============================================
-        // 12. GESTION STOCK
+        // 12. GESTION STOCK (CORRIGÉE)
         // ============================================
         async function renderStock() {
             await loadProducts();
             let rows = [];
             products.forEach(p => {
                 if (p.type === 'simple') {
-                    rows.push({ name: p.name, variant: 'Simple', stock: p.stock || 0, productId: p.id, variantId: null, isVariant: false, images: p.images || [] });
+                    rows.push({ 
+                        name: p.name, 
+                        variant: 'Simple', 
+                        stock: p.stock || 0, 
+                        productId: p.id, 
+                        variantId: null, 
+                        isVariant: false, 
+                        images: p.images || [],
+                        icon: p.icon 
+                    });
                 } else if (p.variants) {
                     p.variants.forEach(v => {
-                        rows.push({ name: p.name, variant: `${v.attributes?.taille || ''} / ${v.attributes?.couleur || ''}`,
-                            stock: v.stock || 0, productId: p.id, variantId: v.id, isVariant: true, images: p.images || [] });
+                        rows.push({ 
+                            name: p.name, 
+                            variant: `${v.attributes?.taille || ''} / ${v.attributes?.couleur || ''}`,
+                            stock: v.stock || 0, 
+                            productId: p.id, 
+                            variantId: v.id, 
+                            isVariant: true, 
+                            images: p.images || [],
+                            icon: p.icon 
+                        });
                     });
                 }
             });
@@ -651,7 +662,12 @@
                         <thead><tr><th>Icône</th><th>Produit</th><th>Variante</th><th>Stock</th><th>Ajuster</th></tr></thead>
                         <tbody>
                             ${rows.map(r => {
-                                let iconHtml = (r.images && r.images.length > 0) ? `<img src="${r.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">` : '📦';
+                                let iconHtml = '📦';
+                                if (r.images && r.images.length > 0) {
+                                    iconHtml = `<img src="${r.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+                                } else if (r.icon) {
+                                    iconHtml = `<span style="font-size:28px;">${r.icon}</span>`;
+                                }
                                 return `
                                     <tr>
                                         <td><div class="product-img-list">${iconHtml}</div></td>
@@ -712,7 +728,7 @@
         }
 
         // ============================================
-        // 13. GESTION COMMANDES (avec suivi admin et suppression)
+        // 13. GESTION COMMANDES
         // ============================================
         async function renderOrders() {
             await loadOrders();
@@ -764,7 +780,6 @@
             `;
             document.getElementById('mainContent').innerHTML = html;
 
-            // Sélecteur de suivi admin
             document.querySelectorAll('.admin-followup').forEach(sel => {
                 sel.onchange = async () => {
                     const order = orders.find(o => o.id === sel.dataset.id);
@@ -838,7 +853,7 @@
         };
 
         // ============================================
-        // 14. GESTION PROMOS (avec suppression)
+        // 14. GESTION PROMOS
         // ============================================
         async function renderPromos() {
             await loadPromos();
