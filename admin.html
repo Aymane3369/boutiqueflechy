@@ -687,12 +687,59 @@
             attachNavEvents();
         }
 
-        window.viewOrder = function(id) {
-            const order = orders.find(o => o.id === id);
-            if (!order) return;
-            const items = order.items.map(i => `${i.productId} ${i.variantId ? `(${i.variantId})` : ''} x${i.qty}`).join(', ');
-            const originalTotal = order.total + (order.discount || 0);
-            alert(`📋 Commande ${id}\nClient: ${order.client}\nDate: ${order.date} ${order.time}\nStatut: ${order.status}\nSuivi: ${order.adminFollowup || 'À traiter'}\nArticles: ${items}\nPrix original: ${originalTotal.toFixed(2)}€\nRemise: ${(order.discount||0).toFixed(2)}€\nTotal payé: ${order.total}€\nCode promo: ${order.promoCode || 'aucun'}`);
+window.viewOrder = function(id) {
+    const order = orders.find(o => o.id === id);
+    if (!order) return;
+
+    // Calcul du sous-total (somme des prix × quantités)
+    const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    const reduction = order.discount || 0;
+    const totalPaye = order.total || 0;
+
+    // Construction de la liste des articles
+    const itemsList = order.items.map(item => {
+        const product = products.find(p => p.id === item.productId);
+        const name = product ? product.name : 'Produit inconnu';
+        let variantStr = '';
+        if (item.variantId && product && product.variants) {
+            const variant = product.variants.find(v => v.id === item.variantId);
+            if (variant) {
+                variantStr = ` (${variant.attributes.taille}/${variant.attributes.couleur})`;
+            }
+        }
+        return `${name}${variantStr} × ${item.qty} = ${(item.price * item.qty).toFixed(2)} €`;
+    }).join('<br>');
+
+    // Création de la modale
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h2 style="margin-bottom:1rem;">📋 Détail de la commande</h2>
+            <p><strong>N° commande :</strong> ${order.id}</p>
+            <p><strong>Client :</strong> ${order.client}</p>
+            <p><strong>Date :</strong> ${order.date || 'non renseignée'} ${order.time ? 'à ' + order.time : ''}</p>
+            <p><strong>Statut :</strong> ${order.status}</p>
+            <p><strong>Suivi admin :</strong> ${order.adminFollowup || 'À traiter'}</p>
+            <p><strong>Code promo :</strong> ${order.promoCode ? `<span class="badge badge-success">${order.promoCode}</span>` : 'Aucun'}</p>
+            <hr>
+            <p><strong>Articles :</strong></p>
+            <div style="background:#f8fafc;padding:0.5rem;border-radius:8px;margin:0.5rem 0;">
+                ${itemsList}
+            </div>
+            <hr>
+            <p><strong>Sous-total :</strong> ${subtotal.toFixed(2)} €</p>
+            ${reduction > 0 ? `<p><strong>Réduction :</strong> -${reduction.toFixed(2)} €</p>` : ''}
+            <p><strong>Total payé :</strong> ${totalPaye.toFixed(2)} €</p>
+            <div style="margin-top:1.5rem;text-align:right;">
+                <button class="btn-outline" id="closeOrderModal">Fermer</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('closeOrderModal').onclick = () => modal.remove();
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+};
         };
 
         window.deleteOrder = function(id) {
