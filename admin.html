@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -6,9 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StyleShop - Administration</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
-        body { background: #f1f5f9; display: flex; min-height: 100vh; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Inter', sans-serif;
+        }
+        body {
+            background: #f1f5f9;
+            display: flex;
+            min-height: 100vh;
+        }
         .sidebar {
             width: 260px;
             background: #0f172a;
@@ -18,8 +25,20 @@
             flex-direction: column;
             gap: 2rem;
         }
-        .logo h2 { font-size: 1.6rem; color: white; }
-        .logo span { font-size: 0.8rem; color: #94a3b8; }
+        .logo h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: white;
+        }
+        .logo span {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        .nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
         .nav-item {
             padding: 0.7rem 1rem;
             border-radius: 12px;
@@ -27,9 +46,13 @@
             transition: 0.2s;
             font-weight: 500;
         }
-        .nav-item:hover { background: #1e293b; }
-        .nav-item.active { background: #3b82f6; color: white; }
-        
+        .nav-item:hover {
+            background: #1e293b;
+        }
+        .nav-item.active {
+            background: #3b82f6;
+            color: white;
+        }
         .main {
             flex: 1;
             padding: 2rem;
@@ -42,8 +65,11 @@
             margin-bottom: 2rem;
             flex-wrap: wrap;
         }
-        .page-header h1 { font-size: 1.8rem; color: #0f172a; }
-        
+        .page-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
         .btn {
             background: #3b82f6;
             color: white;
@@ -61,24 +87,36 @@
             border: 1px solid #cbd5e1;
             color: #1e293b;
         }
-        .btn-danger { background: #ef4444; }
-        .btn-small { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
-        
+        .btn-danger {
+            background: #ef4444;
+        }
+        .btn-small {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+        }
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
         .stat-card {
             background: white;
-            padding: 1rem;
+            padding: 1.2rem;
             border-radius: 20px;
             border: 1px solid #e2e8f0;
         }
-        .stat-title { font-size: 0.8rem; text-transform: uppercase; color: #475569; }
-        .stat-value { font-size: 2rem; font-weight: 700; margin-top: 0.3rem; }
-        
+        .stat-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #475569;
+            font-weight: 600;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
         .table-container {
             background: white;
             border-radius: 20px;
@@ -86,28 +124,34 @@
             overflow-x: auto;
             margin-top: 1rem;
         }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; padding: 1rem; border-bottom: 1px solid #e2e8f0; }
-        th { background: #f8fafc; font-weight: 600; }
-        
-        .product-img-list {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            background: #f1f5f9;
-            border-radius: 8px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background: #f8fafc;
+            font-weight: 600;
         }
         .badge {
+            background: #e2e8f0;
             padding: 0.2rem 0.7rem;
             border-radius: 30px;
             font-size: 0.75rem;
+            font-weight: 500;
         }
-        .badge-success { background: #dcfce7; color: #15803d; }
-        .badge-warning { background: #fef9c3; color: #854d0e; }
-        
+        .badge-success {
+            background: #dcfce7;
+            color: #15803d;
+        }
+        .badge-warning {
+            background: #fef9c3;
+            color: #854d0e;
+        }
         .modal {
             position: fixed;
             top: 0;
@@ -123,19 +167,41 @@
         .modal-content {
             background: white;
             border-radius: 28px;
-            max-width: 700px;
+            max-width: 750px;
             width: 90%;
             padding: 1.8rem;
             max-height: 85vh;
             overflow-y: auto;
         }
-        .form-group { margin-bottom: 1.2rem; }
-        label { font-weight: 500; display: block; margin-bottom: 0.4rem; }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        label {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 0.4rem;
+        }
         input, select, textarea {
             width: 100%;
             padding: 0.6rem;
             border: 1px solid #cbd5e1;
             border-radius: 12px;
+        }
+        .product-img-list {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #f1f5f9;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .variant-row {
             display: flex;
@@ -143,33 +209,9 @@
             margin-bottom: 0.5rem;
             flex-wrap: wrap;
         }
-        .variant-row input { flex: 1; min-width: 100px; }
-        .flex-between { display: flex; justify-content: space-between; align-items: center; }
-        .emoji-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(50px, 60px));
-            gap: 8px;
-            margin: 10px 0;
-        }
-        .emoji-option {
-            font-size: 32px;
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            border-radius: 16px;
-            padding: 5px;
-            text-align: center;
-            cursor: pointer;
-        }
-        .emoji-option.selected { border-color: #3b82f6; background: #dbeafe; }
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #0f172a;
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 40px;
-            z-index: 200;
+        .variant-row input {
+            flex: 1;
+            min-width: 100px;
         }
         .image-preview {
             max-width: 100px;
@@ -177,10 +219,39 @@
             margin-top: 8px;
             border-radius: 8px;
         }
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 60px));
+            gap: 10px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .emoji-option {
+            font-size: 32px;
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .emoji-option:hover {
+            background: #e2e8f0;
+            transform: scale(1.05);
+        }
+        .emoji-option.selected {
+            border-color: #3b82f6;
+            background: #dbeafe;
+        }
+        .icon-preview {
+            font-size: 40px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
-
 <div class="sidebar">
     <div class="logo"><h2>StyleShop</h2><span>Admin panel</span></div>
     <div class="nav">
@@ -190,632 +261,811 @@
         <div class="nav-item" data-page="orders">📋 Commandes</div>
         <div class="nav-item" data-page="promos">🏷️ Promos</div>
     </div>
-    <div style="margin-top: auto; font-size: 0.7rem; color:#94a3b8;">Accès admin via Supabase</div>
+    <div style="margin-top: auto; font-size: 0.7rem;">Accès admin via Supabase Auth (demo)</div>
 </div>
-
 <div class="main" id="mainContent"></div>
 
 <script>
-    // ============================================
-    // 1. CONFIGURATION SUPABASE (identique à la boutique)
-    // ============================================
-    const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
+    // ---------- Données initiales ----------
+    let products = [
+        { id: "p1", name: "T-shirt Classic", description: "Coupe confortable", type: "simple", price: 19.9, stock: 12, image: null, icon: "👕", active: true },
+        { id: "p2", name: "Sneakers Urban", description: "Tige basse", type: "variants", basePrice: 59.9, variants: [
+            { id: "v1", attributes: "38 / Blanc", stock: 5, price: 59.9 },
+            { id: "v2", attributes: "39 / Blanc", stock: 3, price: 59.9 },
+            { id: "v3", attributes: "40 / Blanc", stock: 0, price: 59.9 },
+            { id: "v4", attributes: "38 / Noir", stock: 8, price: 59.9 },
+            { id: "v5", attributes: "39 / Noir", stock: 2, price: 59.9 },
+            { id: "v6", attributes: "40 / Noir", stock: 4, price: 59.9 }
+        ], image: null, icon: "👟" },
+        { id: "p3", name: "Hoodie Premium", description: "Molleton épais", type: "variants", basePrice: 79.9, variants: [
+            { id: "v7", attributes: "S / Gris", stock: 6, price: 79.9 },
+            { id: "v8", attributes: "M / Gris", stock: 10, price: 79.9 },
+            { id: "v9", attributes: "L / Gris", stock: 3, price: 79.9 }
+        ], image: null, icon: "🧥" },
+        { id: "p4", name: "Casquette Logo", description: "Coton bio", type: "simple", price: 24.9, stock: 2, image: null, icon: "🧢", active: true },
+        { id: "p5", name: "Chaussettes Pack", description: "Lot x3", type: "simple", price: 12.9, stock: 0, image: null, icon: "🧦", active: true }
+    ];
 
-    // ============================================
-    // 2. FONCTIONS FETCH
-    // ============================================
-    async function fetchSupabase(endpoint, options = {}) {
-        const defaultHeaders = {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json'
-        };
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
-            ...options,
-            headers: { ...defaultHeaders, ...options.headers }
-        });
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(`HTTP ${response.status}: ${error}`);
-        }
-        return response.json();
+    let orders = [
+        { id: "ORD-RYCTHN", client: "marc@mail.com", date: "2026-06-10", time: "14:23", items: [{ productId: "p1", qty: 1, price: 19.9 }], total: 19.9, status: "Payée", adminFollowup: "À traiter", promoCode: null, discount: 0 },
+        { id: "ORD-WCP62J", client: "leo@mail.com", date: "2026-06-11", time: "09:15", items: [{ productId: "p2", variantId: "v1", qty: 1, price: 59.9 }], total: 39.8, status: "Payée", adminFollowup: "En cours", promoCode: "PROMO10", discount: 5 },
+        { id: "ORD-G7H81J", client: "claire@mail.com", date: "2026-06-12", time: "18:42", items: [{ productId: "p3", variantId: "v7", qty: 1, price: 59.9 }], total: 59.9, status: "En attente", adminFollowup: "À traiter", promoCode: "BIENVENUE", discount: 10 },
+        { id: "ORD-D4E5F6", client: "bob@mail.com", date: "2026-06-13", time: "11:05", items: [{ productId: "p4", qty: 1, price: 24.9 }], total: 89.9, status: "Payée", adminFollowup: "Expédié", promoCode: null, discount: 0 },
+        { id: "ORD-A1B2C3", client: "alice@mail.com", date: "2026-06-14", time: "20:30", items: [{ productId: "p1", qty: 2, price: 19.9 }, { productId: "p4", qty: 1, price: 24.9 }], total: 69.7, status: "Payée", adminFollowup: "Terminé", promoCode: "BLACKFRIDAY", discount: 15 }
+    ];
+
+    let promos = [
+        { code: "PROMO10", type: "fixed", value: 5, active: true },
+        { code: "BIENVENUE", type: "percent", value: 15, active: true },
+        { code: "BLACKFRIDAY", type: "fixed", value: 15, active: true }
+    ];
+
+    function loadData() {
+        const storedProducts = localStorage.getItem("styleshop_products");
+        if(storedProducts) products = JSON.parse(storedProducts);
+        const storedOrders = localStorage.getItem("styleshop_orders");
+        if(storedOrders) orders = JSON.parse(storedOrders);
+        const storedPromos = localStorage.getItem("styleshop_promos");
+        if(storedPromos) promos = JSON.parse(storedPromos);
+    }
+    function saveProducts() { localStorage.setItem("styleshop_products", JSON.stringify(products)); }
+    function saveOrders() { localStorage.setItem("styleshop_orders", JSON.stringify(orders)); }
+    function savePromos() { localStorage.setItem("styleshop_promos", JSON.stringify(promos)); }
+    loadData();
+
+    function getProductById(id) { return products.find(p => p.id === id); }
+    
+    // Affichage de l'icône (image ou émoji)
+    function getProductIcon(product) {
+        if(product.image) return `<img class="product-img-list" src="${product.image}">`;
+        if(product.icon) return `<div class="product-img-list" style="font-size:28px;">${product.icon}</div>`;
+        return `<div class="product-img-list" style="font-size:28px;">📦</div>`;
     }
 
-    // ============================================
-    // 3. VARIABLES GLOBALES
-    // ============================================
-    let products = [];
-    let orders = [];
-    let promos = [];
-    let currentPage = 'dashboard';
-
-    // ============================================
-    // 4. CHARGEMENT DES DONNÉES
-    // ============================================
-    async function loadProducts() {
-        try {
-            products = await fetchSupabase('products?select=*');
-            return products;
-        } catch(e) {
-            console.error('Erreur chargement produits:', e);
-            showToast('Erreur chargement produits');
-            return [];
-        }
-    }
-
-    async function loadOrders() {
-        try {
-            orders = await fetchSupabase('orders?select=*');
-            return orders;
-        } catch(e) {
-            console.error('Erreur chargement commandes:', e);
-            return [];
-        }
-    }
-
-    async function loadPromos() {
-        try {
-            promos = await fetchSupabase('promos?select=*');
-            return promos;
-        } catch(e) {
-            console.error('Erreur chargement promos:', e);
-            return [];
-        }
-    }
-
-    // ============================================
-    // 5. UTILITAIRES
-    // ============================================
-    function showToast(msg) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerText = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2000);
-    }
-
+    // Dashboard 6 cartes
     function getStockStats() {
-        let totalStock = 0, ruptures = 0, low = 0;
+        let totalStock = 0;
+        let ruptures = 0;
+        let lowStockItems = 0;
         products.forEach(p => {
-            if (p.type === 'simple') {
-                totalStock += p.stock || 0;
-                if (p.stock === 0) ruptures++;
-                else if (p.stock <= 2) low++;
-            } else if (p.variants) {
+            if(p.type === "simple") {
+                totalStock += p.stock;
+                if(p.stock === 0) ruptures++;
+                else if(p.stock <= 2) lowStockItems++;
+            } else if(p.variants) {
                 p.variants.forEach(v => {
-                    totalStock += v.stock || 0;
-                    if (v.stock === 0) ruptures++;
-                    else if (v.stock <= 2) low++;
+                    totalStock += v.stock;
+                    if(v.stock === 0) ruptures++;
+                    else if(v.stock <= 2) lowStockItems++;
                 });
             }
         });
-        return { totalStock, ruptures, lowStockItems: low };
+        return { totalStock, ruptures, lowStockItems };
     }
 
-    // ============================================
-    // 6. RENDU DASHBOARD
-    // ============================================
-    async function renderDashboard() {
-        await Promise.all([loadProducts(), loadOrders(), loadPromos()]);
-        const totalProducts = products.length;
-        const activeProducts = products.filter(p => p.active !== false).length;
-        const paidOrders = orders.filter(o => o.status === 'Payée');
-        const revenue = paidOrders.reduce((s, o) => s + o.total, 0);
-        const stockStats = getStockStats();
+    function getStats() {
+        let totalProducts = products.length;
+        let activeProducts = products.filter(p => p.active !== false).length;
+        let paidOrders = orders.filter(o => o.status === "Payée");
+        let revenue = paidOrders.reduce((sum, o) => sum + o.total, 0);
+        return { totalProducts, activeProducts, revenue, ordersCount: orders.length };
+    }
 
-        const html = `
+    function renderDashboard() {
+        const stats = getStats();
+        const stockStats = getStockStats();
+        const paidOrdersCount = orders.filter(o => o.status === "Payée").length;
+        return `
             <div class="page-header"><h1>Dashboard</h1></div>
             <div class="stats-grid">
-                <div class="stat-card"><div class="stat-title">📦 PRODUITS</div><div class="stat-value">${totalProducts}</div><div>${activeProducts} actifs</div></div>
-                <div class="stat-card"><div class="stat-title">🛒 COMMANDES</div><div class="stat-value">${orders.length}</div><div>${paidOrders.length} payées</div></div>
-                <div class="stat-card"><div class="stat-title">💰 CA</div><div class="stat-value">${revenue.toFixed(2)} €</div></div>
-                <div class="stat-card"><div class="stat-title">📦 STOCK TOTAL</div><div class="stat-value">${stockStats.totalStock}</div></div>
-                <div class="stat-card"><div class="stat-title">⚠️ STOCK BAS</div><div class="stat-value">${stockStats.lowStockItems}</div></div>
-                <div class="stat-card"><div class="stat-title">❌ RUPTURES</div><div class="stat-value">${stockStats.ruptures}</div></div>
+                <div class="stat-card"><div class="stat-title">📦 PRODUITS</div><div class="stat-value">${stats.totalProducts}</div><div>${stats.activeProducts} actifs</div></div>
+                <div class="stat-card"><div class="stat-title">🛒 COMMANDES</div><div class="stat-value">${stats.ordersCount}</div><div>${paidOrdersCount} payées</div></div>
+                <div class="stat-card"><div class="stat-title">💰 CHIFFRE D'AFFAIRES</div><div class="stat-value">${stats.revenue.toFixed(2)} €</div><div>commandes payées</div></div>
+                <div class="stat-card"><div class="stat-title">📦 STOCK TOTAL</div><div class="stat-value">${stockStats.totalStock}</div><div>unités</div></div>
+                <div class="stat-card"><div class="stat-title">⚠️ STOCK BAS</div><div class="stat-value">${stockStats.lowStockItems}</div><div>articles sous seuil (≤2)</div></div>
+                <div class="stat-card"><div class="stat-title">❌ RUPTURES</div><div class="stat-value">${stockStats.ruptures}</div><div>produits/variantes à 0</div></div>
             </div>
             <div class="table-container">
                 <table>
-                    <thead><tr><th>N° commande</th><th>Client</th><th>Total</th><th>Statut</th></tr></thead>
+                    <thead><tr><th>N° commande</th><th>Client</th><th>Total</th><th>Code promo</th><th>Statut</th><th>Suivi admin</th></tr></thead>
                     <tbody>
-                        ${orders.slice(0,5).map(o => `<tr><td>${o.id}</td><td>${o.client}</td><td>${o.total}€</td><td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td></tr>`).join('')}
+                        ${orders.slice(0,5).map(o => `<tr>
+                            <td>${o.id}</td>
+                            <td>${o.client}</td>
+                            <td>${o.total} €</td>
+                            <td>${o.promoCode ? `${o.promoCode} (‑${o.discount}€)` : "—"}</td>
+                            <td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td>
+                            <td><select class="status-admin" data-order-id="${o.id}">${['À traiter','En cours','Expédié','Terminé'].map(s => `<option ${o.adminFollowup === s ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
+                        </tr>`).join('')}
                     </tbody>
                 </table>
             </div>
         `;
-        document.getElementById('mainContent').innerHTML = html;
-        attachNavEvents();
     }
 
-    // ============================================
-    // 7. GESTION PRODUITS
-    // ============================================
-    async function renderProductsList() {
-        await loadProducts();
-        const html = `
-            <div class="page-header"><h1>Produits</h1><button class="btn" id="addProductBtn">+ Ajouter</button></div>
+    // Produits (liste)
+    function renderProducts() {
+        return `
+            <div class="page-header"><h1>Produits</h1><button class="btn" id="addProductBtn">+ Ajouter produit</button></div>
             <div class="table-container">
                 <table>
                     <thead><tr><th>Icône</th><th>Nom</th><th>Type</th><th>Prix</th><th>Stock</th><th>Actif</th><th>Actions</th></tr></thead>
                     <tbody>
-                        ${products.map(p => `
-                            <tr>
-                                <td><div class="product-img-list">${p.icon || '📦'}</div></td>
+                        ${products.map(p => {
+                            let priceDisplay = p.type === "simple" ? `${p.price} €` : `à partir de ${p.basePrice} €`;
+                            let stockDisplay = p.type === "simple" ? p.stock : (p.variants?.reduce((s,v)=>s+v.stock,0) || 0);
+                            let iconHtml = getProductIcon(p);
+                            return `<tr>
+                                <td>${iconHtml}</td>
                                 <td>${p.name}</td>
-                                <td>${p.type === 'simple' ? 'Simple' : 'Variantes'}</td>
-                                <td>${p.type === 'simple' ? (p.price || 0)+'€' : 'à partir de '+(p.base_price || 0)+'€'}</td>
-                                <td>${p.type === 'simple' ? (p.stock || 0) : (p.variants?.reduce((s,v)=>s+v.stock,0) || 0)}</td>
-                                <td>${p.active !== false ? '✅' : '❌'}</td>
-                                <td>
-                                    <button class="btn-small btn-outline" onclick="editProduct('${p.id}')">Modifier</button>
-                                    <button class="btn-small btn-danger" onclick="deleteProduct('${p.id}')">Supprimer</button>
-                                </td>
-                            </tr>
-                        `).join('')}
+                                <td>${p.type === "simple" ? "Simple" : "Variantes"}</td>
+                                <td>${priceDisplay}</td>
+                                <td>${stockDisplay}</td>
+                                <td>${p.active !== false ? "✅" : "❌"}</td>
+                                <td><button class="btn-small btn-outline edit-product" data-id="${p.id}">Modifier</button> <button class="btn-small btn-danger delete-product" data-id="${p.id}">Supprimer</button></td>
+                            </tr>`;
+                        }).join('')}
                     </tbody>
                 </table>
             </div>
         `;
-        document.getElementById('mainContent').innerHTML = html;
-        document.getElementById('addProductBtn').onclick = () => showProductModal();
-        attachNavEvents();
     }
 
-    // Supprimer un produit
-    window.deleteProduct = async function(id) {
-        if (!confirm('Supprimer ce produit ?')) return;
-        try {
-            await fetchSupabase(`products?id=eq.${id}`, { method: 'DELETE' });
-            showToast('Produit supprimé');
-            renderProductsList();
-        } catch(e) {
-            showToast('Erreur: ' + e.message);
-        }
-    };
-
-    // Modifier un produit
-    window.editProduct = async function(id) {
-        await loadProducts();
-        const product = products.find(p => p.id === id);
-        if (product) showProductModal(product);
-    };
-
-    // ============================================
-    // 8. MODALE PRODUIT
-    // ============================================
-    function showProductModal(product = null) {
-        const isEdit = !!product;
-        let variantsArray = product?.variants ? [...product.variants] : [];
-        let selectedEmoji = product?.icon || '📦';
-        const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑'];
-
-        const modalDiv = document.createElement('div');
-        modalDiv.className = 'modal';
-        modalDiv.innerHTML = `
-            <div class="modal-content">
-                <h2>${isEdit ? 'Modifier' : 'Ajouter'} un produit</h2>
-                <div class="form-group"><label>Nom</label><input id="prodName" value="${product?.name || ''}"></div>
-                <div class="form-group"><label>Description</label><textarea id="prodDesc">${product?.description || ''}</textarea></div>
-                <div class="form-group"><label>Type</label>
-                    <select id="prodType">
-                        <option value="simple" ${product?.type === 'simple' ? 'selected' : ''}>Produit simple</option>
-                        <option value="variants" ${product?.type === 'variants' ? 'selected' : ''}>Avec variantes</option>
-                    </select>
-                </div>
-                <div id="simpleFields" style="${product?.type === 'variants' ? 'display:none' : 'block'}">
-                    <div class="form-group"><label>Prix (€)</label><input id="simplePrice" type="number" step="0.01" value="${product?.price || ''}"></div>
-                    <div class="form-group"><label>Stock</label><input id="simpleStock" type="number" value="${product?.stock || 0}"></div>
-                </div>
-                <div id="variantsFields" style="${product?.type === 'variants' ? 'block' : 'display:none'}">
-                    <div class="form-group"><label>Prix de base (€)</label><input id="basePrice" type="number" step="0.01" value="${product?.base_price || ''}"></div>
-                    <div class="form-group"><label>Variantes</label><div id="variantsContainer"></div><button type="button" class="btn-small" id="addVariantBtn">+ Ajouter variante</button></div>
-                </div>
-                <div class="form-group">
-                    <label>Icône</label>
-                    <div class="emoji-grid" id="emojiGrid"></div>
-                    <input type="text" id="customEmoji" placeholder="Ou saisis un émoji" maxlength="2">
-                    <div>Aperçu: <span id="emojiPreview" style="font-size:2rem;">${selectedEmoji}</span></div>
-                </div>
-                <div class="form-group"><label><input type="checkbox" id="activeCheck" ${product?.active !== false ? 'checked' : ''}> Actif</label></div>
-                <div class="flex-between"><button class="btn-outline" id="cancelModal">Annuler</button><button class="btn" id="saveModal">Enregistrer</button></div>
-            </div>
-        `;
-        document.body.appendChild(modalDiv);
-
-        // Grille d'émojis
-        const grid = modalDiv.querySelector('#emojiGrid');
-        emojiList.forEach(e => {
-            const div = document.createElement('div');
-            div.className = 'emoji-option' + (e === selectedEmoji ? ' selected' : '');
-            div.textContent = e;
-            div.onclick = () => {
-                modalDiv.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
-                div.classList.add('selected');
-                modalDiv.querySelector('#customEmoji').value = '';
-                modalDiv.querySelector('#emojiPreview').textContent = e;
-                selectedEmoji = e;
-            };
-            grid.appendChild(div);
-        });
-
-        // Saisie personnalisée
-        modalDiv.querySelector('#customEmoji').addEventListener('input', (e) => {
-            const val = e.target.value.trim();
-            if (val) {
-                modalDiv.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
-                modalDiv.querySelector('#emojiPreview').textContent = val;
-                selectedEmoji = val;
-            }
-        });
-
-        // Variantes
-        const variantsContainer = modalDiv.querySelector('#variantsContainer');
-        function renderVariants() {
-            variantsContainer.innerHTML = '';
-            variantsArray.forEach((v, idx) => {
-                const div = document.createElement('div');
-                div.className = 'variant-row';
-                div.innerHTML = `
-                    <input type="text" placeholder="Taille/Couleur" value="${v.attributes?.taille || ''}/${v.attributes?.couleur || ''}">
-                    <input type="number" placeholder="Stock" value="${v.stock || 0}" style="width:80px">
-                    <input type="number" placeholder="Prix €" step="0.01" value="${v.price || 0}" style="width:100px">
-                    <button class="btn-small btn-danger" data-idx="${idx}">✖</button>
-                `;
-                variantsContainer.appendChild(div);
-            });
-            variantsContainer.querySelectorAll('.btn-danger').forEach(btn => {
-                btn.onclick = () => {
-                    const idx = parseInt(btn.dataset.idx);
-                    variantsArray.splice(idx, 1);
-                    renderVariants();
-                };
-            });
-        }
-        if (product?.type === 'variants') renderVariants();
-
-        modalDiv.querySelector('#addVariantBtn')?.addEventListener('click', () => {
-            variantsArray.push({ attributes: { taille: '', couleur: '' }, stock: 0, price: 0 });
-            renderVariants();
-        });
-
-        // Toggle simple/variants
-        const typeSelect = modalDiv.querySelector('#prodType');
-        const simpleDiv = modalDiv.querySelector('#simpleFields');
-        const variantsDiv = modalDiv.querySelector('#variantsFields');
-        typeSelect.addEventListener('change', () => {
-            const isVar = typeSelect.value === 'variants';
-            simpleDiv.style.display = isVar ? 'none' : 'block';
-            variantsDiv.style.display = isVar ? 'block' : 'none';
-        });
-
-        // Sauvegarde
-        modalDiv.querySelector('#saveModal').onclick = async () => {
-            const name = modalDiv.querySelector('#prodName').value.trim();
-            if (!name) return alert('Nom requis');
-            const description = modalDiv.querySelector('#prodDesc').value;
-            const active = modalDiv.querySelector('#activeCheck').checked;
-
-            if (typeSelect.value === 'simple') {
-                const price = parseFloat(modalDiv.querySelector('#simplePrice').value);
-                const stock = parseInt(modalDiv.querySelector('#simpleStock').value);
-                if (isNaN(price)) return alert('Prix invalide');
-                const newProd = {
-                    id: isEdit ? product.id : Date.now().toString(),
-                    name, description, type: 'simple', price, stock,
-                    icon: selectedEmoji, active
-                };
-                if (isEdit) {
-                    const idx = products.findIndex(p => p.id === product.id);
-                    if (idx !== -1) products[idx] = newProd;
-                } else products.push(newProd);
-            } else {
-                const basePrice = parseFloat(modalDiv.querySelector('#basePrice').value);
-                if (isNaN(basePrice)) return alert('Prix de base requis');
-                const finalVariants = [];
-                const rows = variantsContainer.querySelectorAll('.variant-row');
-                rows.forEach(row => {
-                    const inputs = row.querySelectorAll('input');
-                    const attrsStr = inputs[0]?.value || '';
-                    const [taille, couleur] = attrsStr.split('/');
-                    const stock = parseInt(inputs[1]?.value || 0);
-                    const price = parseFloat(inputs[2]?.value || 0) || basePrice;
-                    if (taille.trim()) {
-                        finalVariants.push({
-                            id: Date.now() + Math.random(),
-                            attributes: { taille: taille.trim(), couleur: couleur.trim() || '' },
-                            stock, price
-                        });
-                    }
-                });
-                if (finalVariants.length === 0) return alert('Ajoutez au moins une variante');
-                const newProd = {
-                    id: isEdit ? product.id : Date.now().toString(),
-                    name, description, type: 'variants',
-                    base_price: basePrice, variants: finalVariants,
-                    icon: selectedEmoji, active
-                };
-                if (isEdit) {
-                    const idx = products.findIndex(p => p.id === product.id);
-                    if (idx !== -1) products[idx] = newProd;
-                } else products.push(newProd);
-            }
-
-            // Sauvegarde dans Supabase
-            try {
-                if (isEdit) {
-                    await fetchSupabase(`products?id=eq.${product.id}`, {
-                        method: 'PATCH',
-                        body: JSON.stringify(products.find(p => p.id === product.id))
-                    });
-                } else {
-                    await fetchSupabase('products', {
-                        method: 'POST',
-                        body: JSON.stringify(products[products.length - 1])
-                    });
-                }
-                showToast(isEdit ? 'Produit modifié' : 'Produit ajouté');
-                modalDiv.remove();
-                renderProductsList();
-            } catch(e) {
-                showToast('Erreur: ' + e.message);
-            }
-        };
-
-        modalDiv.querySelector('#cancelModal').onclick = () => modalDiv.remove();
-        modalDiv.addEventListener('click', (e) => { if (e.target === modalDiv) modalDiv.remove(); });
-    }
-
-    // ============================================
-    // 9. GESTION STOCK
-    // ============================================
-    async function renderStock() {
-        await loadProducts();
+    // Stock avec icône
+    function renderStock() {
         let rows = [];
         products.forEach(p => {
-            if (p.type === 'simple') {
-                rows.push({ name: p.name, variant: 'Simple', stock: p.stock || 0, productId: p.id, variantId: null, isVariant: false, icon: p.icon });
-            } else if (p.variants) {
+            if(p.type === "simple") {
+                rows.push({ name: p.name, variant: "Simple", stock: p.stock, productId: p.id, variantId: null, isVariant: false, icon: p.icon, image: p.image });
+            } else if(p.variants) {
                 p.variants.forEach(v => {
-                    rows.push({ name: p.name, variant: `${v.attributes?.taille || ''} / ${v.attributes?.couleur || ''}`, stock: v.stock || 0, productId: p.id, variantId: v.id, isVariant: true, icon: p.icon });
+                    rows.push({ name: p.name, variant: v.attributes, stock: v.stock, productId: p.id, variantId: v.id, isVariant: true, icon: p.icon, image: p.image });
                 });
             }
         });
-
-        const html = `
+        return `
             <div class="page-header"><h1>Gestion du stock</h1></div>
             <div class="table-container">
                 <table>
                     <thead><tr><th>Icône</th><th>Produit</th><th>Variante</th><th>Stock actuel</th><th>Ajuster</th></tr></thead>
                     <tbody>
-                        ${rows.map(r => `
-                            <tr>
-                                <td><div class="product-img-list">${r.icon || '📦'}</div></td>
+                        ${rows.map(r => {
+                            let iconDisplay = r.image ? `<img class="product-img-list" src="${r.image}">` : (r.icon ? `<div class="product-img-list" style="font-size:28px;">${r.icon}</div>` : `<div class="product-img-list" style="font-size:28px;">📦</div>`);
+                            return `<tr>
+                                <td>${iconDisplay}</td>
                                 <td>${r.name}</td>
                                 <td>${r.variant}</td>
-                                <td>${r.stock === 0 ? 'Rupture' : r.stock <= 2 ? `Bas (${r.stock})` : r.stock}</td>
-                                <td>
-                                    <button class="btn-small stock-down" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">-</button>
-                                    <span style="margin:0 8px;">${r.stock}</span>
-                                    <button class="btn-small stock-up" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">+</button>
-                                </td>
-                            </tr>
-                        `).join('')}
+                                <td>${r.stock === 0 ? "Rupture" : r.stock <= 2 ? `Bas (${r.stock})` : r.stock}</td>
+                                <td><button class="btn-small stock-down" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">-</button> <span style="margin:0 8px">${r.stock}</span> <button class="btn-small stock-up" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">+</button></td>
+                            </tr>`;
+                        }).join('')}
                     </tbody>
                 </table>
             </div>
         `;
-        document.getElementById('mainContent').innerHTML = html;
+    }
 
-        // Événements pour les boutons +/- 
-        document.querySelectorAll('.stock-down, .stock-up').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const delta = btn.classList.contains('stock-up') ? 1 : -1;
-                const pid = btn.dataset.pid;
-                const vid = btn.dataset.vid;
-                const isVar = btn.dataset.isvar === 'true';
-                const prod = products.find(p => p.id === pid);
-                if (!prod) return;
+    function updateStock(productId, variantId, delta, isVariant) {
+        const product = products.find(p => p.id === productId);
+        if(!product) return;
+        if(!isVariant && product.type === "simple") {
+            product.stock = Math.max(0, (product.stock || 0) + delta);
+        } else if(isVariant && product.variants) {
+            const variant = product.variants.find(v => v.id === variantId);
+            if(variant) variant.stock = Math.max(0, variant.stock + delta);
+        }
+        saveProducts();
+        renderCurrentPage();
+    }
 
-                if (!isVar && prod.type === 'simple') {
-                    prod.stock = Math.max(0, (prod.stock || 0) + delta);
-                    await fetchSupabase(`products?id=eq.${pid}`, {
-                        method: 'PATCH',
-                        body: JSON.stringify({ stock: prod.stock })
-                    });
-                } else if (isVar && prod.variants) {
-                    const variant = prod.variants.find(v => v.id === vid);
-                    if (variant) {
-                        variant.stock = Math.max(0, variant.stock + delta);
-                        await fetchSupabase(`products?id=eq.${pid}`, {
-                            method: 'PATCH',
-                            body: JSON.stringify({ variants: prod.variants })
-                        });
+    // Détail commande (identique)
+    function showOrderDetail(order) {
+        const productNames = order.items.map(item => {
+            const prod = getProductById(item.productId);
+            const name = prod ? prod.name : "Produit";
+            const variantInfo = item.variantId && prod?.variants ? prod.variants.find(v => v.id === item.variantId)?.attributes : "";
+            return `${name} ${variantInfo ? `(${variantInfo})` : ""} × ${item.qty} = ${(item.price * item.qty).toFixed(2)} €`;
+        }).join("<br>");
+        const modalHtml = `
+            <div class="modal" id="detailModal">
+                <div class="modal-content">
+                    <h2>Détail commande ${order.id}</h2>
+                    <p><strong>Client :</strong> ${order.client}</p>
+                    <p><strong>Date :</strong> ${order.date || "non renseignée"} ${order.time ? `à ${order.time}` : ""}</p>
+                    <p><strong>Statut :</strong> ${order.status}</p>
+                    <p><strong>Suivi admin :</strong> ${order.adminFollowup}</p>
+                    <p><strong>Articles :</strong><br>${productNames}</p>
+                    <p><strong>Total :</strong> ${order.total} €</p>
+                    <p><strong>Code promo :</strong> ${order.promoCode ? `${order.promoCode} (‑${order.discount}€)` : "Aucun"}</p>
+                    <div class="flex-between" style="margin-top:1rem;">
+                        <button class="btn-outline" id="closeDetailBtn">Fermer</button>
+                        <button class="btn" id="applyPromoBtn" data-order-id="${order.id}">💰 Appliquer un code promo</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = document.getElementById('detailModal');
+        document.getElementById('closeDetailBtn').addEventListener('click', () => modal.remove());
+        document.getElementById('applyPromoBtn')?.addEventListener('click', () => {
+            modal.remove();
+            showApplyPromoToOrder(order.id);
+        });
+        modal.addEventListener('click', (e) => { if(e.target === modal) modal.remove(); });
+    }
+
+    function showApplyPromoToOrder(orderId) {
+        const order = orders.find(o => o.id === orderId);
+        if(!order) return;
+        const availablePromos = promos.filter(p => p.active);
+        const modalHtml = `
+            <div class="modal" id="promoModal">
+                <div class="modal-content">
+                    <h2>Appliquer un code promo à ${orderId}</h2>
+                    <div class="form-group">
+                        <label>Choisir un code existant</label>
+                        <select id="existingPromo">
+                            <option value="">-- Aucun --</option>
+                            ${availablePromos.map(p => `<option value="${p.code}">${p.code} (${p.type === 'fixed' ? p.value+'€' : p.value+'%'})</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ou saisir un nouveau code (montant en € ou %) :</label>
+                        <input type="text" id="newPromoCode" placeholder="Code">
+                        <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                            <input type="number" id="promoValue" placeholder="Valeur" step="0.01">
+                            <select id="promoType"><option value="fixed">€</option><option value="percent">%</option></select>
+                        </div>
+                    </div>
+                    <div class="flex-between">
+                        <button class="btn-outline" id="cancelPromoBtn">Annuler</button>
+                        <button class="btn" id="confirmPromoBtn">Appliquer</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = document.getElementById('promoModal');
+        document.getElementById('cancelPromoBtn').addEventListener('click', () => modal.remove());
+        document.getElementById('confirmPromoBtn').addEventListener('click', () => {
+            const existingCode = document.getElementById('existingPromo').value;
+            let promoCode = existingCode;
+            let discount = 0;
+            let type = null;
+            let value = 0;
+            if(existingCode) {
+                const promo = promos.find(p => p.code === existingCode);
+                if(promo) {
+                    type = promo.type;
+                    value = promo.value;
+                }
+            } else {
+                const newCode = document.getElementById('newPromoCode').value.trim().toUpperCase();
+                const rawValue = parseFloat(document.getElementById('promoValue').value);
+                const typeSelect = document.getElementById('promoType').value;
+                if(newCode && !isNaN(rawValue) && rawValue > 0) {
+                    promoCode = newCode;
+                    type = typeSelect;
+                    value = rawValue;
+                    if(!promos.find(p => p.code === newCode)) {
+                        promos.push({ code: newCode, type: type, value: value, active: true });
+                        savePromos();
                     }
                 }
-                renderStock();
-            });
+            }
+            if(promoCode && type) {
+                const originalTotal = order.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                let discountAmount = type === 'fixed' ? value : (originalTotal * value / 100);
+                discountAmount = Math.min(discountAmount, originalTotal);
+                order.discount = parseFloat(discountAmount.toFixed(2));
+                order.promoCode = promoCode;
+                order.total = parseFloat((originalTotal - discountAmount).toFixed(2));
+                saveOrders();
+                alert(`Code ${promoCode} appliqué : remise de ${order.discount.toFixed(2)}€`);
+                modal.remove();
+                renderCurrentPage();
+            } else {
+                alert("Veuillez sélectionner ou créer un code promo valide");
+            }
         });
-        attachNavEvents();
+        modal.addEventListener('click', (e) => { if(e.target === modal) modal.remove(); });
     }
 
-    // ============================================
-    // 10. GESTION COMMANDES
-    // ============================================
-    async function renderOrders() {
-        await loadOrders();
-        const html = `
-            <div class="page-header"><h1>Commandes (${orders.length})</h1></div>
+    function renderOrders() {
+        return `
+            <div class="page-header"><h1>Commandes (${orders.length})</h1><button class="btn" id="simulateOrderBtn">+ Simuler commande</button></div>
             <div class="table-container">
                 <table>
-                    <thead><tr><th>N°</th><th>Client</th><th>Total</th><th>Statut</th><th>Suivi admin</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>N°</th><th>Client</th><th>Total</th><th>Code promo</th><th>Statut</th><th>Suivi admin</th><th>Détail</th><th>Actions</th></tr></thead>
                     <tbody>
-                        ${orders.map(o => `
-                            <tr>
-                                <td>${o.id}</td>
-                                <td>${o.client}</td>
-                                <td>${o.total}€</td>
-                                <td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td>
-                                <td>
-                                    <select class="admin-followup" data-id="${o.id}">
-                                        ${['À traiter','En cours','Expédié','Terminé'].map(s => `
-                                            <option ${o.admin_followup === s ? 'selected' : ''}>${s}</option>
-                                        `).join('')}
-                                    </select>
-                                </td>
-                                <td>
-                                    <button class="btn-small btn-outline" onclick="viewOrder('${o.id}')">Voir</button>
-                                    <button class="btn-small btn-danger" onclick="deleteOrder('${o.id}')">Supprimer</button>
-                                </td>
-                            </tr>
-                        `).join('')}
+                        ${orders.map(o => `<tr>
+                            <td>${o.id}</td>
+                            <td>${o.client}</td>
+                            <td>${o.total} €</td>
+                            <td>${o.promoCode ? `${o.promoCode} (‑${o.discount}€)` : "—"}</td>
+                            <td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td>
+                            <td><select class="status-admin" data-order-id="${o.id}">${['À traiter','En cours','Expédié','Terminé'].map(s => `<option ${o.adminFollowup === s ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
+                            <td><button class="btn-small btn-outline view-detail" data-id="${o.id}">👁️ Voir</button></td>
+                            <td><button class="btn-small btn-outline apply-promo" data-id="${o.id}">💰 Promo</button> <button class="btn-small btn-danger delete-order" data-id="${o.id}">Supprimer</button></td>
+                        </tr>`).join('')}
                     </tbody>
                 </table>
             </div>
         `;
-        document.getElementById('mainContent').innerHTML = html;
-
-        // Suivi admin
-        document.querySelectorAll('.admin-followup').forEach(sel => {
-            sel.addEventListener('change', async () => {
-                const order = orders.find(o => o.id === sel.dataset.id);
-                if (order) {
-                    order.admin_followup = sel.value;
-                    await fetchSupabase(`orders?id=eq.${order.id}`, {
-                        method: 'PATCH',
-                        body: JSON.stringify({ admin_followup: sel.value })
-                    });
-                }
-            });
-        });
-        attachNavEvents();
     }
 
-    window.viewOrder = function(id) {
-        const order = orders.find(o => o.id === id);
-        if (!order) return;
-        const items = order.items.map(i => `${i.productId} ${i.variantId ? `(${i.variantId})` : ''} x${i.qty}`).join(', ');
-        alert(`📋 Commande ${id}\nClient: ${order.client}\nDate: ${order.date} ${order.time}\nArticles: ${items}\nTotal: ${order.total}€\nPromo: ${order.promo_code || 'aucun'}`);
-    };
-
-    window.deleteOrder = async function(id) {
-        if (!confirm('Supprimer cette commande ?')) return;
-        try {
-            await fetchSupabase(`orders?id=eq.${id}`, { method: 'DELETE' });
-            showToast('Commande supprimée');
-            renderOrders();
-        } catch(e) {
-            showToast('Erreur: ' + e.message);
-        }
-    };
-
-    // ============================================
-    // 11. GESTION PROMOS
-    // ============================================
-    async function renderPromos() {
-        await loadPromos();
-        const html = `
-            <div class="page-header"><h1>Codes promo</h1><button class="btn" id="addPromoBtn">+ Créer</button></div>
+    function renderPromos() {
+        return `
+            <div class="page-header"><h1>Codes promo</h1><button class="btn" id="addPromoBtn">+ Créer un code</button></div>
             <div class="table-container">
                 <table>
                     <thead><tr><th>Code</th><th>Type</th><th>Valeur</th><th>Actif</th><th>Actions</th></tr></thead>
                     <tbody>
-                        ${promos.map(p => `
-                            <tr>
-                                <td><strong>${p.code}</strong></td>
-                                <td>${p.type === 'fixed' ? '€ fixe' : '%'}</td>
-                                <td>${p.type === 'fixed' ? p.value+'€' : p.value+'%'}</td>
-                                <td>${p.active ? '✅' : '❌'}</td>
-                                <td>
-                                    <button class="btn-small btn-outline" onclick="togglePromo('${p.code}')">Toggle actif</button>
-                                    <button class="btn-small btn-danger" onclick="deletePromo('${p.code}')">Supprimer</button>
-                                </td>
-                            </tr>
-                        `).join('')}
+                        ${promos.map(p => `<tr>
+                            <td>${p.code}</td>
+                            <td>${p.type === 'fixed' ? '€ fixe' : '%'}</td>
+                            <td>${p.type === 'fixed' ? p.value+'€' : p.value+'%'}</td>
+                            <td>${p.active ? "✅" : "❌"}</td>
+                            <td><button class="btn-small btn-outline toggle-promo" data-code="${p.code}">Toggle actif</button> <button class="btn-small btn-danger delete-promo" data-code="${p.code}">Supprimer</button></td>
+                        </tr>`).join('')}
                     </tbody>
-                </table>
+                </tr>
             </div>
         `;
-        document.getElementById('mainContent').innerHTML = html;
-        document.getElementById('addPromoBtn').onclick = async () => {
-            const code = prompt('Code promo (ex: SOLDES20)');
-            if (!code) return;
-            const type = confirm('Type: OK = % / Annuler = €') ? 'percent' : 'fixed';
-            const value = parseFloat(prompt('Valeur (ex: 15 pour 15% ou 10€)'));
-            if (isNaN(value) || value <= 0) return alert('Valeur invalide');
-            try {
-                const newPromo = { code: code.toUpperCase(), type, value, active: true };
-                await fetchSupabase('promos', {
-                    method: 'POST',
-                    body: JSON.stringify(newPromo)
-                });
-                showToast('Code promo créé');
-                renderPromos();
-            } catch(e) {
-                showToast('Erreur: ' + e.message);
-            }
-        };
-        attachNavEvents();
     }
 
-    window.togglePromo = async function(code) {
-        const promo = promos.find(p => p.code === code);
-        if (!promo) return;
-        promo.active = !promo.active;
-        try {
-            await fetchSupabase(`promos?code=eq.${code}`, {
-                method: 'PATCH',
-                body: JSON.stringify({ active: promo.active })
+    function showAddPromoModal() {
+        const modalHtml = `
+            <div class="modal" id="promoModal">
+                <div class="modal-content">
+                    <h2>Créer un code promo</h2>
+                    <div class="form-group"><label>Code</label><input id="promoCode" placeholder="ex: SOLDES20"></div>
+                    <div class="form-group"><label>Type</label><select id="promoType"><option value="fixed">Réduction fixe (€)</option><option value="percent">Pourcentage (%)</option></select></div>
+                    <div class="form-group"><label>Valeur</label><input id="promoValue" type="number" step="0.01" placeholder="5 ou 15"></div>
+                    <div class="flex-between"><button class="btn-outline" id="cancelPromoBtn">Annuler</button><button class="btn" id="savePromoBtn">Enregistrer</button></div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = document.getElementById('promoModal');
+        document.getElementById('savePromoBtn').addEventListener('click', () => {
+            const code = document.getElementById('promoCode').value.trim().toUpperCase();
+            const type = document.getElementById('promoType').value;
+            const value = parseFloat(document.getElementById('promoValue').value);
+            if(!code || isNaN(value) || value <= 0) return alert("Code et valeur valides requis");
+            promos.push({ code, type, value, active: true });
+            savePromos();
+            modal.remove();
+            renderCurrentPage();
+        });
+        document.getElementById('cancelPromoBtn').addEventListener('click', () => modal.remove());
+        modal.addEventListener('click', (e) => { if(e.target === modal) modal.remove(); });
+    }
+
+    function simulateOrder() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let newId = 'ORD-' + Array.from({length:6}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+        const randClient = `client${Math.floor(Math.random()*100)}@demo.com`;
+        const now = new Date();
+        const date = now.toISOString().slice(0,10);
+        const time = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+        let items = [{ productId: "p1", qty: 1, price: 19.9 }];
+        let subtotal = 19.9;
+        let promoCode = null, discount = 0;
+        const activePromos = promos.filter(p => p.active);
+        if(activePromos.length > 0 && Math.random() > 0.5) {
+            const promo = activePromos[Math.floor(Math.random() * activePromos.length)];
+            promoCode = promo.code;
+            if(promo.type === 'fixed') discount = Math.min(promo.value, subtotal);
+            else discount = subtotal * promo.value / 100;
+            discount = parseFloat(discount.toFixed(2));
+        }
+        const newOrder = {
+            id: newId, client: randClient, date: date, time: time,
+            items: items, total: parseFloat((subtotal - discount).toFixed(2)),
+            status: Math.random() > 0.6 ? "Payée" : "En attente",
+            adminFollowup: "À traiter", promoCode: promoCode, discount: discount
+        };
+        orders.unshift(newOrder);
+        saveOrders();
+        renderCurrentPage();
+    }
+
+    // ---------- MODAL PRODUIT AVEC ÉMOJIS ----------
+    const emojiList = ["👕", "👖", "👟", "🧥", "🧢", "🧦", "🧤", "🕶️", "👗", "👚", "🎒", "👔", "💼", "👠", "👡", "🩳", "🧣", "🧦", "👑", "📿"];
+
+    function showProductModal(product = null) {
+        const isEdit = !!product;
+        let variantsArray = product?.variants ? [...product.variants] : [];
+        let selectedEmoji = product?.icon || "📦";
+        
+        const modalHtml = `
+            <div class="modal" id="productModal">
+                <div class="modal-content">
+                    <h2>${isEdit ? "Modifier" : "Ajouter"} un produit</h2>
+                    <div class="form-group"><label>Nom</label><input id="prodName" value="${product?.name || ''}"></div>
+                    <div class="form-group"><label>Description</label><textarea id="prodDesc">${product?.description || ''}</textarea></div>
+                    <div class="form-group"><label>Type</label><select id="prodType">
+                        <option value="simple" ${product?.type === 'simple' ? 'selected' : ''}>Produit simple</option>
+                        <option value="variants" ${product?.type === 'variants' ? 'selected' : ''}>Avec variantes</option>
+                    </select></div>
+                    
+                    <div id="simpleFields" style="${product?.type === 'variants' ? 'display:none' : 'display:block'}">
+                        <div class="form-group"><label>Prix (€)</label><input id="simplePrice" type="number" step="0.01" value="${product?.price || ''}"></div>
+                        <div class="form-group"><label>Stock</label><input id="simpleStock" type="number" value="${product?.stock || 0}"></div>
+                    </div>
+                    
+                    <div id="variantsFields" style="${product?.type === 'variants' ? 'display:block' : 'display:none'}">
+                        <div class="form-group"><label>Prix de base (€)</label><input id="basePrice" type="number" step="0.01" value="${product?.basePrice || ''}"></div>
+                        <div class="form-group"><label>Variantes</label>
+                            <div id="variantsContainer"></div>
+                            <button type="button" class="btn-small" id="addVariantBtn" style="margin-top:0.5rem;">+ Ajouter une variante</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Icône / Image</label>
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                            <label><input type="radio" name="iconType" value="emoji" ${!product?.image ? 'checked' : ''}> Choisir un émoji</label>
+                            <label><input type="radio" name="iconType" value="upload" ${product?.image ? 'checked' : ''}> Télécharger une image (PNG/JPG)</label>
+                            <label><input type="radio" name="iconType" value="none" ${(!product?.image && !product?.icon) ? 'checked' : ''}> Pas d'icône</label>
+                        </div>
+                        <div id="emojiSelector" style="margin-top: 10px;">
+                            <div class="emoji-grid" id="emojiGrid"></div>
+                            <div class="form-group" style="margin-top: 10px;"><label>Ou saisis ton émoji :</label><input type="text" id="customEmoji" placeholder="ex: 🚀" maxlength="2" style="width: 80px;"></div>
+                            <div>Aperçu : <span id="emojiPreview" class="icon-preview">${selectedEmoji}</span></div>
+                        </div>
+                        <div id="uploadArea" style="display:${product?.image ? 'block' : 'none'}; margin-top:0.5rem;">
+                            <input type="file" id="imageUpload" accept="image/png,image/jpeg">
+                            <br>
+                            <img id="previewImg" src="${product?.image || ''}" class="image-preview" style="display:${product?.image ? 'block' : 'none'}">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group"><label><input type="checkbox" id="activeCheck" ${product?.active !== false ? 'checked' : ''}> Produit actif</label></div>
+                    
+                    <div class="flex-between">
+                        <button class="btn-outline" id="closeModalBtn">Annuler</button>
+                        <button class="btn" id="saveProductBtn">Enregistrer</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = document.getElementById('productModal');
+        
+        // Remplir la grille d'émojis
+        const emojiGrid = document.getElementById('emojiGrid');
+        emojiList.forEach(emoji => {
+            const div = document.createElement('div');
+            div.className = 'emoji-option';
+            if(emoji === selectedEmoji) div.classList.add('selected');
+            div.textContent = emoji;
+            div.addEventListener('click', () => {
+                document.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
+                div.classList.add('selected');
+                document.getElementById('customEmoji').value = '';
+                document.getElementById('emojiPreview').textContent = emoji;
+                selectedEmoji = emoji;
             });
-            renderPromos();
-        } catch(e) {
-            showToast('Erreur: ' + e.message);
+            emojiGrid.appendChild(div);
+        });
+        
+        // Gestion des radios
+        const radioEmoji = document.querySelector('input[name="iconType"][value="emoji"]');
+        const radioUpload = document.querySelector('input[name="iconType"][value="upload"]');
+        const radioNone = document.querySelector('input[name="iconType"][value="none"]');
+        const emojiSelectorDiv = document.getElementById('emojiSelector');
+        const uploadAreaDiv = document.getElementById('uploadArea');
+        const customEmojiInput = document.getElementById('customEmoji');
+        const emojiPreviewSpan = document.getElementById('emojiPreview');
+        
+        function toggleIconFields() {
+            if(radioEmoji.checked) {
+                emojiSelectorDiv.style.display = 'block';
+                uploadAreaDiv.style.display = 'none';
+            } else if(radioUpload.checked) {
+                emojiSelectorDiv.style.display = 'none';
+                uploadAreaDiv.style.display = 'block';
+            } else {
+                emojiSelectorDiv.style.display = 'none';
+                uploadAreaDiv.style.display = 'none';
+            }
         }
-    };
-
-    window.deletePromo = async function(code) {
-        if (!confirm('Supprimer ce code promo ?')) return;
-        try {
-            await fetchSupabase(`promos?code=eq.${code}`, { method: 'DELETE' });
-            showToast('Code promo supprimé');
-            renderPromos();
-        } catch(e) {
-            showToast('Erreur: ' + e.message);
+        radioEmoji.addEventListener('change', toggleIconFields);
+        radioUpload.addEventListener('change', toggleIconFields);
+        radioNone.addEventListener('change', toggleIconFields);
+        toggleIconFields();
+        
+        customEmojiInput.addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            if(val) {
+                // Désélectionner les émojis de la grille
+                document.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
+                emojiPreviewSpan.textContent = val;
+                selectedEmoji = val;
+            } else if(radioEmoji.checked) {
+                // Si vide, reprendre le premier sélectionné ou par défaut
+                const firstSelected = document.querySelector('.emoji-option.selected');
+                if(firstSelected) {
+                    emojiPreviewSpan.textContent = firstSelected.textContent;
+                    selectedEmoji = firstSelected.textContent;
+                } else {
+                    emojiPreviewSpan.textContent = "📦";
+                    selectedEmoji = "📦";
+                }
+            }
+        });
+        
+        // Gestion upload image
+        const fileInput = document.getElementById('imageUpload');
+        const previewImg = document.getElementById('previewImg');
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if(file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    previewImg.src = ev.target.result;
+                    previewImg.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert("Seulement PNG ou JPG");
+                fileInput.value = '';
+            }
+        });
+        
+        // Gestion des variantes
+        const typeSelect = document.getElementById('prodType');
+        const simpleDiv = document.getElementById('simpleFields');
+        const variantsDiv = document.getElementById('variantsFields');
+        
+        function toggleFields() {
+            const isVariants = typeSelect.value === 'variants';
+            simpleDiv.style.display = isVariants ? 'none' : 'block';
+            variantsDiv.style.display = isVariants ? 'block' : 'none';
         }
-    };
-
-    // ============================================
-    // 12. NAVIGATION
-    // ============================================
-    function attachNavEvents() {
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.onclick = () => navigateTo(item.dataset.page);
+        typeSelect.addEventListener('change', toggleFields);
+        
+        function renderVariants() {
+            const container = document.getElementById('variantsContainer');
+            if(!container) return;
+            container.innerHTML = '';
+            variantsArray.forEach((v, idx) => {
+                const div = document.createElement('div');
+                div.className = 'variant-row';
+                div.innerHTML = `
+                    <input type="text" placeholder="Taille / Couleur" value="${escapeHtml(v.attributes || '')}" data-field="attrs${idx}">
+                    <input type="number" placeholder="Stock" value="${v.stock || 0}" style="width:90px" data-field="stock${idx}">
+                    <input type="number" placeholder="Prix €" step="0.01" value="${v.price || ''}" style="width:100px" data-field="price${idx}">
+                    <button type="button" class="btn-small btn-danger" data-idx="${idx}">✖</button>
+                `;
+                container.appendChild(div);
+            });
+            document.querySelectorAll('#variantsContainer .btn-danger').forEach(btn => {
+                btn.removeEventListener('click', handleVariantDelete);
+                btn.addEventListener('click', handleVariantDelete);
+            });
+        }
+        function handleVariantDelete(e) {
+            const idx = parseInt(e.currentTarget.dataset.idx);
+            variantsArray.splice(idx, 1);
+            renderVariants();
+        }
+        function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){ return m==='&'?'&amp;':m==='<'?'&lt;':'&gt;';}); }
+        
+        const addVariantBtn = document.getElementById('addVariantBtn');
+        if(addVariantBtn) {
+            addVariantBtn.addEventListener('click', () => {
+                variantsArray.push({ attributes: "", stock: 0, price: 0 });
+                renderVariants();
+            });
+        }
+        if(product?.type === 'variants') renderVariants();
+        
+        // Sauvegarde
+        document.getElementById('saveProductBtn').addEventListener('click', () => {
+            const name = document.getElementById('prodName').value.trim();
+            if(!name) return alert("Nom requis");
+            const description = document.getElementById('prodDesc').value;
+            const active = document.getElementById('activeCheck').checked;
+            
+            let icon = null;
+            let image = null;
+            if(radioEmoji.checked) {
+                icon = document.getElementById('emojiPreview').textContent;
+                image = null;
+            } else if(radioUpload.checked && fileInput.files.length > 0 && previewImg.src && previewImg.src.startsWith('data:')) {
+                image = previewImg.src;
+                icon = null;
+            } else if(radioUpload.checked && product?.image && !fileInput.files.length) {
+                image = product.image;
+                icon = null;
+            } else {
+                icon = null;
+                image = null;
+            }
+            
+            const type = typeSelect.value;
+            if(type === 'simple') {
+                const price = parseFloat(document.getElementById('simplePrice').value);
+                const stock = parseInt(document.getElementById('simpleStock').value);
+                if(isNaN(price)) return alert("Prix invalide");
+                const newProduct = {
+                    id: isEdit ? product.id : Date.now().toString(),
+                    name, description, type: "simple",
+                    price, stock, image, icon, active
+                };
+                if(isEdit) {
+                    const idx = products.findIndex(p => p.id === product.id);
+                    if(idx !== -1) products[idx] = newProduct;
+                } else products.push(newProduct);
+            } else {
+                const basePrice = parseFloat(document.getElementById('basePrice').value);
+                if(isNaN(basePrice)) return alert("Prix de base requis");
+                const finalVariants = [];
+                const rows = document.querySelectorAll('#variantsContainer .variant-row');
+                for(let i=0; i<rows.length; i++) {
+                    const row = rows[i];
+                    const attrsInput = row.querySelector(`input[data-field="attrs${i}"]`);
+                    const stockInput = row.querySelector(`input[data-field="stock${i}"]`);
+                    const priceInput = row.querySelector(`input[data-field="price${i}"]`);
+                    const attributes = attrsInput ? attrsInput.value.trim() : '';
+                    if(!attributes) continue;
+                    const stock = parseInt(stockInput ? stockInput.value : 0) || 0;
+                    const priceVar = parseFloat(priceInput ? priceInput.value : 0) || basePrice;
+                    finalVariants.push({
+                        id: Date.now() + i + Math.random(),
+                        attributes: attributes,
+                        stock: stock,
+                        price: priceVar
+                    });
+                }
+                if(finalVariants.length === 0) return alert("Ajoutez au moins une variante");
+                const newProduct = {
+                    id: isEdit ? product.id : Date.now().toString(),
+                    name, description, type: "variants",
+                    basePrice: basePrice,
+                    variants: finalVariants,
+                    image, icon, active
+                };
+                if(isEdit) {
+                    const idx = products.findIndex(p => p.id === product.id);
+                    if(idx !== -1) products[idx] = newProduct;
+                } else products.push(newProduct);
+            }
+            saveProducts();
+            modal.remove();
+            renderCurrentPage();
+        });
+        
+        document.getElementById('closeModalBtn').addEventListener('click', () => modal.remove());
+        modal.addEventListener('click', (e) => { if(e.target === modal) modal.remove(); });
+    }
+    
+    // Événements globaux
+    function attachGlobalEvents() {
+        document.querySelectorAll('.status-admin').forEach(sel => {
+            sel.removeEventListener('change', handleAdminChange);
+            sel.addEventListener('change', handleAdminChange);
+        });
+        document.querySelectorAll('.stock-up, .stock-down').forEach(btn => {
+            btn.removeEventListener('click', handleStockClick);
+            btn.addEventListener('click', handleStockClick);
+        });
+        document.querySelectorAll('.delete-product').forEach(btn => {
+            btn.removeEventListener('click', handleDeleteProduct);
+            btn.addEventListener('click', handleDeleteProduct);
+        });
+        document.querySelectorAll('.edit-product').forEach(btn => {
+            btn.removeEventListener('click', handleEditProduct);
+            btn.addEventListener('click', handleEditProduct);
+        });
+        document.querySelectorAll('.delete-order').forEach(btn => {
+            btn.removeEventListener('click', handleDeleteOrder);
+            btn.addEventListener('click', handleDeleteOrder);
+        });
+        document.querySelectorAll('.view-detail').forEach(btn => {
+            btn.removeEventListener('click', handleViewDetail);
+            btn.addEventListener('click', handleViewDetail);
+        });
+        document.querySelectorAll('.apply-promo').forEach(btn => {
+            btn.removeEventListener('click', handleApplyPromo);
+            btn.addEventListener('click', handleApplyPromo);
+        });
+        document.querySelectorAll('.toggle-promo').forEach(btn => {
+            btn.removeEventListener('click', handleTogglePromo);
+            btn.addEventListener('click', handleTogglePromo);
+        });
+        document.querySelectorAll('.delete-promo').forEach(btn => {
+            btn.removeEventListener('click', handleDeletePromo);
+            btn.addEventListener('click', handleDeletePromo);
         });
     }
-
-    async function navigateTo(page) {
-        currentPage = page;
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
-
-        if (page === 'dashboard') await renderDashboard();
-        else if (page === 'products') await renderProductsList();
-        else if (page === 'stock') await renderStock();
-        else if (page === 'orders') await renderOrders();
-        else if (page === 'promos') await renderPromos();
+    
+    function handleAdminChange(e) {
+        const order = orders.find(o => o.id === e.target.dataset.orderId);
+        if(order) { order.adminFollowup = e.target.value; saveOrders(); }
     }
-
-    // ============================================
-    // 13. INITIALISATION
-    // ============================================
-    async function init() {
-        await renderDashboard();
-        attachNavEvents();
+    function handleStockClick(e) {
+        const btn = e.currentTarget;
+        const delta = btn.classList.contains('stock-up') ? 1 : -1;
+        updateStock(btn.dataset.pid, btn.dataset.vid, delta, btn.dataset.isvar === 'true');
     }
-
-    init();
+    function handleDeleteProduct(e) {
+        if(confirm("Supprimer ce produit ?")) {
+            products = products.filter(p => p.id !== e.currentTarget.dataset.id);
+            saveProducts();
+            renderCurrentPage();
+        }
+    }
+    function handleEditProduct(e) {
+        const product = products.find(p => p.id === e.currentTarget.dataset.id);
+        if(product) showProductModal(product);
+    }
+    function handleDeleteOrder(e) {
+        if(confirm("Supprimer cette commande ?")) {
+            orders = orders.filter(o => o.id !== e.currentTarget.dataset.id);
+            saveOrders();
+            renderCurrentPage();
+        }
+    }
+    function handleViewDetail(e) {
+        const order = orders.find(o => o.id === e.currentTarget.dataset.id);
+        if(order) showOrderDetail(order);
+    }
+    function handleApplyPromo(e) {
+        const orderId = e.currentTarget.dataset.id;
+        showApplyPromoToOrder(orderId);
+    }
+    function handleTogglePromo(e) {
+        const promo = promos.find(p => p.code === e.currentTarget.dataset.code);
+        if(promo) { promo.active = !promo.active; savePromos(); renderCurrentPage(); }
+    }
+    function handleDeletePromo(e) {
+        if(confirm("Supprimer ce code promo ?")) {
+            promos = promos.filter(p => p.code !== e.currentTarget.dataset.code);
+            savePromos();
+            renderCurrentPage();
+        }
+    }
+    
+    let currentPage = 'dashboard';
+    function renderCurrentPage() {
+        let html = '';
+        if(currentPage === 'dashboard') html = renderDashboard();
+        else if(currentPage === 'products') html = renderProducts();
+        else if(currentPage === 'stock') html = renderStock();
+        else if(currentPage === 'orders') html = renderOrders();
+        else if(currentPage === 'promos') html = renderPromos();
+        document.getElementById('mainContent').innerHTML = html;
+        if(currentPage === 'products') {
+            const addBtn = document.getElementById('addProductBtn');
+            if(addBtn) addBtn.addEventListener('click', () => showProductModal(null));
+        }
+        if(currentPage === 'orders') {
+            const simBtn = document.getElementById('simulateOrderBtn');
+            if(simBtn) simBtn.addEventListener('click', simulateOrder);
+        }
+        if(currentPage === 'promos') {
+            const addPromoBtn = document.getElementById('addPromoBtn');
+            if(addPromoBtn) addPromoBtn.addEventListener('click', showAddPromoModal);
+        }
+        attachGlobalEvents();
+    }
+    
+    function initNavigation() {
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+                currentPage = item.dataset.page;
+                renderCurrentPage();
+            });
+        });
+        renderCurrentPage();
+    }
+    initNavigation();
 </script>
 </body>
 </html>
-```
-
--
