@@ -56,7 +56,6 @@
         .upload-area input[type="file"] { width: auto; padding: 0.4rem; }
         .upload-btn { background: #22c55e; color: white; border: none; padding: 0.4rem 1rem; border-radius: 30px; cursor: pointer; }
         .upload-btn:hover { background: #16a34a; }
-        .error-message { background: #fee2e2; color: #dc2626; padding: 1rem; border-radius: 12px; margin: 1rem 0; border: 1px solid #fecaca; }
         @media (max-width: 700px) { .sidebar { width: 80px; padding: 1rem 0.5rem; } .sidebar .logo h2 { font-size: 1rem; } .sidebar .logo span, .footer-sidebar { display: none; } .nav-item { font-size: 0.8rem; text-align: center; padding: 0.5rem; } .main { padding: 1rem; } }
     </style>
 </head>
@@ -219,16 +218,27 @@
             return { totalStock, ruptures, lowStockItems: low, stockValue, productRuptures };
         }
 
+        // ============================================
+        // AFFICHAGE ICÔNE / IMAGE (CORRIGÉ)
+        // ============================================
         function getDisplayIcon(product) {
+            // Vérifier les images du tableau
             if (product.images && product.images.length > 0) {
-                return `<img src="${product.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
-            } else if (product.image_url) {
-                return `<img src="${product.image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
-            } else if (product.icon) {
-                return `<span style="font-size:28px;">${product.icon}</span>`;
-            } else {
-                return `<span style="font-size:28px;">📦</span>`;
+                const imgUrl = product.images[0];
+                if (typeof imgUrl === 'string' && (imgUrl.startsWith('http') || imgUrl.startsWith('data:image'))) {
+                    return `<img src="${imgUrl}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+                }
             }
+            // Vérifier image_url (ancienne version)
+            if (product.image_url && typeof product.image_url === 'string' && 
+                (product.image_url.startsWith('http') || product.image_url.startsWith('data:image'))) {
+                return `<img src="${product.image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+            }
+            // Sinon afficher l'icône ou 📦
+            if (product.icon) {
+                return `<span style="font-size:28px;">${product.icon}</span>`;
+            }
+            return `<span style="font-size:28px;">📦</span>`;
         }
 
         // ============================================
@@ -252,7 +262,7 @@
         }
 
         // ============================================
-        // 7. DASHBOARD (complet)
+        // 7. DASHBOARD
         // ============================================
         async function renderDashboard() {
             await Promise.all([loadProducts(), loadOrders(), loadPromos()]);
@@ -292,7 +302,7 @@
         }
 
         // ============================================
-        // 8. GESTION PRODUITS (complet)
+        // 8. GESTION PRODUITS
         // ============================================
         async function renderProducts() {
             await loadProducts();
@@ -327,7 +337,7 @@
         }
 
         // ============================================
-        // 9. MODALE PRODUIT (complet avec images)
+        // 9. MODALE PRODUIT
         // ============================================
         const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
 
@@ -640,8 +650,18 @@
                         <thead><tr><th>Icône</th><th>Produit</th><th>Variante</th><th>Stock</th><th>Ajuster</th></tr></thead>
                         <tbody>
                             ${rows.map(r => {
-                                let iconHtml = (r.images && r.images.length > 0) ? `<img src="${r.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">` :
-                                                (r.icon ? `<span style="font-size:28px;">${r.icon}</span>` : '📦');
+                                // Vérification de l'image
+                                let iconHtml = '📦';
+                                if (r.images && r.images.length > 0) {
+                                    const imgUrl = r.images[0];
+                                    if (typeof imgUrl === 'string' && (imgUrl.startsWith('http') || imgUrl.startsWith('data:image'))) {
+                                        iconHtml = `<img src="${imgUrl}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+                                    } else if (r.icon) {
+                                        iconHtml = `<span style="font-size:28px;">${r.icon}</span>`;
+                                    }
+                                } else if (r.icon) {
+                                    iconHtml = `<span style="font-size:28px;">${r.icon}</span>`;
+                                }
                                 return `
                                     <tr>
                                         <td><div class="product-img-list">${iconHtml}</div></td>
@@ -702,7 +722,7 @@
         }
 
         // ============================================
-        // 12. GESTION COMMANDES (avec modale détaillée)
+        // 12. GESTION COMMANDES
         // ============================================
         async function renderOrders() {
             await loadOrders();
@@ -762,7 +782,7 @@
         }
 
         // ============================================
-        // 13. VUE DÉTAILLÉE D'UNE COMMANDE (modale complète)
+        // 13. VUE DÉTAILLÉE D'UNE COMMANDE
         // ============================================
         window.viewOrder = function(id) {
             const order = orders.find(o => o.id === id);
