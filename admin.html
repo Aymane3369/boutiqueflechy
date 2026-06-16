@@ -5,666 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StyleShop - Administration</title>
     <style>
-        /* ============================================
-           STYLES PROFESSIONNELS
-           ============================================ */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', -apple-system, sans-serif; }
-        
-        :root {
-            --primary: #0f172a;
-            --primary-light: #1e293b;
-            --blue: #3b82f6;
-            --blue-hover: #2563eb;
-            --green: #22c55e;
-            --green-hover: #16a34a;
-            --red: #ef4444;
-            --red-hover: #dc2626;
-            --gray: #64748b;
-            --gray-light: #f1f5f9;
-            --white: #ffffff;
-            --shadow: 0 1px 3px rgba(0,0,0,0.06);
-            --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
-            --radius: 16px;
-            --radius-sm: 8px;
-            --transition: 0.2s ease;
-        }
-
-        body { background: #f1f5f9; display: flex; min-height: 100vh; color: var(--primary); }
-
-        /* ============================================
-           SIDEBAR
-           ============================================ */
-        .sidebar {
-            width: 280px;
-            background: var(--primary);
-            color: #e2e8f0;
-            padding: 1.5rem 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
-            transition: width 0.3s ease;
-        }
-        
-        .sidebar::-webkit-scrollbar { width: 4px; }
-        .sidebar::-webkit-scrollbar-track { background: transparent; }
-        .sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-
-        .logo { padding: 0 0.5rem; }
-        .logo h2 { font-size: 1.6rem; color: white; letter-spacing: -0.5px; }
-        .logo span { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-
-        .nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-        .nav-item {
-            padding: 0.7rem 1rem;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 500;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: #cbd5e1;
-        }
-        .nav-item:hover { background: var(--primary-light); color: white; }
-        .nav-item.active { background: var(--blue); color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
-        .nav-item .icon { font-size: 1.2rem; width: 24px; text-align: center; }
-        .nav-item.logout { margin-top: auto; border-top: 1px solid #1e293b; padding-top: 1rem; color: #f87171; }
-        .nav-item.logout:hover { background: rgba(239,68,68,0.15); color: #fca5a5; }
-
-        .footer-sidebar { 
-            font-size: 0.7rem; 
-            color: #475569; 
-            padding: 0 0.5rem;
-            border-top: 1px solid #1e293b;
-            padding-top: 1rem;
-        }
-
-        /* ============================================
-           MAIN CONTENT
-           ============================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
+        body { background: #f1f5f9; display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: #0f172a; color: #e2e8f0; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 2rem; position: sticky; top: 0; height: 100vh; }
+        .logo h2 { font-size: 1.6rem; color: white; }
+        .logo span { font-size: 0.8rem; color: #94a3b8; }
+        .nav-item { padding: 0.7rem 1rem; border-radius: 12px; cursor: pointer; transition: 0.2s; font-weight: 500; }
+        .nav-item:hover { background: #1e293b; }
+        .nav-item.active { background: #3b82f6; color: white; }
+        .footer-sidebar { margin-top: auto; font-size: 0.7rem; color: #94a3b8; }
         .main { flex: 1; padding: 2rem; overflow-y: auto; }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        .page-header h1 { font-size: 1.8rem; color: var(--primary); font-weight: 700; }
-
-        /* ============================================
-           BOUTONS
-           ============================================ */
-        .btn {
-            background: var(--blue);
-            color: white;
-            border: none;
-            padding: 0.6rem 1.4rem;
-            border-radius: 30px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: var(--transition);
-            font-size: 0.95rem;
-            text-decoration: none;
-        }
-        .btn:hover { background: var(--blue-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
-        .btn:active { transform: translateY(0); }
-        .btn-outline { background: white; border: 1.5px solid #e2e8f0; color: var(--primary); }
-        .btn-outline:hover { background: var(--gray-light); border-color: #cbd5e1; box-shadow: none; transform: none; }
-        .btn-danger { background: var(--red); }
-        .btn-danger:hover { background: var(--red-hover); box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
-        .btn-success { background: var(--green); }
-        .btn-success:hover { background: var(--green-hover); box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
-        .btn-small { padding: 0.3rem 0.8rem; font-size: 0.8rem; gap: 0.3rem; }
-
-        /* ============================================
-           STATS CARDS
-           ============================================ */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: white;
-            padding: 1.2rem 1.5rem;
-            border-radius: var(--radius);
-            border: 1px solid #e2e8f0;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-        }
-        .stat-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
-        .stat-title { font-size: 0.75rem; text-transform: uppercase; color: var(--gray); font-weight: 600; letter-spacing: 0.5px; }
-        .stat-value { font-size: 2rem; font-weight: 700; margin-top: 0.3rem; color: var(--primary); }
-        .stat-sub { font-size: 0.85rem; color: var(--gray); margin-top: 0.2rem; }
-
-        /* ============================================
-           TABLEAUX
-           ============================================ */
-        .table-container {
-            background: white;
-            border-radius: var(--radius);
-            border: 1px solid #e2e8f0;
-            overflow-x: auto;
-            margin-top: 1rem;
-            box-shadow: var(--shadow);
-        }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; }
+        .page-header h1 { font-size: 1.8rem; color: #0f172a; }
+        .btn { background: #3b82f6; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 30px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #1e293b; }
+        .btn-danger { background: #ef4444; }
+        .btn-small { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1rem 1.2rem; border-radius: 20px; border: 1px solid #e2e8f0; }
+        .stat-title { font-size: 0.8rem; text-transform: uppercase; color: #475569; font-weight: 600; }
+        .stat-value { font-size: 2rem; font-weight: 700; margin-top: 0.3rem; }
+        .stat-sub { font-size: 0.85rem; color: #64748b; }
+        .table-container { background: white; border-radius: 20px; border: 1px solid #e2e8f0; overflow-x: auto; margin-top: 1rem; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; }
-        th { background: #f8fafc; font-weight: 600; color: var(--primary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        tr:hover td { background: #fafbfc; }
-
-        /* ============================================
-           BADGES
-           ============================================ */
-        .badge {
-            padding: 0.2rem 0.7rem;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            display: inline-block;
-        }
+        th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; font-weight: 600; color: #1e293b; }
+        .badge { padding: 0.2rem 0.7rem; border-radius: 30px; font-size: 0.75rem; font-weight: 500; }
         .badge-success { background: #dcfce7; color: #15803d; }
         .badge-warning { background: #fef9c3; color: #854d0e; }
         .badge-danger { background: #fee2e2; color: #dc2626; }
-        .badge-info { background: #dbeafe; color: #1d4ed8; }
-        .badge-dark { background: #1e293b; color: white; }
-
-        /* ============================================
-           IMAGES PRODUITS
-           ============================================ */
-        .product-img-list {
-            width: 42px;
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            background: var(--gray-light);
-            border-radius: var(--radius-sm);
-            overflow: hidden;
-        }
-        .product-img-list img { width: 100%; height: 100%; object-fit: cover; }
-
-        /* ============================================
-           MODALES
-           ============================================ */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            animation: fadeIn 0.25s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .modal-content {
-            background: white;
-            border-radius: 28px;
-            max-width: 750px;
-            width: 92%;
-            padding: 2rem;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
-            animation: slideUp 0.3s ease;
-        }
-        .modal-content::-webkit-scrollbar { width: 6px; }
-        .modal-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-        .modal-content h2 { font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--primary); }
-
+        .product-img-list { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 28px; background: #f1f5f9; border-radius: 8px; overflow: hidden; }
+        .product-img-list img { width: 40px; height: 40px; object-fit: cover; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; border-radius: 28px; max-width: 750px; width: 90%; padding: 1.8rem; max-height: 85vh; overflow-y: auto; }
         .form-group { margin-bottom: 1.2rem; }
-        .form-group label {
-            font-weight: 600;
-            display: block;
-            margin-bottom: 0.4rem;
-            color: var(--primary);
-            font-size: 0.9rem;
-        }
-        .form-group label .required { color: var(--red); }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 0.7rem;
-            border: 1.5px solid #e2e8f0;
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem;
-            transition: var(--transition);
-            background: white;
-        }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--blue);
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-        }
-        input:disabled, textarea:disabled { background: var(--gray-light); cursor: not-allowed; }
-
-        .variant-row {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-            flex-wrap: wrap;
-            align-items: center;
-        }
+        label { font-weight: 500; display: block; margin-bottom: 0.4rem; }
+        input, select, textarea { width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.95rem; }
+        .variant-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
         .variant-row input { flex: 1; min-width: 80px; }
-
-        .flex-between { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-
-        /* ============================================
-           EMOJIS
-           ============================================ */
-        .emoji-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(48px, 56px));
-            gap: 8px;
-            margin: 10px 0;
-        }
-        .emoji-option {
-            font-size: 28px;
-            background: var(--gray-light);
-            border: 2px solid #e2e8f0;
-            border-radius: var(--radius-sm);
-            padding: 6px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .emoji-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 60px)); gap: 8px; margin: 10px 0; }
+        .emoji-option { font-size: 32px; background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 16px; padding: 5px; text-align: center; cursor: pointer; transition: 0.1s; }
         .emoji-option:hover { background: #e2e8f0; transform: scale(1.05); }
-        .emoji-option.selected { border-color: var(--blue); background: #dbeafe; }
-
-        /* ============================================
-           UPLOAD IMAGES
-           ============================================ */
-        .upload-area {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .upload-area input[type="file"] { width: auto; padding: 0.4rem; border: none; }
-        .upload-btn {
-            background: var(--green);
-            color: white;
-            border: none;
-            padding: 0.5rem 1.2rem;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-        }
-        .upload-btn:hover { background: var(--green-hover); }
-
-        .image-preview-grid {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-top: 0.5rem;
-        }
-        .image-preview-grid img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: var(--radius-sm);
-            border: 1px solid #e2e8f0;
-        }
-
-        /* ============================================
-           TOAST NOTIFICATIONS
-           ============================================ */
-        .toast {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: var(--primary);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 40px;
-            z-index: 2000;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-            animation: slideUp 0.3s ease;
-            font-weight: 500;
-            max-width: 400px;
-        }
-        .toast.success { background: var(--green); }
-        .toast.error { background: var(--red); }
-
-        /* ============================================
-           LOGIN PAGE
-           ============================================ */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: #f1f5f9;
-        }
-        .login-box {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 28px;
-            box-shadow: var(--shadow-lg);
-            width: 100%;
-            max-width: 420px;
-        }
-        .login-box h1 { text-align: center; margin-bottom: 0.5rem; color: var(--primary); }
-        .login-box .subtitle { text-align: center; color: var(--gray); margin-bottom: 1.5rem; }
-        .login-box input { margin-bottom: 1rem; }
-        .login-box .btn { width: 100%; justify-content: center; padding: 0.8rem; }
-        .login-box .auth-switch { text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--gray); }
-        .login-box .auth-switch span { color: var(--blue); cursor: pointer; font-weight: 600; }
-        .login-box .auth-switch span:hover { text-decoration: underline; }
-        .login-box .auth-error { color: var(--red); text-align: center; margin-bottom: 1rem; display: none; padding: 0.5rem; background: #fee2e2; border-radius: var(--radius-sm); }
-        .login-box .auth-success { color: var(--green); text-align: center; margin-bottom: 1rem; display: none; padding: 0.5rem; background: #dcfce7; border-radius: var(--radius-sm); }
-
-        /* ============================================
-           SETTINGS
-           ============================================ */
-        .settings-section {
-            background: white;
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 1.5rem;
-            box-shadow: var(--shadow);
-        }
-        .settings-section h3 { margin-bottom: 1rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; }
-
-        /* ============================================
-           RESPONSIVE
-           ============================================ */
-        @media (max-width: 768px) {
-            .sidebar { width: 72px; padding: 1rem 0.5rem; }
-            .sidebar .logo h2 { font-size: 0.9rem; text-align: center; }
-            .sidebar .logo span, .footer-sidebar { display: none; }
-            .nav-item { font-size: 0.7rem; text-align: center; padding: 0.5rem; justify-content: center; flex-direction: column; gap: 0.2rem; }
-            .nav-item .icon { font-size: 1.2rem; }
-            .nav-item .label { display: none; }
-            .main { padding: 1rem; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .modal-content { padding: 1.5rem; width: 95%; }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid { grid-template-columns: 1fr; }
-            .page-header h1 { font-size: 1.3rem; }
-        }
+        .emoji-option.selected { border-color: #3b82f6; background: #dbeafe; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: white; padding: 0.8rem 1.5rem; border-radius: 40px; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .image-preview-grid { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+        .image-preview-grid img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .upload-area { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+        .upload-area input[type="file"] { width: auto; padding: 0.4rem; }
+        .upload-btn { background: #22c55e; color: white; border: none; padding: 0.4rem 1rem; border-radius: 30px; cursor: pointer; }
+        .upload-btn:hover { background: #16a34a; }
+        .error-message { background: #fee2e2; color: #dc2626; padding: 1rem; border-radius: 12px; margin: 1rem 0; border: 1px solid #fecaca; }
+        @media (max-width: 700px) { .sidebar { width: 80px; padding: 1rem 0.5rem; } .sidebar .logo h2 { font-size: 1rem; } .sidebar .logo span, .footer-sidebar { display: none; } .nav-item { font-size: 0.8rem; text-align: center; padding: 0.5rem; } .main { padding: 1rem; } }
     </style>
 </head>
 <body>
 
-    <!-- ============================================
-    SIDEBAR
-    ============================================ -->
-    <div class="sidebar" id="sidebar">
-        <div class="logo">
-            <h2>✦ StyleShop</h2>
-            <span>Panel d'administration</span>
+    <div class="sidebar">
+        <div class="logo"><h2>StyleShop</h2><span>Admin panel</span></div>
+        <div class="nav">
+            <div class="nav-item active" data-page="dashboard">📊 Dashboard</div>
+            <div class="nav-item" data-page="products">👕 Produits</div>
+            <div class="nav-item" data-page="stock">📦 Stock</div>
+            <div class="nav-item" data-page="orders">📋 Commandes</div>
+            <div class="nav-item" data-page="promos">🏷️ Promos</div>
         </div>
-        <nav class="nav">
-            <div class="nav-item active" data-page="dashboard">
-                <span class="icon">📊</span>
-                <span class="label">Dashboard</span>
-            </div>
-            <div class="nav-item" data-page="products">
-                <span class="icon">👕</span>
-                <span class="label">Produits</span>
-            </div>
-            <div class="nav-item" data-page="stock">
-                <span class="icon">📦</span>
-                <span class="label">Stock</span>
-            </div>
-            <div class="nav-item" data-page="orders">
-                <span class="icon">📋</span>
-                <span class="label">Commandes</span>
-            </div>
-            <div class="nav-item" data-page="promos">
-                <span class="icon">🏷️</span>
-                <span class="label">Promos</span>
-            </div>
-            <div class="nav-item" data-page="settings">
-                <span class="icon">⚙️</span>
-                <span class="label">Paramètres</span>
-            </div>
-            <div class="nav-item logout" data-page="logout">
-                <span class="icon">🚪</span>
-                <span class="label">Déconnexion</span>
-            </div>
-        </nav>
-        <div class="footer-sidebar">v2.1 — Sécurisé avec Supabase</div>
+        <div class="footer-sidebar">Accès admin via Supabase</div>
     </div>
 
-    <!-- ============================================
-    MAIN CONTENT
-    ============================================ -->
-    <div class="main" id="mainContent"></div>
+    <div class="main" id="mainContent">
+        <div style="text-align:center; padding:3rem;">Chargement des données...</div>
+    </div>
 
-    <!-- ============================================
-    SCRIPT
-    ============================================ -->
     <script>
         // ============================================
-        // 1. CONFIGURATION
+        // 1. CONFIGURATION SUPABASE
         // ============================================
         const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
 
-        const STRIPE_PUBLISHABLE_KEY = 'pk_test_51Tekkn6wfDMIVGHfTWzp5lHp5tI4eZnsQLy0xl0EQNXGDq9dUKyYqAnhfQURu5yxVyA10AJadtuLYWv2xVRwkXAK00itBqEpSx';
-        const ADMIN_EMAIL = 'admin@styleshop.com';
-
         // ============================================
-        // 2. SUPABASE CLIENT
-        // ============================================
-        // Charger Supabase depuis CDN
-        const supabaseScript = document.createElement('script');
-        supabaseScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
-        supabaseScript.onload = () => {
-            window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            console.log('✅ Supabase client initialized');
-            init();
-        };
-        document.head.appendChild(supabaseScript);
-
-        // ============================================
-        // 3. VARIABLES GLOBALES
-        // ============================================
-        let products = [];
-        let orders = [];
-        let promos = [];
-        let currentPage = 'dashboard';
-        let isInitialized = false;
-
-        // ============================================
-        // 4. AUTHENTIFICATION
-        // ============================================
-        async function isAuthenticated() {
-            if (!window.supabaseClient) return false;
-            try {
-                const { data, error } = await window.supabaseClient.auth.getSession();
-                if (error) throw error;
-                return !!data.session;
-            } catch (e) {
-                console.error('Auth check error:', e);
-                return false;
-            }
-        }
-
-        async function requireAuth() {
-            if (!window.supabaseClient) return false;
-            const auth = await isAuthenticated();
-            if (!auth) {
-                renderLogin();
-                return false;
-            }
-            return true;
-        }
-
-        async function signIn(email, password) {
-            if (!window.supabaseClient) return { success: false, error: 'Supabase non initialisé' };
-            try {
-                const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-                if (error) throw error;
-                
-                // Vérifier le rôle admin
-                const { data: profile } = await window.supabaseClient
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', data.user.id)
-                    .single();
-
-                if (profile && profile.role !== 'admin') {
-                    await window.supabaseClient.auth.signOut();
-                    throw new Error('Accès non autorisé - Droits admin requis');
-                }
-
-                return { success: true, data };
-            } catch (e) {
-                console.error('Sign in error:', e);
-                return { success: false, error: e.message };
-            }
-        }
-
-        async function signUp(email, password) {
-            if (!window.supabaseClient) return { success: false, error: 'Supabase non initialisé' };
-            try {
-                const { data, error } = await window.supabaseClient.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: {
-                        emailRedirectTo: window.location.origin + '/admin.html'
-                    }
-                });
-                if (error) throw error;
-                return { success: true, data };
-            } catch (e) {
-                console.error('Sign up error:', e);
-                return { success: false, error: e.message };
-            }
-        }
-
-        async function signOut() {
-            if (!window.supabaseClient) return;
-            await window.supabaseClient.auth.signOut();
-            renderLogin();
-        }
-
-        function renderLogin() {
-            document.getElementById('sidebar').style.display = 'none';
-            document.getElementById('mainContent').innerHTML = `
-                <div class="login-container">
-                    <div class="login-box">
-                        <h1>✦ StyleShop</h1>
-                        <p class="subtitle">Panel d'administration sécurisé</p>
-                        <div id="authError" class="auth-error"></div>
-                        <div id="authSuccess" class="auth-success"></div>
-                        <input type="email" id="loginEmail" placeholder="Email" value="admin@styleshop.com">
-                        <input type="password" id="loginPassword" placeholder="Mot de passe" onkeyup="if(event.key==='Enter') document.getElementById('loginBtn').click()">
-                        <button class="btn" id="loginBtn">🔐 Se connecter</button>
-                        <div class="auth-switch">
-                            Pas encore de compte ? <span id="showSignupBtn">S'inscrire</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('loginBtn').onclick = async () => {
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                const errorDiv = document.getElementById('authError');
-                const successDiv = document.getElementById('authSuccess');
-                
-                errorDiv.style.display = 'none';
-                successDiv.style.display = 'none';
-
-                const result = await signIn(email, password);
-                if (result.success) {
-                    document.getElementById('sidebar').style.display = 'flex';
-                    await loadAllData();
-                    await renderDashboard();
-                } else {
-                    errorDiv.textContent = '❌ ' + result.error;
-                    errorDiv.style.display = 'block';
-                }
-            };
-
-            document.getElementById('showSignupBtn').onclick = () => showSignupForm();
-        }
-
-        function showSignupForm() {
-            const loginBox = document.querySelector('.login-box');
-            loginBox.innerHTML = `
-                <h1>✦ StyleShop</h1>
-                <p class="subtitle">Créer un compte administrateur</p>
-                <div id="authError" class="auth-error"></div>
-                <div id="authSuccess" class="auth-success"></div>
-                <input type="email" id="signupEmail" placeholder="Email" value="admin@styleshop.com">
-                <input type="password" id="signupPassword" placeholder="Mot de passe (6+ caractères)">
-                <input type="password" id="signupConfirm" placeholder="Confirmer le mot de passe">
-                <button class="btn" id="signupBtn">📝 Créer mon compte</button>
-                <div class="auth-switch">
-                    Déjà un compte ? <span id="showLoginBtn">Se connecter</span>
-                </div>
-            `;
-
-            document.getElementById('signupBtn').onclick = async () => {
-                const email = document.getElementById('signupEmail').value;
-                const password = document.getElementById('signupPassword').value;
-                const confirm = document.getElementById('signupConfirm').value;
-                const errorDiv = document.getElementById('authError');
-                const successDiv = document.getElementById('authSuccess');
-
-                errorDiv.style.display = 'none';
-                successDiv.style.display = 'none';
-
-                if (password !== confirm) {
-                    errorDiv.textContent = '❌ Les mots de passe ne correspondent pas';
-                    errorDiv.style.display = 'block';
-                    return;
-                }
-                if (password.length < 6) {
-                    errorDiv.textContent = '❌ Le mot de passe doit faire au moins 6 caractères';
-                    errorDiv.style.display = 'block';
-                    return;
-                }
-
-                const result = await signUp(email, password);
-                if (result.success) {
-                    successDiv.textContent = '✅ Compte créé ! Vérifiez vos emails pour confirmer.';
-                    successDiv.style.display = 'block';
-                    setTimeout(() => renderLogin(), 3000);
-                } else {
-                    errorDiv.textContent = '❌ ' + result.error;
-                    errorDiv.style.display = 'block';
-                }
-            };
-
-            document.getElementById('showLoginBtn').onclick = () => renderLogin();
-        }
-
-        // ============================================
-        // 5. FONCTIONS SUPABASE
+        // 2. FONCTION FETCH AVEC LOGS
         // ============================================
         async function fetchSupabase(endpoint, options = {}) {
             const defaultHeaders = {
@@ -673,73 +94,47 @@
                 'Content-Type': 'application/json'
             };
             try {
+                console.log(`📡 Appel à : ${SUPABASE_URL}/rest/v1/${endpoint}`);
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
                     ...options,
                     headers: { ...defaultHeaders, ...options.headers }
                 });
+                console.log(`📡 Statut HTTP : ${response.status}`);
 
-                if (response.status === 204 || response.status === 201) return null;
+                if (response.status === 204 || response.status === 201) {
+                    console.log('✅ Réponse 204/201 (pas de contenu)');
+                    return null;
+                }
                 if (!response.ok) {
                     const error = await response.text();
+                    console.error(`❌ Erreur HTTP ${response.status}:`, error);
                     throw new Error(`HTTP ${response.status}: ${error}`);
                 }
                 const text = await response.text();
-                if (!text) return null;
-                return JSON.parse(text);
+                console.log(`📦 Réponse brute (${text.length} caractères) :`, text.substring(0, 200) + '...');
+                if (!text) {
+                    console.warn('⚠️ Réponse vide');
+                    return null;
+                }
+                const data = JSON.parse(text);
+                console.log(`✅ Données parsées (${data.length || 'objet'} éléments)`);
+                return data;
             } catch (e) {
-                console.error('Fetch error:', e);
+                console.error('❌ Erreur fetchSupabase:', e);
                 return null;
             }
         }
 
         // ============================================
-        // 6. UPLOAD IMAGES
+        // 3. VARIABLES GLOBALES
         // ============================================
-        async function uploadImageToSupabase(file) {
-            const bucketName = 'products';
-            const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
-            
-            try {
-                const { data: buckets } = await fetchSupabase('storage/buckets', { method: 'GET' });
-                const bucketExists = buckets?.some(b => b.name === bucketName);
-                
-                if (!bucketExists) {
-                    await fetchSupabase('storage/buckets', {
-                        method: 'POST',
-                        body: JSON.stringify({ name: bucketName, public: true })
-                    });
-                }
-
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const uploadResponse = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    },
-                    body: formData
-                });
-
-                if (!uploadResponse.ok) {
-                    const error = await uploadResponse.text();
-                    throw new Error(`Upload failed: ${error}`);
-                }
-
-                return `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
-            } catch (e) {
-                console.error('Upload error:', e);
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => resolve(e.target.result);
-                    reader.readAsDataURL(file);
-                });
-            }
-        }
+        let products = [];
+        let orders = [];
+        let promos = [];
+        let currentPage = 'dashboard';
 
         // ============================================
-        // 7. CHARGEMENT DES DONNÉES
+        // 4. CHARGEMENT DES DONNÉES AVEC LOGS
         // ============================================
         async function loadProducts() {
             try {
@@ -750,15 +145,21 @@
                             p.variants.forEach(v => { v.stock = parseInt(v.stock) || 0; });
                         }
                         if (p.type === 'simple') p.stock = parseInt(p.stock) || 0;
+                        if (typeof p.image_url !== 'string') p.image_url = null;
                         if (!Array.isArray(p.images)) p.images = [];
+                        if (p.image_url && !p.images.includes(p.image_url)) {
+                            p.images.unshift(p.image_url);
+                        }
                     });
                     products = data;
+                    console.log(`✅ Produits chargés : ${products.length}`);
                 } else {
                     products = [];
+                    console.warn('⚠️ Aucun produit reçu ou format incorrect');
                 }
                 return products;
             } catch (e) {
-                console.error('Erreur chargement produits:', e);
+                console.error('❌ Erreur loadProducts:', e);
                 products = [];
                 return products;
             }
@@ -769,12 +170,14 @@
                 const data = await fetchSupabase('orders?select=*');
                 if (Array.isArray(data)) {
                     orders = data;
+                    console.log(`✅ Commandes chargées : ${orders.length}`);
                 } else {
                     orders = [];
+                    console.warn('⚠️ Aucune commande reçue');
                 }
                 return orders;
             } catch (e) {
-                console.error('Erreur chargement commandes:', e);
+                console.error('❌ Erreur loadOrders:', e);
                 orders = [];
                 return orders;
             }
@@ -785,30 +188,28 @@
                 const data = await fetchSupabase('promos?select=*');
                 if (Array.isArray(data)) {
                     promos = data;
+                    console.log(`✅ Promos chargées : ${promos.length}`);
                 } else {
                     promos = [];
+                    console.warn('⚠️ Aucune promo reçue');
                 }
                 return promos;
             } catch (e) {
-                console.error('Erreur chargement promos:', e);
+                console.error('❌ Erreur loadPromos:', e);
                 promos = [];
                 return promos;
             }
         }
 
-        async function loadAllData() {
-            await Promise.all([loadProducts(), loadOrders(), loadPromos()]);
-        }
-
         // ============================================
-        // 8. UTILITAIRES
+        // 5. UTILITAIRES
         // ============================================
-        function showToast(message, type = 'success') {
+        function showToast(msg) {
             const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
+            toast.className = 'toast';
+            toast.innerText = msg;
             document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            setTimeout(() => toast.remove(), 2500);
         }
 
         function getStockStats() {
@@ -838,21 +239,301 @@
         }
 
         function getDisplayIcon(product) {
-            if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-                const img = product.images[0];
-                return `<img src="${img}" style="width:42px;height:42px;object-fit:cover;border-radius:8px;">`;
+            if (product.images && product.images.length > 0) {
+                return `<img src="${product.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+            } else if (product.image_url) {
+                return `<img src="${product.image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
             } else if (product.icon) {
-                return `<span style="font-size:24px;">${product.icon}</span>`;
+                return `<span style="font-size:28px;">${product.icon}</span>`;
             } else {
-                return `<span style="font-size:24px;">📦</span>`;
+                return `<span style="font-size:28px;">📦</span>`;
             }
         }
 
         // ============================================
-        // 9. NAVIGATION
+        // 6. NAVIGATION
         // ============================================
         function attachNavEvents() {
             document.querySelectorAll('.nav-item').forEach(item => {
-                item.onclick = () => {
-                    if (item.dataset.page === 'logout') {
+                item.onclick = () => navigateTo(item.dataset.page);
+            });
+        }
+
+        async function navigateTo(page) {
+            currentPage = page;
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
+            if (page === 'dashboard') await renderDashboard();
+            else if (page === 'products') await renderProducts();
+            else if (page === 'stock') await renderStock();
+            else if (page === 'orders') await renderOrders();
+            else if (page === 'promos') await renderPromos();
+        }
+
+        // ============================================
+        // 7. DASHBOARD
+        // ============================================
+        async function renderDashboard() {
+            await Promise.all([loadProducts(), loadOrders(), loadPromos()]);
+            const totalProducts = products.length;
+            const activeProducts = products.filter(p => p.active !== false).length;
+            const paidOrders = orders.filter(o => o.status === 'Payée');
+            const revenue = paidOrders.reduce((s, o) => s + (o.total || 0), 0);
+            const stockStats = getStockStats();
+
+            const html = `
+                <div class="page-header"><h1>📊 Dashboard</h1></div>
+                ${products.length === 0 && orders.length === 0 ? `
+                    <div class="error-message">
+                        ⚠️ Aucune donnée chargée. Vérifiez la console (F12) pour les erreurs.
+                        <br><button class="btn btn-outline" onclick="location.reload()" style="margin-top:0.5rem;">🔄 Recharger</button>
+                    </div>
+                ` : ''}
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-title">📦 Produits</div><div class="stat-value">${totalProducts}</div><div class="stat-sub">${activeProducts} actifs</div></div>
+                    <div class="stat-card"><div class="stat-title">🛒 Commandes</div><div class="stat-value">${orders.length}</div><div class="stat-sub">${paidOrders.length} payées</div></div>
+                    <div class="stat-card"><div class="stat-title">💰 CA</div><div class="stat-value">${revenue.toFixed(2)} €</div><div class="stat-sub">commandes payées</div></div>
+                    <div class="stat-card"><div class="stat-title">📦 Stock total</div><div class="stat-value">${stockStats.totalStock}</div><div class="stat-sub">unités</div></div>
+                    <div class="stat-card"><div class="stat-title">💵 Valeur du stock</div><div class="stat-value">${stockStats.stockValue.toFixed(2)} €</div><div class="stat-sub">estimation</div></div>
+                    <div class="stat-card"><div class="stat-title">⚠️ Stock bas</div><div class="stat-value">${stockStats.lowStockItems}</div><div class="stat-sub">articles ≤2</div></div>
+                    <div class="stat-card"><div class="stat-title">❌ Ruptures (articles)</div><div class="stat-value">${stockStats.ruptures}</div><div class="stat-sub">produits/variantes à 0</div></div>
+                    <div class="stat-card"><div class="stat-title">📦 Produits en rupture</div><div class="stat-value">${stockStats.productRuptures}</div><div class="stat-sub">produits (toutes variantes à 0)</div></div>
+                </div>
+                <h3 style="margin:1.5rem 0 0.5rem;">Dernières commandes</h3>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>N°</th><th>Client</th><th>Total</th><th>Statut</th></tr></thead>
+                        <tbody>
+                            ${orders.slice(0,5).map(o => `
+                                <tr><td><strong>${o.id}</strong></td><td>${o.client}</td><td>${(o.total||0).toFixed(2)} €</td><td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td></tr>
+                            `).join('')}
+                            ${orders.length === 0 ? '<tr><td colspan="4" style="text-align:center;color:#94a3b8;">Aucune commande</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('mainContent').innerHTML = html;
+            attachNavEvents();
+        }
+
+        // ============================================
+        // 8. GESTION PRODUITS (simplifiée pour l'exemple)
+        // ============================================
+        async function renderProducts() {
+            await loadProducts();
+            const html = `
+                <div class="page-header"><h1>👕 Produits</h1><button class="btn" id="addProductBtn">+ Ajouter</button></div>
+                ${products.length === 0 ? `
+                    <div class="error-message">⚠️ Aucun produit chargé. Vérifiez la console.</div>
+                ` : ''}
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Icône</th><th>Nom</th><th>Type</th><th>Prix</th><th>Stock</th><th>Actif</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${products.map(p => `
+                                <tr>
+                                    <td><div class="product-img-list">${getDisplayIcon(p)}</div></td>
+                                    <td><strong>${p.name}</strong></td>
+                                    <td>${p.type === 'simple' ? 'Simple' : 'Variantes'}</td>
+                                    <td>${p.type === 'simple' ? (p.price || 0) + ' €' : 'à partir de ' + (p.base_price || 0) + ' €'}</td>
+                                    <td>${p.type === 'simple' ? (p.stock || 0) : (p.variants?.reduce((s,v) => s + (v.stock || 0), 0) || 0)}</td>
+                                    <td>${p.active !== false ? '✅' : '❌'}</td>
+                                    <td>
+                                        <button class="btn-small btn-outline" onclick="editProduct('${p.id}')">Modifier</button>
+                                        <button class="btn-small btn-danger" onclick="deleteProduct('${p.id}')">Supprimer</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                            ${products.length === 0 ? '<tr><td colspan="7" style="text-align:center;color:#94a3b8;">Aucun produit</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('mainContent').innerHTML = html;
+            document.getElementById('addProductBtn').onclick = () => showToast('Fonctionnalité d\'ajout à implémenter');
+            attachNavEvents();
+        }
+
+        // ============================================
+        // 9. GESTION STOCK (simplifiée)
+        // ============================================
+        async function renderStock() {
+            await loadProducts();
+            let rows = [];
+            products.forEach(p => {
+                if (p.type === 'simple') {
+                    rows.push({ name: p.name, variant: 'Simple', stock: p.stock || 0, productId: p.id, variantId: null, isVariant: false, images: p.images || [] });
+                } else if (p.variants) {
+                    p.variants.forEach(v => {
+                        rows.push({ name: p.name, variant: `${v.attributes?.taille || ''} / ${v.attributes?.couleur || ''}`,
+                            stock: v.stock || 0, productId: p.id, variantId: v.id, isVariant: true, images: p.images || [] });
+                    });
+                }
+            });
+
+            const html = `
+                <div class="page-header"><h1>📦 Gestion du stock</h1></div>
+                ${rows.length === 0 ? `
+                    <div class="error-message">⚠️ Aucun produit chargé pour le stock.</div>
+                ` : ''}
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Icône</th><th>Produit</th><th>Variante</th><th>Stock</th><th>Ajuster</th></tr></thead>
+                        <tbody>
+                            ${rows.map(r => {
+                                let iconHtml = (r.images && r.images.length > 0) ? `<img src="${r.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">` : '📦';
+                                return `
+                                    <tr>
+                                        <td><div class="product-img-list">${iconHtml}</div></td>
+                                        <td><strong>${r.name}</strong></td>
+                                        <td>${r.variant}</td>
+                                        <td>${r.stock === 0 ? '<span class="badge badge-danger">Rupture</span>' :
+                                            r.stock <= 2 ? `<span class="badge badge-warning">Bas (${r.stock})</span>` :
+                                            `<span class="badge badge-success">${r.stock}</span>`}</td>
+                                        <td>
+                                            <button class="btn-small btn-outline stock-down" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">-</button>
+                                            <span style="margin:0 8px;font-weight:600;">${r.stock}</span>
+                                            <button class="btn-small btn-outline stock-up" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">+</button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                            ${rows.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Aucun produit</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('mainContent').innerHTML = html;
+
+            document.querySelectorAll('.stock-down, .stock-up').forEach(btn => {
+                btn.onclick = async () => {
+                    const delta = btn.classList.contains('stock-up') ? 1 : -1;
+                    const pid = btn.dataset.pid;
+                    const vid = btn.dataset.vid;
+                    const isVar = btn.dataset.isvar === 'true';
+                    const prod = products.find(p => p.id === pid);
+                    if (!prod) { showToast('Erreur'); return; }
+                    try {
+                        if (!isVar && prod.type === 'simple') {
+                            prod.stock = Math.max(0, (prod.stock || 0) + delta);
+                            await fetchSupabase(`products?id=eq.${pid}`, {
+                                method: 'PATCH',
+                                body: JSON.stringify({ stock: prod.stock })
+                            });
+                        } else if (isVar && prod.variants) {
+                            const variant = prod.variants.find(v => v.id === vid);
+                            if (variant) {
+                                variant.stock = Math.max(0, (variant.stock || 0) + delta);
+                                await fetchSupabase(`products?id=eq.${pid}`, {
+                                    method: 'PATCH',
+                                    body: JSON.stringify({ variants: prod.variants })
+                                });
+                            }
+                        }
+                        await loadProducts();
+                        await renderStock();
+                        showToast('✅ Stock mis à jour');
+                    } catch (e) {
+                        showToast('❌ Erreur: ' + e.message);
+                    }
+                };
+            });
+            attachNavEvents();
+        }
+
+        // ============================================
+        // 10. GESTION COMMANDES (simplifiée)
+        // ============================================
+        async function renderOrders() {
+            await loadOrders();
+            const html = `
+                <div class="page-header"><h1>📋 Commandes (${orders.length})</h1></div>
+                ${orders.length === 0 ? `
+                    <div class="error-message">⚠️ Aucune commande chargée.</div>
+                ` : ''}
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>N°</th><th>Client</th><th>Total</th><th>Statut</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${orders.map(o => `
+                                <tr>
+                                    <td><strong>${o.id}</strong></td>
+                                    <td>${o.client}</td>
+                                    <td>${(o.total||0).toFixed(2)} €</td>
+                                    <td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td>
+                                    <td>
+                                        <button class="btn-small btn-outline" onclick="alert('Détail de ${o.id}')">👁️</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                            ${orders.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Aucune commande</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('mainContent').innerHTML = html;
+            attachNavEvents();
+        }
+
+        // ============================================
+        // 11. GESTION PROMOS (simplifiée)
+        // ============================================
+        async function renderPromos() {
+            await loadPromos();
+            const html = `
+                <div class="page-header"><h1>🏷️ Codes promo</h1><button class="btn" id="addPromoBtn">+ Créer</button></div>
+                ${promos.length === 0 ? `
+                    <div class="error-message">⚠️ Aucune promo chargée.</div>
+                ` : ''}
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Code</th><th>Type</th><th>Valeur</th><th>Actif</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${promos.map(p => `
+                                <tr>
+                                    <td><strong>${p.code}</strong></td>
+                                    <td>${p.type === 'fixed' ? '€ fixe' : '%'}</td>
+                                    <td>${p.type === 'fixed' ? p.value + ' €' : p.value + ' %'}</td>
+                                    <td>${p.active ? '✅' : '❌'}</td>
+                                    <td>
+                                        <button class="btn-small btn-outline" onclick="showToast('Toggle promo')">Toggle</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                            ${promos.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Aucun code promo</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('mainContent').innerHTML = html;
+            document.getElementById('addPromoBtn').onclick = () => showToast('Fonctionnalité à implémenter');
+            attachNavEvents();
+        }
+
+        // ============================================
+        // 12. SYNCHRONISATION INTER-ONGLETS
+        // ============================================
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'shop_products' || e.key === 'shop_promos' || e.key === 'shop_orders' || e.key === 'shop_cart') {
+                console.log('🔄 Changement détecté sur', e.key);
+                if (currentPage === 'dashboard') renderDashboard();
+                else if (currentPage === 'products') renderProducts();
+                else if (currentPage === 'stock') renderStock();
+                else if (currentPage === 'orders') renderOrders();
+                else if (currentPage === 'promos') renderPromos();
+            }
+        });
+
+        // ============================================
+        // 13. INITIALISATION
+        // ============================================
+        async function init() {
+            console.log('🚀 Admin initialisation...');
+            await renderDashboard();
+            attachNavEvents();
+        }
+        init();
+    </script>
+</body>
+</html>
                        
