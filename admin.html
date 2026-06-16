@@ -21,6 +21,7 @@
         .btn-outline { background: white; border: 1px solid #cbd5e1; color: #1e293b; }
         .btn-danger { background: #ef4444; }
         .btn-small { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
+        .btn-success { background: #22c55e; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         .stat-card { background: white; padding: 1rem 1.2rem; border-radius: 20px; border: 1px solid #e2e8f0; }
         .stat-title { font-size: 0.8rem; text-transform: uppercase; color: #475569; font-weight: 600; }
@@ -73,9 +74,7 @@
         <div class="footer-sidebar">Accès admin via Supabase</div>
     </div>
 
-    <div class="main" id="mainContent">
-        <div style="text-align:center; padding:3rem;">Chargement des données...</div>
-    </div>
+    <div class="main" id="mainContent"></div>
 
     <script>
         // ============================================
@@ -85,7 +84,7 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
 
         // ============================================
-        // 2. FONCTION FETCH AVEC LOGS
+        // 2. FONCTIONS FETCH
         // ============================================
         async function fetchSupabase(endpoint, options = {}) {
             const defaultHeaders = {
@@ -94,33 +93,21 @@
                 'Content-Type': 'application/json'
             };
             try {
-                console.log(`📡 Appel à : ${SUPABASE_URL}/rest/v1/${endpoint}`);
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
                     ...options,
                     headers: { ...defaultHeaders, ...options.headers }
                 });
-                console.log(`📡 Statut HTTP : ${response.status}`);
 
-                if (response.status === 204 || response.status === 201) {
-                    console.log('✅ Réponse 204/201 (pas de contenu)');
-                    return null;
-                }
+                if (response.status === 204 || response.status === 201) return null;
                 if (!response.ok) {
                     const error = await response.text();
-                    console.error(`❌ Erreur HTTP ${response.status}:`, error);
                     throw new Error(`HTTP ${response.status}: ${error}`);
                 }
                 const text = await response.text();
-                console.log(`📦 Réponse brute (${text.length} caractères) :`, text.substring(0, 200) + '...');
-                if (!text) {
-                    console.warn('⚠️ Réponse vide');
-                    return null;
-                }
-                const data = JSON.parse(text);
-                console.log(`✅ Données parsées (${data.length || 'objet'} éléments)`);
-                return data;
+                if (!text) return null;
+                return JSON.parse(text);
             } catch (e) {
-                console.error('❌ Erreur fetchSupabase:', e);
+                console.error('Fetch error:', e);
                 return null;
             }
         }
@@ -134,7 +121,7 @@
         let currentPage = 'dashboard';
 
         // ============================================
-        // 4. CHARGEMENT DES DONNÉES AVEC LOGS
+        // 4. CHARGEMENT DES DONNÉES
         // ============================================
         async function loadProducts() {
             try {
@@ -152,14 +139,12 @@
                         }
                     });
                     products = data;
-                    console.log(`✅ Produits chargés : ${products.length}`);
                 } else {
                     products = [];
-                    console.warn('⚠️ Aucun produit reçu ou format incorrect');
                 }
                 return products;
             } catch (e) {
-                console.error('❌ Erreur loadProducts:', e);
+                console.error('Erreur chargement produits:', e);
                 products = [];
                 return products;
             }
@@ -170,14 +155,12 @@
                 const data = await fetchSupabase('orders?select=*');
                 if (Array.isArray(data)) {
                     orders = data;
-                    console.log(`✅ Commandes chargées : ${orders.length}`);
                 } else {
                     orders = [];
-                    console.warn('⚠️ Aucune commande reçue');
                 }
                 return orders;
             } catch (e) {
-                console.error('❌ Erreur loadOrders:', e);
+                console.error('Erreur chargement commandes:', e);
                 orders = [];
                 return orders;
             }
@@ -188,14 +171,12 @@
                 const data = await fetchSupabase('promos?select=*');
                 if (Array.isArray(data)) {
                     promos = data;
-                    console.log(`✅ Promos chargées : ${promos.length}`);
                 } else {
                     promos = [];
-                    console.warn('⚠️ Aucune promo reçue');
                 }
                 return promos;
             } catch (e) {
-                console.error('❌ Erreur loadPromos:', e);
+                console.error('Erreur chargement promos:', e);
                 promos = [];
                 return promos;
             }
@@ -271,7 +252,7 @@
         }
 
         // ============================================
-        // 7. DASHBOARD
+        // 7. DASHBOARD (complet)
         // ============================================
         async function renderDashboard() {
             await Promise.all([loadProducts(), loadOrders(), loadPromos()]);
@@ -283,12 +264,6 @@
 
             const html = `
                 <div class="page-header"><h1>📊 Dashboard</h1></div>
-                ${products.length === 0 && orders.length === 0 ? `
-                    <div class="error-message">
-                        ⚠️ Aucune donnée chargée. Vérifiez la console (F12) pour les erreurs.
-                        <br><button class="btn btn-outline" onclick="location.reload()" style="margin-top:0.5rem;">🔄 Recharger</button>
-                    </div>
-                ` : ''}
                 <div class="stats-grid">
                     <div class="stat-card"><div class="stat-title">📦 Produits</div><div class="stat-value">${totalProducts}</div><div class="stat-sub">${activeProducts} actifs</div></div>
                     <div class="stat-card"><div class="stat-title">🛒 Commandes</div><div class="stat-value">${orders.length}</div><div class="stat-sub">${paidOrders.length} payées</div></div>
@@ -317,15 +292,12 @@
         }
 
         // ============================================
-        // 8. GESTION PRODUITS (simplifiée pour l'exemple)
+        // 8. GESTION PRODUITS (complet)
         // ============================================
         async function renderProducts() {
             await loadProducts();
             const html = `
                 <div class="page-header"><h1>👕 Produits</h1><button class="btn" id="addProductBtn">+ Ajouter</button></div>
-                ${products.length === 0 ? `
-                    <div class="error-message">⚠️ Aucun produit chargé. Vérifiez la console.</div>
-                ` : ''}
                 <div class="table-container">
                     <table>
                         <thead><tr><th>Icône</th><th>Nom</th><th>Type</th><th>Prix</th><th>Stock</th><th>Actif</th><th>Actions</th></tr></thead>
@@ -350,38 +322,326 @@
                 </div>
             `;
             document.getElementById('mainContent').innerHTML = html;
-            document.getElementById('addProductBtn').onclick = () => showToast('Fonctionnalité d\'ajout à implémenter');
+            document.getElementById('addProductBtn').onclick = () => showProductModal();
             attachNavEvents();
         }
 
         // ============================================
-        // 9. GESTION STOCK (simplifiée)
+        // 9. MODALE PRODUIT (complet avec images)
+        // ============================================
+        const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
+
+        function showProductModal(product = null) {
+            const isEdit = !!product;
+            let variantsArray = product?.variants ? [...product.variants] : [];
+            let selectedEmoji = product?.icon || '📦';
+            let imagesArray = product?.images ? [...product.images] : [];
+            let uploadedImages = [];
+
+            const modalDiv = document.createElement('div');
+            modalDiv.className = 'modal';
+            modalDiv.innerHTML = `
+                <div class="modal-content">
+                    <h2>${isEdit ? 'Modifier' : 'Ajouter'} un produit</h2>
+                    <div class="form-group"><label>Nom</label><input id="prodName" value="${product?.name || ''}"></div>
+                    <div class="form-group"><label>Description</label><textarea id="prodDesc" rows="2">${product?.description || ''}</textarea></div>
+                    <div class="form-group"><label>Type</label>
+                        <select id="prodType">
+                            <option value="simple" ${product?.type === 'simple' ? 'selected' : ''}>Simple</option>
+                            <option value="variants" ${product?.type === 'variants' ? 'selected' : ''}>Variantes</option>
+                        </select>
+                    </div>
+                    <div id="simpleFields" style="${product?.type === 'variants' ? 'display:none' : 'block'}">
+                        <div class="form-group"><label>Prix (€)</label><input id="simplePrice" type="number" step="0.01" value="${product?.price || ''}"></div>
+                        <div class="form-group"><label>Stock</label><input id="simpleStock" type="number" value="${product?.stock || 0}"></div>
+                    </div>
+                    <div id="variantsFields" style="${product?.type === 'variants' ? 'block' : 'display:none'}">
+                        <div class="form-group"><label>Prix de base (€)</label><input id="basePrice" type="number" step="0.01" value="${product?.base_price || ''}"></div>
+                        <div class="form-group"><label>Variantes</label><div id="variantsContainer"></div><button type="button" class="btn-small btn-outline" id="addVariantBtn">+ Ajouter variante</button></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Icône / Image</label>
+                        <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:0.5rem;">
+                            <label><input type="radio" name="imgType" value="emoji" ${imagesArray.length === 0 ? 'checked' : ''}> Émoji</label>
+                            <label><input type="radio" name="imgType" value="upload" ${imagesArray.length > 0 ? 'checked' : ''}> Télécharger (PNG/JPG)</label>
+                            <label><input type="radio" name="imgType" value="none" ${(!imagesArray.length && !selectedEmoji) ? 'checked' : ''}> Pas d'icône</label>
+                        </div>
+                        <div id="emojiSelector" style="${imagesArray.length > 0 ? 'display:none' : 'block'}">
+                            <div class="emoji-grid" id="emojiGrid"></div>
+                            <input type="text" id="customEmoji" placeholder="Ou saisis un émoji" maxlength="2" style="width:200px;">
+                            <div>Aperçu : <span id="emojiPreview" style="font-size:2rem;">${selectedEmoji}</span></div>
+                        </div>
+                        <div id="uploadArea" style="${imagesArray.length > 0 ? 'block' : 'display:none'}; margin-top:0.5rem;">
+                            <input type="file" id="imageUpload" accept="image/png,image/jpeg,image/jpg" multiple>
+                            <button type="button" class="upload-btn" id="addImageBtn">📤 Ajouter les images</button>
+                            <button type="button" class="btn-small btn-outline" id="clearImagesBtn">Effacer toutes</button>
+                            <div class="image-preview-grid" id="imagePreviewGrid">
+                                ${imagesArray.map(url => `<img src="${url}">`).join('')}
+                            </div>
+                            <textarea id="imagesInput" rows="2" placeholder="Ou URLs séparées par des virgules">${imagesArray.join(', ')}</textarea>
+                        </div>
+                    </div>
+                    <div class="form-group"><label><input type="checkbox" id="activeCheck" ${product?.active !== false ? 'checked' : ''}> Actif</label></div>
+                    <div class="flex-between"><button class="btn-outline" id="cancelModal">Annuler</button><button class="btn" id="saveModal">Enregistrer</button></div>
+                </div>
+            `;
+            document.body.appendChild(modalDiv);
+
+            // Grille émojis
+            const grid = modalDiv.querySelector('#emojiGrid');
+            emojiList.forEach(e => {
+                const div = document.createElement('div');
+                div.className = 'emoji-option' + (e === selectedEmoji ? ' selected' : '');
+                div.textContent = e;
+                div.onclick = () => {
+                    modalDiv.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
+                    div.classList.add('selected');
+                    modalDiv.querySelector('#customEmoji').value = '';
+                    modalDiv.querySelector('#emojiPreview').textContent = e;
+                    selectedEmoji = e;
+                    document.querySelector('input[name="imgType"][value="upload"]').checked = false;
+                    document.querySelector('input[name="imgType"][value="emoji"]').checked = true;
+                    document.getElementById('uploadArea').style.display = 'none';
+                    document.getElementById('emojiSelector').style.display = 'block';
+                };
+                grid.appendChild(div);
+            });
+            modalDiv.querySelector('#customEmoji').addEventListener('input', (e) => {
+                const val = e.target.value.trim();
+                if (val) {
+                    modalDiv.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
+                    modalDiv.querySelector('#emojiPreview').textContent = val;
+                    selectedEmoji = val;
+                }
+            });
+
+            // Radios
+            const radioEmoji = modalDiv.querySelector('input[value="emoji"]');
+            const radioUpload = modalDiv.querySelector('input[value="upload"]');
+            const radioNone = modalDiv.querySelector('input[value="none"]');
+            const emojiDiv = modalDiv.querySelector('#emojiSelector');
+            const uploadDiv = modalDiv.querySelector('#uploadArea');
+            const toggleFields = () => {
+                if (radioEmoji.checked) {
+                    emojiDiv.style.display = 'block';
+                    uploadDiv.style.display = 'none';
+                } else if (radioUpload.checked) {
+                    emojiDiv.style.display = 'none';
+                    uploadDiv.style.display = 'block';
+                } else {
+                    emojiDiv.style.display = 'none';
+                    uploadDiv.style.display = 'none';
+                }
+            };
+            radioEmoji.addEventListener('change', toggleFields);
+            radioUpload.addEventListener('change', toggleFields);
+            radioNone.addEventListener('change', toggleFields);
+            toggleFields();
+
+            // Upload image
+            const fileInput = modalDiv.querySelector('#imageUpload');
+            const previewGrid = modalDiv.querySelector('#imagePreviewGrid');
+            const imagesInput = modalDiv.querySelector('#imagesInput');
+
+            function updatePreview() {
+                const urls = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
+                const all = [...uploadedImages, ...urls];
+                previewGrid.innerHTML = all.map(url => `<img src="${url}">`).join('');
+                imagesInput.value = all.join(', ');
+            }
+
+            modalDiv.querySelector('#addImageBtn').addEventListener('click', () => {
+                const files = fileInput.files;
+                if (!files || files.length === 0) { showToast('Sélectionnez des images'); return; }
+                for (let f of files) {
+                    if (f.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => { uploadedImages.push(e.target.result); updatePreview(); };
+                        reader.readAsDataURL(f);
+                    }
+                }
+                fileInput.value = '';
+            });
+
+            modalDiv.querySelector('#clearImagesBtn').addEventListener('click', () => {
+                uploadedImages = [];
+                imagesInput.value = '';
+                updatePreview();
+            });
+            imagesInput.addEventListener('input', updatePreview);
+
+            // Variantes
+            const variantsContainer = modalDiv.querySelector('#variantsContainer');
+            function renderVariants() {
+                variantsContainer.innerHTML = '';
+                variantsArray.forEach((v, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'variant-row';
+                    div.innerHTML = `
+                        <input type="text" placeholder="Taille/Couleur" value="${v.attributes?.taille || ''}/${v.attributes?.couleur || ''}">
+                        <input type="number" placeholder="Stock" value="${v.stock || 0}" style="width:80px;">
+                        <input type="number" placeholder="Prix €" step="0.01" value="${v.price || 0}" style="width:100px;">
+                        <button class="btn-small btn-danger" data-idx="${idx}">✖</button>
+                    `;
+                    variantsContainer.appendChild(div);
+                });
+                variantsContainer.querySelectorAll('.btn-danger').forEach(btn => {
+                    btn.onclick = () => {
+                        const idx = parseInt(btn.dataset.idx);
+                        variantsArray.splice(idx, 1);
+                        renderVariants();
+                    };
+                });
+            }
+            if (product?.type === 'variants') renderVariants();
+            modalDiv.querySelector('#addVariantBtn')?.addEventListener('click', () => {
+                variantsArray.push({ attributes: { taille: '', couleur: '' }, stock: 0, price: 0 });
+                renderVariants();
+            });
+
+            // Toggle simple/variants
+            const typeSelect = modalDiv.querySelector('#prodType');
+            const simpleDiv = modalDiv.querySelector('#simpleFields');
+            const variantsDiv = modalDiv.querySelector('#variantsFields');
+            typeSelect.addEventListener('change', () => {
+                const isVar = typeSelect.value === 'variants';
+                simpleDiv.style.display = isVar ? 'none' : 'block';
+                variantsDiv.style.display = isVar ? 'block' : 'none';
+            });
+
+            // Sauvegarde
+            modalDiv.querySelector('#saveModal').onclick = async () => {
+                const name = modalDiv.querySelector('#prodName').value.trim();
+                if (!name) return alert('Nom requis');
+                const description = modalDiv.querySelector('#prodDesc').value;
+                const active = modalDiv.querySelector('#activeCheck').checked;
+
+                let icon = null;
+                if (radioEmoji.checked && selectedEmoji) {
+                    icon = selectedEmoji;
+                }
+
+                // Récupérer toutes les images
+                const allImages = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
+
+                if (typeSelect.value === 'simple') {
+                    const price = parseFloat(modalDiv.querySelector('#simplePrice').value);
+                    const stock = parseInt(modalDiv.querySelector('#simpleStock').value);
+                    if (isNaN(price)) return alert('Prix invalide');
+                    const newProd = {
+                        id: isEdit ? product.id : Date.now().toString(),
+                        name, description, type: 'simple',
+                        price, stock,
+                        icon, images: allImages, active
+                    };
+                    if (isEdit) {
+                        const idx = products.findIndex(p => p.id === product.id);
+                        if (idx !== -1) products[idx] = newProd;
+                    } else products.push(newProd);
+                } else {
+                    const basePrice = parseFloat(modalDiv.querySelector('#basePrice').value);
+                    if (isNaN(basePrice)) return alert('Prix de base requis');
+                    const finalVariants = [];
+                    const rows = variantsContainer.querySelectorAll('.variant-row');
+                    rows.forEach(row => {
+                        const inputs = row.querySelectorAll('input');
+                        const attrsStr = inputs[0]?.value || '';
+                        const [taille, couleur] = attrsStr.split('/');
+                        const stock = parseInt(inputs[1]?.value || 0);
+                        const price = parseFloat(inputs[2]?.value || 0) || basePrice;
+                        if (taille.trim()) {
+                            finalVariants.push({
+                                id: Date.now() + Math.random().toString(36).substring(2,6),
+                                attributes: { taille: taille.trim(), couleur: couleur.trim() || '' },
+                                stock, price
+                            });
+                        }
+                    });
+                    if (finalVariants.length === 0) return alert('Ajoutez au moins une variante');
+                    const newProd = {
+                        id: isEdit ? product.id : Date.now().toString(),
+                        name, description, type: 'variants',
+                        base_price: basePrice,
+                        variants: finalVariants,
+                        icon, images: allImages, active
+                    };
+                    if (isEdit) {
+                        const idx = products.findIndex(p => p.id === product.id);
+                        if (idx !== -1) products[idx] = newProd;
+                    } else products.push(newProd);
+                }
+
+                try {
+                    if (isEdit) {
+                        await fetchSupabase(`products?id=eq.${product.id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify(products.find(p => p.id === product.id))
+                        });
+                    } else {
+                        await fetchSupabase('products', {
+                            method: 'POST',
+                            body: JSON.stringify(products[products.length - 1])
+                        });
+                    }
+                    await loadProducts();
+                    showToast(isEdit ? '✅ Produit modifié' : '✅ Produit ajouté');
+                    modalDiv.remove();
+                    await renderProducts();
+                } catch (e) {
+                    showToast('❌ Erreur: ' + e.message);
+                }
+            };
+            modalDiv.querySelector('#cancelModal').onclick = () => modalDiv.remove();
+            modalDiv.addEventListener('click', (e) => { if (e.target === modalDiv) modalDiv.remove(); });
+        }
+
+        // ============================================
+        // 10. ACTIONS PRODUITS
+        // ============================================
+        window.editProduct = async function(id) {
+            await loadProducts();
+            const product = products.find(p => p.id === id);
+            if (product) showProductModal(product);
+        };
+
+        window.deleteProduct = async function(id) {
+            if (!confirm('Supprimer ce produit ?')) return;
+            try {
+                await fetchSupabase(`products?id=eq.${id}`, { method: 'DELETE' });
+                await loadProducts();
+                showToast('✅ Produit supprimé');
+                await renderProducts();
+            } catch (e) {
+                showToast('❌ Erreur: ' + e.message);
+            }
+        };
+
+        // ============================================
+        // 11. GESTION STOCK
         // ============================================
         async function renderStock() {
             await loadProducts();
             let rows = [];
             products.forEach(p => {
                 if (p.type === 'simple') {
-                    rows.push({ name: p.name, variant: 'Simple', stock: p.stock || 0, productId: p.id, variantId: null, isVariant: false, images: p.images || [] });
+                    rows.push({ name: p.name, variant: 'Simple', stock: p.stock || 0, productId: p.id, variantId: null, isVariant: false, icon: p.icon, images: p.images || [] });
                 } else if (p.variants) {
                     p.variants.forEach(v => {
                         rows.push({ name: p.name, variant: `${v.attributes?.taille || ''} / ${v.attributes?.couleur || ''}`,
-                            stock: v.stock || 0, productId: p.id, variantId: v.id, isVariant: true, images: p.images || [] });
+                            stock: v.stock || 0, productId: p.id, variantId: v.id, isVariant: true, icon: p.icon, images: p.images || [] });
                     });
                 }
             });
 
             const html = `
                 <div class="page-header"><h1>📦 Gestion du stock</h1></div>
-                ${rows.length === 0 ? `
-                    <div class="error-message">⚠️ Aucun produit chargé pour le stock.</div>
-                ` : ''}
                 <div class="table-container">
                     <table>
                         <thead><tr><th>Icône</th><th>Produit</th><th>Variante</th><th>Stock</th><th>Ajuster</th></tr></thead>
                         <tbody>
                             ${rows.map(r => {
-                                let iconHtml = (r.images && r.images.length > 0) ? `<img src="${r.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">` : '📦';
+                                let iconHtml = (r.images && r.images.length > 0) ? `<img src="${r.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">` :
+                                                (r.icon ? `<span style="font-size:28px;">${r.icon}</span>` : '📦');
                                 return `
                                     <tr>
                                         <td><div class="product-img-list">${iconHtml}</div></td>
@@ -442,49 +702,139 @@
         }
 
         // ============================================
-        // 10. GESTION COMMANDES (simplifiée)
+        // 12. GESTION COMMANDES (avec modale détaillée)
         // ============================================
         async function renderOrders() {
             await loadOrders();
             const html = `
                 <div class="page-header"><h1>📋 Commandes (${orders.length})</h1></div>
-                ${orders.length === 0 ? `
-                    <div class="error-message">⚠️ Aucune commande chargée.</div>
-                ` : ''}
                 <div class="table-container">
                     <table>
-                        <thead><tr><th>N°</th><th>Client</th><th>Total</th><th>Statut</th><th>Actions</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>N°</th><th>Client</th><th>Prix original</th><th>Remise</th><th>Total payé</th><th>Code promo</th><th>Statut</th><th>Suivi admin</th><th>Actions</th>
+                            </tr>
+                        </thead>
                         <tbody>
-                            ${orders.map(o => `
-                                <tr>
-                                    <td><strong>${o.id}</strong></td>
-                                    <td>${o.client}</td>
-                                    <td>${(o.total||0).toFixed(2)} €</td>
-                                    <td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td>
-                                    <td>
-                                        <button class="btn-small btn-outline" onclick="alert('Détail de ${o.id}')">👁️</button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                            ${orders.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Aucune commande</td></tr>' : ''}
+                            ${orders.map(o => {
+                                const originalTotal = o.total + (o.discount || 0);
+                                return `
+                                    <tr>
+                                        <td><strong>${o.id}</strong></td>
+                                        <td>${o.client}</td>
+                                        <td>${originalTotal.toFixed(2)} €</td>
+                                        <td>${(o.discount || 0).toFixed(2)} €</td>
+                                        <td>${(o.total || 0).toFixed(2)} €</td>
+                                        <td>${o.promo_code ? `<span class="badge badge-success">${o.promo_code}</span>` : '—'}</td>
+                                        <td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td>
+                                        <td>
+                                            <select class="admin-followup" data-id="${o.id}">
+                                                ${['À traiter','En cours','Expédié','Terminé'].map(s => `<option ${o.admin_followup === s ? 'selected' : ''}>${s}</option>`).join('')}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <button class="btn-small btn-outline" onclick="viewOrder('${o.id}')">👁️ Voir</button>
+                                            <button class="btn-small btn-danger" onclick="deleteOrder('${o.id}')">🗑️</button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                            ${orders.length === 0 ? '<tr><td colspan="9" style="text-align:center;color:#94a3b8;">Aucune commande</td></tr>' : ''}
                         </tbody>
                     </table>
                 </div>
             `;
             document.getElementById('mainContent').innerHTML = html;
+
+            document.querySelectorAll('.admin-followup').forEach(sel => {
+                sel.onchange = async () => {
+                    const order = orders.find(o => o.id === sel.dataset.id);
+                    if (order) {
+                        order.admin_followup = sel.value;
+                        await fetchSupabase(`orders?id=eq.${order.id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ admin_followup: sel.value })
+                        });
+                    }
+                };
+            });
             attachNavEvents();
         }
 
         // ============================================
-        // 11. GESTION PROMOS (simplifiée)
+        // 13. VUE DÉTAILLÉE D'UNE COMMANDE (modale complète)
+        // ============================================
+        window.viewOrder = function(id) {
+            const order = orders.find(o => o.id === id);
+            if (!order) return;
+
+            const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const reduction = order.discount || 0;
+            const totalPaye = order.total || 0;
+
+            const itemsList = order.items.map(item => {
+                const product = products.find(p => p.id === item.productId);
+                const name = product ? product.name : 'Produit inconnu';
+                let variantStr = '';
+                if (item.variantId && product && product.variants) {
+                    const variant = product.variants.find(v => v.id === item.variantId);
+                    if (variant) {
+                        variantStr = ` (${variant.attributes.taille}/${variant.attributes.couleur})`;
+                    }
+                }
+                return `${name}${variantStr} × ${item.qty} = ${(item.price * item.qty).toFixed(2)} €`;
+            }).join('<br>');
+
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h2>📋 Détail de la commande</h2>
+                    <p><strong>N° :</strong> ${order.id}</p>
+                    <p><strong>Client :</strong> ${order.client}</p>
+                    <p><strong>Date :</strong> ${order.date || 'non renseignée'} ${order.time ? 'à ' + order.time : ''}</p>
+                    <p><strong>Statut :</strong> ${order.status}</p>
+                    <p><strong>Suivi admin :</strong> ${order.admin_followup || 'À traiter'}</p>
+                    <p><strong>Code promo :</strong> ${order.promo_code ? `<span class="badge badge-success">${order.promo_code}</span>` : 'Aucun'}</p>
+                    <hr>
+                    <p><strong>Articles :</strong></p>
+                    <div style="background:#f8fafc;padding:0.5rem;border-radius:8px;margin:0.5rem 0;">${itemsList}</div>
+                    <hr>
+                    <p><strong>Sous-total :</strong> ${subtotal.toFixed(2)} €</p>
+                    ${reduction > 0 ? `<p><strong>Réduction :</strong> -${reduction.toFixed(2)} €</p>` : ''}
+                    <p><strong>Total payé :</strong> ${totalPaye.toFixed(2)} €</p>
+                    <div style="margin-top:1.5rem;text-align:right;">
+                        <button class="btn-outline" id="closeOrderModal">Fermer</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('closeOrderModal').onclick = () => modal.remove();
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+        };
+
+        // ============================================
+        // 14. SUPPRIMER UNE COMMANDE
+        // ============================================
+        window.deleteOrder = async function(id) {
+            if (!confirm('Supprimer cette commande ?')) return;
+            try {
+                await fetchSupabase(`orders?id=eq.${id}`, { method: 'DELETE' });
+                await loadOrders();
+                showToast('✅ Commande supprimée');
+                await renderOrders();
+            } catch (e) {
+                showToast('❌ Erreur: ' + e.message);
+            }
+        };
+
+        // ============================================
+        // 15. GESTION PROMOS
         // ============================================
         async function renderPromos() {
             await loadPromos();
             const html = `
                 <div class="page-header"><h1>🏷️ Codes promo</h1><button class="btn" id="addPromoBtn">+ Créer</button></div>
-                ${promos.length === 0 ? `
-                    <div class="error-message">⚠️ Aucune promo chargée.</div>
-                ` : ''}
                 <div class="table-container">
                     <table>
                         <thead><tr><th>Code</th><th>Type</th><th>Valeur</th><th>Actif</th><th>Actions</th></tr></thead>
@@ -496,7 +846,8 @@
                                     <td>${p.type === 'fixed' ? p.value + ' €' : p.value + ' %'}</td>
                                     <td>${p.active ? '✅' : '❌'}</td>
                                     <td>
-                                        <button class="btn-small btn-outline" onclick="showToast('Toggle promo')">Toggle</button>
+                                        <button class="btn-small btn-outline" onclick="togglePromo('${p.code}')">${p.active ? 'Désactiver' : 'Activer'}</button>
+                                        <button class="btn-small btn-danger" onclick="deletePromo('${p.code}')">Supprimer</button>
                                     </td>
                                 </tr>
                             `).join('')}
@@ -506,12 +857,58 @@
                 </div>
             `;
             document.getElementById('mainContent').innerHTML = html;
-            document.getElementById('addPromoBtn').onclick = () => showToast('Fonctionnalité à implémenter');
+            document.getElementById('addPromoBtn').onclick = async () => {
+                const code = prompt('Code promo (ex: SOLDES20)');
+                if (!code) return;
+                const type = confirm('Type : OK = Pourcentage (%) / Annuler = Montant fixe (€)') ? 'percent' : 'fixed';
+                const value = parseFloat(prompt('Valeur (ex: 15 pour 15% ou 10€)'));
+                if (isNaN(value) || value <= 0) return alert('Valeur invalide');
+                try {
+                    await fetchSupabase('promos', {
+                        method: 'POST',
+                        body: JSON.stringify({ code: code.toUpperCase(), type, value, active: true })
+                    });
+                    await loadPromos();
+                    showToast('✅ Code promo créé');
+                    await renderPromos();
+                } catch (e) {
+                    showToast('❌ Erreur: ' + e.message);
+                }
+            };
             attachNavEvents();
         }
 
+        window.togglePromo = async function(code) {
+            const promo = promos.find(p => p.code === code);
+            if (!promo) return;
+            promo.active = !promo.active;
+            try {
+                await fetchSupabase(`promos?code=eq.${code}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ active: promo.active })
+                });
+                await loadPromos();
+                showToast(promo.active ? '✅ Promo activée' : '⛔ Promo désactivée');
+                await renderPromos();
+            } catch (e) {
+                showToast('❌ Erreur: ' + e.message);
+            }
+        };
+
+        window.deletePromo = async function(code) {
+            if (!confirm('Supprimer ce code promo ?')) return;
+            try {
+                await fetchSupabase(`promos?code=eq.${code}`, { method: 'DELETE' });
+                await loadPromos();
+                showToast('✅ Code promo supprimé');
+                await renderPromos();
+            } catch (e) {
+                showToast('❌ Erreur: ' + e.message);
+            }
+        };
+
         // ============================================
-        // 12. SYNCHRONISATION INTER-ONGLETS
+        // 16. SYNCHRONISATION INTER-ONGLETS
         // ============================================
         window.addEventListener('storage', function(e) {
             if (e.key === 'shop_products' || e.key === 'shop_promos' || e.key === 'shop_orders' || e.key === 'shop_cart') {
@@ -525,10 +922,9 @@
         });
 
         // ============================================
-        // 13. INITIALISATION
+        // 17. INITIALISATION
         // ============================================
         async function init() {
-            console.log('🚀 Admin initialisation...');
             await renderDashboard();
             attachNavEvents();
         }
@@ -536,4 +932,3 @@
     </script>
 </body>
 </html>
-                       
