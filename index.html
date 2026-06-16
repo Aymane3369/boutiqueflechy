@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StyleShop - Boutique</title>
     <style>
-        /* styles inchangés - identiques à la version précédente */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body { background: #f8fafc; color: #0f172a; }
         .header { background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
@@ -188,6 +187,7 @@
             setTimeout(() => toast.remove(), 2000);
         }
 
+        // --- Affichage : image prioritaire ---
         function getProductDisplayIcon(product) {
             if (product.images && product.images.length > 0) {
                 return `<img src="${product.images[0]}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">`;
@@ -315,7 +315,7 @@
         }
 
         // ============================================
-        // 9. RENDU CATALOGUE (corrigé pour variantes)
+        // 9. RENDU CATALOGUE
         // ============================================
         function renderCatalogue() {
             const app = document.getElementById('app');
@@ -329,31 +329,16 @@
                 <h1>Catalogue</h1>
                 <div class="products-grid">
                     ${active.map(p => {
-                        // Calcul du stock total pour les variantes
-                        let totalStock = 0;
-                        let hasStock = false;
+                        let totalStock = 0, hasStock = false;
                         if (p.type === 'simple') {
                             totalStock = p.stock || 0;
                             hasStock = totalStock > 0;
                         } else if (p.variants) {
-                            p.variants.forEach(v => {
-                                totalStock += v.stock || 0;
-                                if (v.stock > 0) hasStock = true;
-                            });
+                            p.variants.forEach(v => { totalStock += v.stock || 0; if (v.stock > 0) hasStock = true; });
                         }
-                        // Déterminer la classe et le texte du badge
-                        let badgeClass = 'stock-ok';
-                        let badgeText = 'En stock';
-                        if (!hasStock) {
-                            badgeClass = 'stock-out';
-                            badgeText = 'Rupture';
-                        } else if (p.type === 'simple' && totalStock <= 2) {
-                            badgeClass = 'stock-warning';
-                            badgeText = `Derniers (${totalStock})`;
-                        } else if (p.type === 'variants' && totalStock <= 2) {
-                            badgeClass = 'stock-warning';
-                            badgeText = `Stock très bas (${totalStock})`;
-                        }
+                        let badgeClass = 'stock-ok', badgeText = 'En stock';
+                        if (!hasStock) { badgeClass = 'stock-out'; badgeText = 'Rupture'; }
+                        else if (totalStock <= 2) { badgeClass = 'stock-warning'; badgeText = `Derniers (${totalStock})`; }
                         return `
                             <div class="product-card" onclick="navigateTo('product','${p.id}')">
                                 <div class="product-icon">${getProductDisplayIcon(p)}</div>
@@ -442,7 +427,7 @@
         }
 
         // ============================================
-        // 11. RENDU PANIER (inchangé)
+        // 11. RENDU PANIER
         // ============================================
         function renderCart() {
             const app = document.getElementById('app');
@@ -528,7 +513,7 @@
         }
 
         // ============================================
-        // 12. SIMULATION PAIEMENT (avec sauvegarde commande)
+        // 12. SIMULATION PAIEMENT
         // ============================================
         function simulateCheckout() {
             if (!cart || cart.length === 0) { showToast('Panier vide'); return; }
@@ -614,7 +599,20 @@
         window.simulateCheckout = simulateCheckout;
 
         // ============================================
-        // 15. INITIALISATION
+        // 15. SYNCHRONISATION INTER-ONGLETS
+        // ============================================
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'shop_products' || e.key === 'shop_promos' || e.key === 'shop_cart' || e.key === 'shop_orders') {
+                console.log('🔄 Changement détecté sur', e.key);
+                products = loadProducts();
+                promos = loadPromos();
+                if (e.key === 'shop_cart') loadCart();
+                renderCurrentPage();
+            }
+        });
+
+        // ============================================
+        // 16. INITIALISATION
         // ============================================
         loadCart();
         renderCurrentPage();
