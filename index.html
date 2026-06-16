@@ -2,17 +2,15 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StyleShop - Boutique</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>StyleShop - Boutique en ligne</title>
     <style>
-        /* (identique à votre version précédente) */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', 'Inter', sans-serif; }
         body { background: #f8fafc; color: #0f172a; }
-        .header { background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.6rem; font-weight: 700; cursor: pointer; }
+        .header { background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px); background: rgba(255,255,255,0.95); }
+        .logo { font-size: 1.6rem; font-weight: 700; color: #0f172a; cursor: pointer; }
         .cart-icon { position: relative; cursor: pointer; font-size: 1.8rem; }
-        .cart-count { position: absolute; top: -8px; right: -12px; background: #3b82f6; color: white; font-size: 0.7rem; border-radius: 30px; padding: 2px 6px; min-width: 20px; text-align: center; }
+        .cart-count { position: absolute; top: -8px; right: -12px; background: #3b82f6; color: white; font-size: 0.7rem; font-weight: bold; border-radius: 30px; padding: 2px 6px; min-width: 20px; text-align: center; }
         .container { max-width: 1300px; margin: 0 auto; padding: 2rem; }
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 2rem; margin-top: 1.5rem; }
         .product-card { background: white; border-radius: 24px; padding: 1.2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: 0.2s; cursor: pointer; }
@@ -20,6 +18,7 @@
         .product-icon { font-size: 3rem; display: flex; align-items: center; justify-content: center; margin-bottom: 0.5rem; }
         .product-icon img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
         .product-title { font-size: 1.2rem; font-weight: 600; text-align: center; }
+        .product-type { font-size: 0.75rem; color: #475569; margin: 0.25rem 0; text-align: center; }
         .product-price { font-weight: 700; font-size: 1.2rem; margin-top: 0.5rem; text-align: center; }
         .stock-badge { font-size: 0.7rem; margin-top: 0.5rem; text-align: center; }
         .stock-ok { color: #15803d; }
@@ -37,10 +36,11 @@
         .back-link { display: inline-block; margin-bottom: 1rem; cursor: pointer; color: #3b82f6; }
         .cart-page { background: white; border-radius: 32px; padding: 1.5rem; border: 1px solid #e2e8f0; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #e2e8f0; }
+        .cart-item-info { flex: 2; }
         .cart-item-qty { display: flex; gap: 0.5rem; align-items: center; }
         .qty-btn { background: #e2e8f0; padding: 0.2rem 0.6rem; border-radius: 20px; font-weight: bold; cursor: pointer; border: none; }
         .summary { margin-top: 1.5rem; text-align: right; }
-        .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: white; padding: 0.8rem 1.5rem; border-radius: 40px; z-index: 200; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: white; padding: 0.8rem 1.5rem; border-radius: 40px; z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .modal-content { background: white; max-width: 500px; width: 90%; border-radius: 32px; padding: 1.8rem; }
         hr { margin: 1rem 0; }
@@ -66,14 +66,33 @@
 
     <script>
         // ============================================
-        // 1. CONFIGURATION SUPABASE
+        // 1. CONFIGURATION SUPABASE (fetch direct)
         // ============================================
         const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // ============================================
-        // 2. VARIABLES GLOBALES
+        // 2. FONCTIONS FETCH
+        // ============================================
+        async function fetchSupabase(endpoint, options = {}) {
+            const defaultHeaders = {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            };
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+                ...options,
+                headers: { ...defaultHeaders, ...options.headers }
+            });
+            if (!response.ok) {
+                const error = await response.text();
+                throw new Error(`HTTP ${response.status}: ${error}`);
+            }
+            return response.json();
+        }
+
+        // ============================================
+        // 3. VARIABLES GLOBALES
         // ============================================
         let products = [];
         let promos = [];
@@ -84,10 +103,10 @@
         let selectedVariantCache = {};
 
         // ============================================
-        // 3. PANIER (localStorage)
+        // 4. PANIER (localStorage)
         // ============================================
         function saveCart() {
-            localStorage.setItem('styleShopCart', JSON.stringify(cart));
+            try { localStorage.setItem('styleShopCart', JSON.stringify(cart)); } catch(e) {}
             updateCartCount();
         }
 
@@ -100,30 +119,60 @@
         }
 
         function updateCartCount() {
-            const total = cart.reduce((s, i) => s + (i.quantity || 0), 0);
+            const total = Array.isArray(cart) ? cart.reduce((s, i) => s + (i.quantity || 0), 0) : 0;
             const el = document.getElementById('cartCount');
             if (el) el.innerText = total;
         }
 
         // ============================================
-        // 4. CHARGEMENT DES DONNÉES
+        // 5. CHARGEMENT DES DONNÉES (fetch)
         // ============================================
         async function loadProducts() {
-            const { data, error } = await supabase.from('products').select('*');
-            if (!error && data) products = data;
-            else console.error(error);
-            return products;
+            try {
+                const data = await fetchSupabase('products?select=*');
+                if (Array.isArray(data)) {
+                    // Convertir les stocks en nombres
+                    data.forEach(p => {
+                        if (p.variants && Array.isArray(p.variants)) {
+                            p.variants.forEach(v => { v.stock = parseInt(v.stock) || 0; });
+                        }
+                        if (p.type === 'simple') p.stock = parseInt(p.stock) || 0;
+                        // S'assurer que image_url est bien une chaîne
+                        if (typeof p.image_url !== 'string') p.image_url = null;
+                    });
+                    products = data;
+                    console.log('✅ Produits chargés:', products.length);
+                } else {
+                    products = [];
+                }
+                return products;
+            } catch (e) {
+                console.error('Erreur chargement produits:', e);
+                showToast('Erreur de chargement des produits');
+                products = [];
+                return products;
+            }
         }
 
         async function loadPromos() {
-            const { data, error } = await supabase.from('promos').select('*');
-            if (!error && data) promos = data.filter(p => p.active);
-            else console.error(error);
-            return promos;
+            try {
+                const data = await fetchSupabase('promos?select=*');
+                if (Array.isArray(data)) {
+                    promos = data.filter(p => p.active === true);
+                    console.log('🏷️ Promos actives:', promos.length);
+                } else {
+                    promos = [];
+                }
+                return promos;
+            } catch (e) {
+                console.error('Erreur chargement promos:', e);
+                promos = [];
+                return promos;
+            }
         }
 
         // ============================================
-        // 5. UTILITAIRES (image prioritaire)
+        // 6. UTILITAIRES (image prioritaire)
         // ============================================
         function getStock(productId, variantId) {
             const prod = products.find(p => p.id === productId);
@@ -162,7 +211,7 @@
         }
 
         // ============================================
-        // 6. AJOUT / MODIFICATION PANIER
+        // 7. AJOUT / MODIFICATION PANIER
         // ============================================
         function addToCart(productId, variantId, quantity = 1) {
             const product = products.find(p => p.id === productId);
@@ -207,7 +256,7 @@
         }
 
         function updateCartItem(index, newQuantity) {
-            if (!cart || index < 0 || index >= cart.length) return;
+            if (!Array.isArray(cart) || index < 0 || index >= cart.length) return;
             if (newQuantity <= 0) {
                 cart.splice(index, 1);
                 if (cart.length === 0) appliedPromo = null;
@@ -224,10 +273,10 @@
         }
 
         // ============================================
-        // 7. CODES PROMO
+        // 8. CODES PROMO
         // ============================================
         function getSubtotal() {
-            return cart.reduce((s, i) => s + (i.price || 0) * (i.quantity || 0), 0);
+            return Array.isArray(cart) ? cart.reduce((s, i) => s + (i.price || 0) * (i.quantity || 0), 0) : 0;
         }
 
         function applyPromoCode(code) {
@@ -247,7 +296,7 @@
         function getTotal() { return getSubtotal() - (appliedPromo?.discountAmount || 0); }
 
         // ============================================
-        // 8. NAVIGATION
+        // 9. NAVIGATION
         // ============================================
         function navigateTo(page, productId = null) {
             if (page === 'product' && productId) {
@@ -268,7 +317,7 @@
         }
 
         // ============================================
-        // 9. RENDU CATALOGUE (avec stock total pour variantes)
+        // 10. RENDU CATALOGUE
         // ============================================
         function renderCatalogue() {
             const app = document.getElementById('app');
@@ -307,7 +356,7 @@
         }
 
         // ============================================
-        // 10. RENDU FICHE PRODUIT
+        // 11. RENDU FICHE PRODUIT
         // ============================================
         function renderProductDetail(productId) {
             const app = document.getElementById('app');
@@ -380,12 +429,12 @@
         }
 
         // ============================================
-        // 11. RENDU PANIER
+        // 12. RENDU PANIER
         // ============================================
         function renderCart() {
             const app = document.getElementById('app');
             if (!app) return;
-            if (!cart || cart.length === 0) {
+            if (!Array.isArray(cart) || cart.length === 0) {
                 appliedPromo = null;
                 app.innerHTML = `<div style="text-align:center;padding:2rem;"><h2>Panier vide</h2><button class="outline" onclick="navigateTo('catalogue')">Continuer</button></div>`;
                 return;
@@ -466,10 +515,10 @@
         }
 
         // ============================================
-        // 12. SIMULATION PAIEMENT
+        // 13. SIMULATION PAIEMENT (avec fetch)
         // ============================================
         async function simulateCheckout() {
-            if (!cart || cart.length === 0) { showToast('Panier vide'); return; }
+            if (!Array.isArray(cart) || cart.length === 0) { showToast('Panier vide'); return; }
             for (const item of cart) {
                 const stock = getStock(item.productId, item.variantId);
                 if ((item.quantity || 0) > stock) { showToast(`Stock dépassé pour ${item.name}`); return; }
@@ -479,7 +528,6 @@
             const now = new Date();
             const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`;
 
-            // Créer la commande
             const order = {
                 id: orderId,
                 client: clientEmail,
@@ -498,21 +546,30 @@
                 discount: appliedPromo?.discountAmount || 0
             };
 
-            // Insérer dans Supabase
-            await supabase.from('orders').insert(order);
+            // Insérer la commande dans Supabase
+            await fetchSupabase('orders', {
+                method: 'POST',
+                body: JSON.stringify(order)
+            });
 
-            // Mise à jour des stocks
+            // Mettre à jour les stocks
             for (const item of cart) {
                 const prod = products.find(p => p.id === item.productId);
                 if (!prod) continue;
                 if (prod.type === 'simple') {
                     prod.stock = Math.max(0, (prod.stock || 0) - (item.quantity || 0));
-                    await supabase.from('products').update({ stock: prod.stock }).eq('id', prod.id);
+                    await fetchSupabase(`products?id=eq.${prod.id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ stock: prod.stock })
+                    });
                 } else {
                     const variant = prod.variants?.find(v => v.id === item.variantId);
                     if (variant) {
                         variant.stock = Math.max(0, (variant.stock || 0) - (item.quantity || 0));
-                        await supabase.from('products').update({ variants: prod.variants }).eq('id', prod.id);
+                        await fetchSupabase(`products?id=eq.${prod.id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ variants: prod.variants })
+                        });
                     }
                 }
             }
@@ -533,7 +590,7 @@
         }
 
         // ============================================
-        // 13. RENDU PAGE COURANTE
+        // 14. RENDU PAGE COURANTE
         // ============================================
         function renderCurrentPage() {
             if (currentPage === 'catalogue') renderCatalogue();
@@ -543,41 +600,47 @@
         }
 
         // ============================================
-        // 14. SYNCHRONISATION REALTIME
+        // 15. SYNCHRONISATION INTER-ONGLETS
         // ============================================
-        function subscribeToRealtime() {
-            const channel = supabase.channel('public-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
-                    console.log('🔄 Produits mis à jour');
-                    await loadProducts();
-                    if (currentPage !== 'cart') renderCurrentPage();
-                    else renderCart(); // pour mettre à jour les prix
-                })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'promos' }, async () => {
-                    console.log('🔄 Promos mises à jour');
-                    await loadPromos();
-                    if (currentPage === 'cart') renderCart(); // mettre à jour l'affichage promo
-                })
-                .subscribe();
-        }
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'shop_products' || e.key === 'shop_promos' || e.key === 'shop_cart' || e.key === 'shop_orders') {
+                console.log('🔄 Changement détecté sur', e.key);
+                // Recharger les données depuis le localStorage (ou depuis Supabase si besoin)
+                // Ici on recharge depuis Supabase pour être sûr d'avoir les dernières données
+                if (e.key === 'shop_products' || e.key === 'shop_promos') {
+                    loadProducts().then(() => {
+                        if (currentPage !== 'cart') renderCurrentPage();
+                        else renderCart();
+                    });
+                    loadPromos().then(() => {
+                        if (currentPage === 'cart') renderCart();
+                    });
+                }
+                if (e.key === 'shop_cart') {
+                    loadCart();
+                    renderCart();
+                }
+            }
+        });
 
         // ============================================
-        // 15. INITIALISATION
+        // 16. EXPOSER LES FONCTIONS
         // ============================================
-        async function init() {
-            await loadProducts();
-            await loadPromos();
-            loadCart();
-            renderCurrentPage();
-            subscribeToRealtime();
-        }
-
-        // Exposer les fonctions
         window.navigateTo = navigateTo;
         window.addToCart = addToCart;
         window.updateCartItem = updateCartItem;
         window.simulateCheckout = simulateCheckout;
 
+        // ============================================
+        // 17. INITIALISATION
+        // ============================================
+        async function init() {
+            console.log('🚀 Initialisation...');
+            await loadProducts();
+            await loadPromos();
+            loadCart();
+            renderCurrentPage();
+        }
         init();
     </script>
 </body>
