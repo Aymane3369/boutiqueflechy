@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StyleShop - Administration</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* === STYLES COMPLETS (identique à votre version) === */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body { background: #f1f5f9; display: flex; min-height: 100vh; }
         .sidebar { width: 260px; background: #0f172a; color: #e2e8f0; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 2rem; position: sticky; top: 0; height: 100vh; }
@@ -79,14 +77,33 @@
 
     <script>
         // ============================================
-        // 1. CONFIGURATION SUPABASE
+        // 1. CONFIGURATION SUPABASE (fetch direct)
         // ============================================
         const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // ============================================
-        // 2. VARIABLES GLOBALES
+        // 2. FONCTIONS FETCH
+        // ============================================
+        async function fetchSupabase(endpoint, options = {}) {
+            const defaultHeaders = {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            };
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+                ...options,
+                headers: { ...defaultHeaders, ...options.headers }
+            });
+            if (!response.ok) {
+                const error = await response.text();
+                throw new Error(`HTTP ${response.status}: ${error}`);
+            }
+            return response.json();
+        }
+
+        // ============================================
+        // 3. VARIABLES GLOBALES
         // ============================================
         let products = [];
         let orders = [];
@@ -94,31 +111,65 @@
         let currentPage = 'dashboard';
 
         // ============================================
-        // 3. CHARGEMENT DES DONNÉES
+        // 4. CHARGEMENT DES DONNÉES (fetch)
         // ============================================
         async function loadProducts() {
-            const { data, error } = await supabase.from('products').select('*');
-            if (!error && data) products = data;
-            else console.error(error);
-            return products;
+            try {
+                const data = await fetchSupabase('products?select=*');
+                if (Array.isArray(data)) {
+                    data.forEach(p => {
+                        if (p.variants && Array.isArray(p.variants)) {
+                            p.variants.forEach(v => { v.stock = parseInt(v.stock) || 0; });
+                        }
+                        if (p.type === 'simple') p.stock = parseInt(p.stock) || 0;
+                        if (typeof p.image_url !== 'string') p.image_url = null;
+                    });
+                    products = data;
+                } else {
+                    products = [];
+                }
+                return products;
+            } catch (e) {
+                console.error('Erreur chargement produits:', e);
+                products = [];
+                return products;
+            }
         }
 
         async function loadOrders() {
-            const { data, error } = await supabase.from('orders').select('*');
-            if (!error && data) orders = data;
-            else console.error(error);
-            return orders;
+            try {
+                const data = await fetchSupabase('orders?select=*');
+                if (Array.isArray(data)) {
+                    orders = data;
+                } else {
+                    orders = [];
+                }
+                return orders;
+            } catch (e) {
+                console.error('Erreur chargement commandes:', e);
+                orders = [];
+                return orders;
+            }
         }
 
         async function loadPromos() {
-            const { data, error } = await supabase.from('promos').select('*');
-            if (!error && data) promos = data;
-            else console.error(error);
-            return promos;
+            try {
+                const data = await fetchSupabase('promos?select=*');
+                if (Array.isArray(data)) {
+                    promos = data;
+                } else {
+                    promos = [];
+                }
+                return promos;
+            } catch (e) {
+                console.error('Erreur chargement promos:', e);
+                promos = [];
+                return promos;
+            }
         }
 
         // ============================================
-        // 4. UTILITAIRES
+        // 5. UTILITAIRES
         // ============================================
         function showToast(msg) {
             const toast = document.createElement('div');
@@ -154,7 +205,6 @@
             return { totalStock, ruptures, lowStockItems: low, stockValue, productRuptures };
         }
 
-        // Affichage : image prioritaire, sinon icône
         function getDisplayIcon(product) {
             if (product.image_url) {
                 return `<img src="${product.image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
@@ -166,7 +216,7 @@
         }
 
         // ============================================
-        // 5. NAVIGATION
+        // 6. NAVIGATION
         // ============================================
         function attachNavEvents() {
             document.querySelectorAll('.nav-item').forEach(item => {
@@ -186,7 +236,7 @@
         }
 
         // ============================================
-        // 6. DASHBOARD
+        // 7. DASHBOARD
         // ============================================
         async function renderDashboard() {
             await Promise.all([loadProducts(), loadOrders(), loadPromos()]);
@@ -226,7 +276,7 @@
         }
 
         // ============================================
-        // 7. GESTION PRODUITS
+        // 8. GESTION PRODUITS
         // ============================================
         async function renderProducts() {
             await loadProducts();
@@ -261,7 +311,7 @@
         }
 
         // ============================================
-        // 8. MODALE PRODUIT (avec upload image)
+        // 9. MODALE PRODUIT (avec upload image)
         // ============================================
         const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
 
@@ -499,9 +549,15 @@
 
                 try {
                     if (isEdit) {
-                        await supabase.from('products').update(products.find(p => p.id === product.id)).eq('id', product.id);
+                        await fetchSupabase(`products?id=eq.${product.id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify(products.find(p => p.id === product.id))
+                        });
                     } else {
-                        await supabase.from('products').insert(products[products.length - 1]);
+                        await fetchSupabase('products', {
+                            method: 'POST',
+                            body: JSON.stringify(products[products.length - 1])
+                        });
                     }
                     showToast(isEdit ? '✅ Produit modifié' : '✅ Produit ajouté');
                     modalDiv.remove();
@@ -515,7 +571,7 @@
         }
 
         // ============================================
-        // 9. ACTIONS PRODUITS
+        // 10. ACTIONS PRODUITS
         // ============================================
         window.editProduct = async function(id) {
             await loadProducts();
@@ -526,7 +582,7 @@
         window.deleteProduct = async function(id) {
             if (!confirm('Supprimer ce produit ?')) return;
             try {
-                await supabase.from('products').delete().eq('id', id);
+                await fetchSupabase(`products?id=eq.${id}`, { method: 'DELETE' });
                 showToast('✅ Produit supprimé');
                 await renderProducts();
             } catch (e) {
@@ -535,7 +591,7 @@
         };
 
         // ============================================
-        // 10. GESTION STOCK
+        // 11. GESTION STOCK
         // ============================================
         async function renderStock() {
             await loadProducts();
@@ -594,12 +650,18 @@
                     try {
                         if (!isVar && prod.type === 'simple') {
                             prod.stock = Math.max(0, (prod.stock || 0) + delta);
-                            await supabase.from('products').update({ stock: prod.stock }).eq('id', pid);
+                            await fetchSupabase(`products?id=eq.${pid}`, {
+                                method: 'PATCH',
+                                body: JSON.stringify({ stock: prod.stock })
+                            });
                         } else if (isVar && prod.variants) {
                             const variant = prod.variants.find(v => v.id === vid);
                             if (variant) {
                                 variant.stock = Math.max(0, (variant.stock || 0) + delta);
-                                await supabase.from('products').update({ variants: prod.variants }).eq('id', pid);
+                                await fetchSupabase(`products?id=eq.${pid}`, {
+                                    method: 'PATCH',
+                                    body: JSON.stringify({ variants: prod.variants })
+                                });
                             }
                         }
                         await renderStock();
@@ -612,7 +674,7 @@
         }
 
         // ============================================
-        // 11. GESTION COMMANDES (avec détails)
+        // 12. GESTION COMMANDES (avec détails)
         // ============================================
         async function renderOrders() {
             await loadOrders();
@@ -661,7 +723,10 @@
                     const order = orders.find(o => o.id === sel.dataset.id);
                     if (order) {
                         order.admin_followup = sel.value;
-                        await supabase.from('orders').update({ admin_followup: sel.value }).eq('id', order.id);
+                        await fetchSupabase(`orders?id=eq.${order.id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ admin_followup: sel.value })
+                        });
                     }
                 };
             });
@@ -716,7 +781,7 @@
         window.deleteOrder = async function(id) {
             if (!confirm('Supprimer cette commande ?')) return;
             try {
-                await supabase.from('orders').delete().eq('id', id);
+                await fetchSupabase(`orders?id=eq.${id}`, { method: 'DELETE' });
                 showToast('✅ Commande supprimée');
                 await renderOrders();
             } catch (e) {
@@ -725,7 +790,7 @@
         };
 
         // ============================================
-        // 12. GESTION PROMOS
+        // 13. GESTION PROMOS
         // ============================================
         async function renderPromos() {
             await loadPromos();
@@ -760,7 +825,10 @@
                 const value = parseFloat(prompt('Valeur (ex: 15 pour 15% ou 10€)'));
                 if (isNaN(value) || value <= 0) return alert('Valeur invalide');
                 try {
-                    await supabase.from('promos').insert({ code: code.toUpperCase(), type, value, active: true });
+                    await fetchSupabase('promos', {
+                        method: 'POST',
+                        body: JSON.stringify({ code: code.toUpperCase(), type, value, active: true })
+                    });
                     showToast('✅ Code promo créé');
                     await renderPromos();
                 } catch (e) {
@@ -775,7 +843,10 @@
             if (!promo) return;
             promo.active = !promo.active;
             try {
-                await supabase.from('promos').update({ active: promo.active }).eq('code', code);
+                await fetchSupabase(`promos?code=eq.${code}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ active: promo.active })
+                });
                 showToast(promo.active ? '✅ Promo activée' : '⛔ Promo désactivée');
                 await renderPromos();
             } catch (e) {
@@ -786,7 +857,7 @@
         window.deletePromo = async function(code) {
             if (!confirm('Supprimer ce code promo ?')) return;
             try {
-                await supabase.from('promos').delete().eq('code', code);
+                await fetchSupabase(`promos?code=eq.${code}`, { method: 'DELETE' });
                 showToast('✅ Code promo supprimé');
                 await renderPromos();
             } catch (e) {
@@ -795,43 +866,41 @@
         };
 
         // ============================================
-        // 13. SYNCHRONISATION REALTIME (!!!)
+        // 14. SYNCHRONISATION INTER-ONGLETS
         // ============================================
-        function subscribeToRealtime() {
-            // Écoute des changements sur les tables
-            const channel = supabase.channel('public-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
-                    console.log('🔄 Changement produits détecté');
-                    await loadProducts();
-                    if (currentPage === 'dashboard') renderDashboard();
-                    else if (currentPage === 'products') renderProducts();
-                    else if (currentPage === 'stock') renderStock();
-                })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, async () => {
-                    console.log('🔄 Changement commandes détecté');
-                    await loadOrders();
-                    if (currentPage === 'dashboard') renderDashboard();
-                    else if (currentPage === 'orders') renderOrders();
-                })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'promos' }, async () => {
-                    console.log('🔄 Changement promos détecté');
-                    await loadPromos();
-                    if (currentPage === 'dashboard') renderDashboard();
-                    else if (currentPage === 'promos') renderPromos();
-                })
-                .subscribe((status) => {
-                    console.log('📡 Realtime status:', status);
-                });
-        }
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'shop_products' || e.key === 'shop_promos' || e.key === 'shop_orders' || e.key === 'shop_cart') {
+                console.log('🔄 Changement détecté sur', e.key);
+                // Recharger les données depuis Supabase
+                if (e.key === 'shop_products' || e.key === 'shop_cart') {
+                    loadProducts().then(() => {
+                        if (currentPage === 'dashboard') renderDashboard();
+                        else if (currentPage === 'products') renderProducts();
+                        else if (currentPage === 'stock') renderStock();
+                        else if (currentPage === 'orders') renderOrders();
+                    });
+                }
+                if (e.key === 'shop_orders') {
+                    loadOrders().then(() => {
+                        if (currentPage === 'dashboard') renderDashboard();
+                        else if (currentPage === 'orders') renderOrders();
+                    });
+                }
+                if (e.key === 'shop_promos') {
+                    loadPromos().then(() => {
+                        if (currentPage === 'dashboard') renderDashboard();
+                        else if (currentPage === 'promos') renderPromos();
+                    });
+                }
+            }
+        });
 
         // ============================================
-        // 14. INITIALISATION
+        // 15. INITIALISATION
         // ============================================
         async function init() {
             await renderDashboard();
             attachNavEvents();
-            // Activer Realtime
-            subscribeToRealtime();
         }
         init();
     </script>
