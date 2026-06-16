@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StyleShop - Boutique</title>
     <style>
+        /* styles inchangés - identiques à la version précédente */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body { background: #f8fafc; color: #0f172a; }
         .header { background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
@@ -64,12 +65,12 @@
 
     <script>
         // ============================================
-        // 1. DONNÉES PAR DÉFAUT (si localStorage vide)
+        // 1. DONNÉES PAR DÉFAUT
         // ============================================
         function getDefaultProducts() {
             return [
-                { id: "tshirt", name: "T-shirt Classic", description: "Coton bio, coupe confortable.", type: "simple", price: 24.90, stock: 12, icon: "👕", images: [], active: true },
-                { id: "sneakers", name: "Sneakers Urban", description: "Sneakers légères, semelle EVA.", type: "variants", basePrice: 89.90, icon: "👟", images: [], active: true,
+                { id: "tshirt", name: "T-shirt Classic", description: "Coton bio.", type: "simple", price: 24.90, stock: 12, icon: "👕", images: [], active: true },
+                { id: "sneakers", name: "Sneakers Urban", description: "Semelle EVA.", type: "variants", basePrice: 89.90, icon: "👟", images: [], active: true,
                     variants: [
                         { id: "snk_38_blanc", attributes: { taille: "38", couleur: "Blanc" }, stock: 5, price: 89.90 },
                         { id: "snk_39_blanc", attributes: { taille: "39", couleur: "Blanc" }, stock: 3, price: 89.90 },
@@ -81,7 +82,7 @@
                         { id: "snk_41_noir", attributes: { taille: "41", couleur: "Noir" }, stock: 1, price: 89.90 }
                     ]
                 },
-                { id: "hoodie", name: "Hoodie Premium", description: "Molleton épais, capuche ajustable.", type: "variants", basePrice: 59.90, icon: "🧥", images: [], active: true,
+                { id: "hoodie", name: "Hoodie Premium", description: "Molleton épais.", type: "variants", basePrice: 59.90, icon: "🧥", images: [], active: true,
                     variants: [
                         { id: "hd_s_gris", attributes: { taille: "S", couleur: "Gris" }, stock: 6, price: 59.90 },
                         { id: "hd_m_gris", attributes: { taille: "M", couleur: "Gris" }, stock: 10, price: 59.90 },
@@ -91,8 +92,8 @@
                         { id: "hd_l_noir", attributes: { taille: "L", couleur: "Noir" }, stock: 1, price: 59.90 }
                     ]
                 },
-                { id: "casquette", name: "Casquette Logo", description: "Coton bio, ajustable.", type: "simple", price: 19.90, stock: 2, icon: "🧢", images: [], active: true },
-                { id: "chaussettes", name: "Chaussettes Pack", description: "Lot de 3 paires.", type: "simple", price: 14.90, stock: 0, icon: "🧦", images: [], active: true }
+                { id: "casquette", name: "Casquette Logo", description: "Coton bio.", type: "simple", price: 19.90, stock: 2, icon: "🧢", images: [], active: true },
+                { id: "chaussettes", name: "Chaussettes Pack", description: "Lot de 3.", type: "simple", price: 14.90, stock: 0, icon: "🧦", images: [], active: true }
             ];
         }
 
@@ -187,7 +188,6 @@
             setTimeout(() => toast.remove(), 2000);
         }
 
-        // AFFICHAGE ICÔNE : priorité à l'image
         function getProductDisplayIcon(product) {
             if (product.images && product.images.length > 0) {
                 return `<img src="${product.images[0]}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">`;
@@ -315,7 +315,7 @@
         }
 
         // ============================================
-        // 9. RENDU CATALOGUE
+        // 9. RENDU CATALOGUE (corrigé pour variantes)
         // ============================================
         function renderCatalogue() {
             const app = document.getElementById('app');
@@ -328,20 +328,41 @@
             const html = `
                 <h1>Catalogue</h1>
                 <div class="products-grid">
-                    ${active.map(p => `
-                        <div class="product-card" onclick="navigateTo('product','${p.id}')">
-                            <div class="product-icon">${getProductDisplayIcon(p)}</div>
-                            <div class="product-title">${p.name}</div>
-                            <div class="product-price">${p.type === 'simple' ? (p.price||0).toFixed(2) : (p.basePrice||0).toFixed(2)} €</div>
-                            <div class="stock-badge">
-                                ${p.type === 'simple' ?
-                                    (p.stock === 0 ? '<span class="stock-out">Rupture</span>' :
-                                    (p.stock <= 2 ? `<span class="stock-warning">Derniers (${p.stock})</span>` :
-                                    `<span class="stock-ok">En stock</span>`)) :
-                                    `<span class="stock-ok">En stock</span>`}
+                    ${active.map(p => {
+                        // Calcul du stock total pour les variantes
+                        let totalStock = 0;
+                        let hasStock = false;
+                        if (p.type === 'simple') {
+                            totalStock = p.stock || 0;
+                            hasStock = totalStock > 0;
+                        } else if (p.variants) {
+                            p.variants.forEach(v => {
+                                totalStock += v.stock || 0;
+                                if (v.stock > 0) hasStock = true;
+                            });
+                        }
+                        // Déterminer la classe et le texte du badge
+                        let badgeClass = 'stock-ok';
+                        let badgeText = 'En stock';
+                        if (!hasStock) {
+                            badgeClass = 'stock-out';
+                            badgeText = 'Rupture';
+                        } else if (p.type === 'simple' && totalStock <= 2) {
+                            badgeClass = 'stock-warning';
+                            badgeText = `Derniers (${totalStock})`;
+                        } else if (p.type === 'variants' && totalStock <= 2) {
+                            badgeClass = 'stock-warning';
+                            badgeText = `Stock très bas (${totalStock})`;
+                        }
+                        return `
+                            <div class="product-card" onclick="navigateTo('product','${p.id}')">
+                                <div class="product-icon">${getProductDisplayIcon(p)}</div>
+                                <div class="product-title">${p.name}</div>
+                                <div class="product-price">${p.type === 'simple' ? (p.price||0).toFixed(2) : (p.basePrice||0).toFixed(2)} €</div>
+                                <div class="stock-badge ${badgeClass}">${badgeText}</div>
                             </div>
-                        </div>
-                    `).join('')}
+                        `;
+                    }).join('')}
                 </div>
             `;
             app.innerHTML = html;
@@ -421,7 +442,7 @@
         }
 
         // ============================================
-        // 11. RENDU PANIER
+        // 11. RENDU PANIER (inchangé)
         // ============================================
         function renderCart() {
             const app = document.getElementById('app');
@@ -507,7 +528,7 @@
         }
 
         // ============================================
-        // 12. SIMULATION PAIEMENT AVEC SAUVEGARDE COMMANDE
+        // 12. SIMULATION PAIEMENT (avec sauvegarde commande)
         // ============================================
         function simulateCheckout() {
             if (!cart || cart.length === 0) { showToast('Panier vide'); return; }
@@ -515,13 +536,11 @@
                 const stock = getStock(item.productId, item.variantId);
                 if ((item.quantity || 0) > stock) { showToast(`Stock dépassé pour ${item.name}`); return; }
             }
-            // Simuler paiement
             const total = getTotal();
             const orderId = 'ORD-' + Math.random().toString(36).substring(2,8).toUpperCase();
             const now = new Date();
             const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`;
 
-            // Créer la commande
             const order = {
                 id: orderId,
                 client: clientEmail,
@@ -540,7 +559,6 @@
                 discount: appliedPromo?.discountAmount || 0
             };
 
-            // Sauvegarder la commande
             let orders = localStorage.getItem('shop_orders');
             if (orders) {
                 try { orders = JSON.parse(orders); if (!Array.isArray(orders)) orders = []; } catch(e){ orders = []; }
@@ -548,7 +566,6 @@
             orders.unshift(order);
             localStorage.setItem('shop_orders', JSON.stringify(orders));
 
-            // Mise à jour des stocks
             for (const item of cart) {
                 const prod = products.find(p => p.id === item.productId);
                 if (!prod) continue;
@@ -580,7 +597,6 @@
         // 13. RENDU PAGE COURANTE
         // ============================================
         function renderCurrentPage() {
-            // Recharger les produits depuis localStorage (pour refléter les changements)
             products = loadProducts();
             promos = loadPromos();
             if (currentPage === 'catalogue') renderCatalogue();
