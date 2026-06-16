@@ -1,232 +1,858 @@
-// ============================================
-// AUTHENTIFICATION AVEC SUPABASE (CORRIGÉE)
-// ============================================
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyleShop - Administration</title>
+    <style>
+        /* ============================================
+           STYLES PROFESSIONNELS
+           ============================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', -apple-system, sans-serif; }
+        
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --blue: #3b82f6;
+            --blue-hover: #2563eb;
+            --green: #22c55e;
+            --green-hover: #16a34a;
+            --red: #ef4444;
+            --red-hover: #dc2626;
+            --gray: #64748b;
+            --gray-light: #f1f5f9;
+            --white: #ffffff;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+            --radius: 16px;
+            --radius-sm: 8px;
+            --transition: 0.2s ease;
+        }
 
-const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
+        body { background: #f1f5f9; display: flex; min-height: 100vh; color: var(--primary); }
 
-// Initialiser Supabase
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        /* ============================================
+           SIDEBAR
+           ============================================ */
+        .sidebar {
+            width: 280px;
+            background: var(--primary);
+            color: #e2e8f0;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            transition: width 0.3s ease;
+        }
+        
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 
-// ============================================
-// VÉRIFIER L'AUTHENTIFICATION
-// ============================================
-async function isAuthenticated() {
-    try {
-        const { data, error } = await supabaseClient.auth.getSession();
-        if (error) throw error;
-        return !!data.session;
-    } catch (e) {
-        console.error('Auth error:', e);
-        return false;
-    }
-}
+        .logo { padding: 0 0.5rem; }
+        .logo h2 { font-size: 1.6rem; color: white; letter-spacing: -0.5px; }
+        .logo span { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
 
-async function requireAuth() {
-    const auth = await isAuthenticated();
-    if (!auth) {
-        renderLogin();
-        return false;
-    }
-    return true;
-}
+        .nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+        .nav-item {
+            padding: 0.7rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #cbd5e1;
+        }
+        .nav-item:hover { background: var(--primary-light); color: white; }
+        .nav-item.active { background: var(--blue); color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+        .nav-item .icon { font-size: 1.2rem; width: 24px; text-align: center; }
+        .nav-item.logout { margin-top: auto; border-top: 1px solid #1e293b; padding-top: 1rem; color: #f87171; }
+        .nav-item.logout:hover { background: rgba(239,68,68,0.15); color: #fca5a5; }
 
-// ============================================
-// PAGE DE CONNEXION
-// ============================================
-function renderLogin() {
-    document.getElementById('sidebar').style.display = 'none';
-    document.getElementById('mainContent').innerHTML = `
-        <div class="login-container">
-            <div class="login-box">
-                <h1>🔐 Admin</h1>
-                <p style="text-align:center;color:#64748b;margin-bottom:1.5rem;">StyleShop - Panel d'administration</p>
-                
-                <div id="authError" style="color:#ef4444;text-align:center;margin-bottom:1rem;display:none;"></div>
-                
-                <input type="email" id="loginEmail" placeholder="Email" value="test@test.com">
-                <input type="password" id="loginPassword" placeholder="Mot de passe" value="Test123!" onkeyup="if(event.key==='Enter') document.getElementById('loginBtn').click()">
-                
-                <button class="btn" id="loginBtn">Se connecter</button>
-                
-                <div style="text-align:center;margin-top:1rem;">
-                    <span style="color:#94a3b8;font-size:0.8rem;">Pas encore de compte ? </span>
-                    <span style="color:#3b82f6;cursor:pointer;font-size:0.8rem;" id="showSignupBtn">S'inscrire</span>
-                </div>
+        .footer-sidebar { 
+            font-size: 0.7rem; 
+            color: #475569; 
+            padding: 0 0.5rem;
+            border-top: 1px solid #1e293b;
+            padding-top: 1rem;
+        }
+
+        /* ============================================
+           MAIN CONTENT
+           ============================================ */
+        .main { flex: 1; padding: 2rem; overflow-y: auto; }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .page-header h1 { font-size: 1.8rem; color: var(--primary); font-weight: 700; }
+
+        /* ============================================
+           BOUTONS
+           ============================================ */
+        .btn {
+            background: var(--blue);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.4rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            text-decoration: none;
+        }
+        .btn:hover { background: var(--blue-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+        .btn:active { transform: translateY(0); }
+        .btn-outline { background: white; border: 1.5px solid #e2e8f0; color: var(--primary); }
+        .btn-outline:hover { background: var(--gray-light); border-color: #cbd5e1; box-shadow: none; transform: none; }
+        .btn-danger { background: var(--red); }
+        .btn-danger:hover { background: var(--red-hover); box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+        .btn-success { background: var(--green); }
+        .btn-success:hover { background: var(--green-hover); box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
+        .btn-small { padding: 0.3rem 0.8rem; font-size: 0.8rem; gap: 0.3rem; }
+
+        /* ============================================
+           STATS CARDS
+           ============================================ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1.2rem 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid #e2e8f0;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .stat-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+        .stat-title { font-size: 0.75rem; text-transform: uppercase; color: var(--gray); font-weight: 600; letter-spacing: 0.5px; }
+        .stat-value { font-size: 2rem; font-weight: 700; margin-top: 0.3rem; color: var(--primary); }
+        .stat-sub { font-size: 0.85rem; color: var(--gray); margin-top: 0.2rem; }
+
+        /* ============================================
+           TABLEAUX
+           ============================================ */
+        .table-container {
+            background: white;
+            border-radius: var(--radius);
+            border: 1px solid #e2e8f0;
+            overflow-x: auto;
+            margin-top: 1rem;
+            box-shadow: var(--shadow);
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; font-weight: 600; color: var(--primary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        tr:hover td { background: #fafbfc; }
+
+        /* ============================================
+           BADGES
+           ============================================ */
+        .badge {
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-success { background: #dcfce7; color: #15803d; }
+        .badge-warning { background: #fef9c3; color: #854d0e; }
+        .badge-danger { background: #fee2e2; color: #dc2626; }
+        .badge-info { background: #dbeafe; color: #1d4ed8; }
+        .badge-dark { background: #1e293b; color: white; }
+
+        /* ============================================
+           IMAGES PRODUITS
+           ============================================ */
+        .product-img-list {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: var(--gray-light);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+        .product-img-list img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ============================================
+           MODALES
+           ============================================ */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.25s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .modal-content {
+            background: white;
+            border-radius: 28px;
+            max-width: 750px;
+            width: 92%;
+            padding: 2rem;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+        }
+        .modal-content::-webkit-scrollbar { width: 6px; }
+        .modal-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .modal-content h2 { font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--primary); }
+
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.4rem;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+        .form-group label .required { color: var(--red); }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background: white;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        input:disabled, textarea:disabled { background: var(--gray-light); cursor: not-allowed; }
+
+        .variant-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .variant-row input { flex: 1; min-width: 80px; }
+
+        .flex-between { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+
+        /* ============================================
+           EMOJIS
+           ============================================ */
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(48px, 56px));
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .emoji-option {
+            font-size: 28px;
+            background: var(--gray-light);
+            border: 2px solid #e2e8f0;
+            border-radius: var(--radius-sm);
+            padding: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .emoji-option:hover { background: #e2e8f0; transform: scale(1.05); }
+        .emoji-option.selected { border-color: var(--blue); background: #dbeafe; }
+
+        /* ============================================
+           UPLOAD IMAGES
+           ============================================ */
+        .upload-area {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .upload-area input[type="file"] { width: auto; padding: 0.4rem; border: none; }
+        .upload-btn {
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        .upload-btn:hover { background: var(--green-hover); }
+
+        .image-preview-grid {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        .image-preview-grid img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* ============================================
+           TOAST NOTIFICATIONS
+           ============================================ */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 40px;
+            z-index: 2000;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            animation: slideUp 0.3s ease;
+            font-weight: 500;
+            max-width: 400px;
+        }
+        .toast.success { background: var(--green); }
+        .toast.error { background: var(--red); }
+
+        /* ============================================
+           LOGIN PAGE
+           ============================================ */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f1f5f9;
+        }
+        .login-box {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 28px;
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 420px;
+        }
+        .login-box h1 { text-align: center; margin-bottom: 0.5rem; color: var(--primary); }
+        .login-box .subtitle { text-align: center; color: var(--gray); margin-bottom: 1.5rem; }
+        .login-box input { margin-bottom: 1rem; }
+        .login-box .btn { width: 100%; justify-content: center; padding: 0.8rem; }
+        .login-box .auth-switch { text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--gray); }
+        .login-box .auth-switch span { color: var(--blue); cursor: pointer; font-weight: 600; }
+        .login-box .auth-switch span:hover { text-decoration: underline; }
+        .login-box .auth-error { color: var(--red); text-align: center; margin-bottom: 1rem; display: none; padding: 0.5rem; background: #fee2e2; border-radius: var(--radius-sm); }
+        .login-box .auth-success { color: var(--green); text-align: center; margin-bottom: 1rem; display: none; padding: 0.5rem; background: #dcfce7; border-radius: var(--radius-sm); }
+
+        /* ============================================
+           SETTINGS
+           ============================================ */
+        .settings-section {
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        .settings-section h3 { margin-bottom: 1rem; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 768px) {
+            .sidebar { width: 72px; padding: 1rem 0.5rem; }
+            .sidebar .logo h2 { font-size: 0.9rem; text-align: center; }
+            .sidebar .logo span, .footer-sidebar { display: none; }
+            .nav-item { font-size: 0.7rem; text-align: center; padding: 0.5rem; justify-content: center; flex-direction: column; gap: 0.2rem; }
+            .nav-item .icon { font-size: 1.2rem; }
+            .nav-item .label { display: none; }
+            .main { padding: 1rem; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .modal-content { padding: 1.5rem; width: 95%; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .page-header h1 { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================
+    SIDEBAR
+    ============================================ -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo">
+            <h2>✦ StyleShop</h2>
+            <span>Panel d'administration</span>
+        </div>
+        <nav class="nav">
+            <div class="nav-item active" data-page="dashboard">
+                <span class="icon">📊</span>
+                <span class="label">Dashboard</span>
             </div>
-        </div>
-    `;
+            <div class="nav-item" data-page="products">
+                <span class="icon">👕</span>
+                <span class="label">Produits</span>
+            </div>
+            <div class="nav-item" data-page="stock">
+                <span class="icon">📦</span>
+                <span class="label">Stock</span>
+            </div>
+            <div class="nav-item" data-page="orders">
+                <span class="icon">📋</span>
+                <span class="label">Commandes</span>
+            </div>
+            <div class="nav-item" data-page="promos">
+                <span class="icon">🏷️</span>
+                <span class="label">Promos</span>
+            </div>
+            <div class="nav-item" data-page="settings">
+                <span class="icon">⚙️</span>
+                <span class="label">Paramètres</span>
+            </div>
+            <div class="nav-item logout" data-page="logout">
+                <span class="icon">🚪</span>
+                <span class="label">Déconnexion</span>
+            </div>
+        </nav>
+        <div class="footer-sidebar">v2.1 — Sécurisé avec Supabase</div>
+    </div>
 
-    // Connexion
-    document.getElementById('loginBtn').onclick = async () => {
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        const errorDiv = document.getElementById('authError');
-        
-        errorDiv.style.display = 'none';
-        
-        const result = await signIn(email, password);
-        if (result.success) {
-            document.getElementById('sidebar').style.display = 'flex';
+    <!-- ============================================
+    MAIN CONTENT
+    ============================================ -->
+    <div class="main" id="mainContent"></div>
+
+    <!-- ============================================
+    SCRIPT
+    ============================================ -->
+    <script>
+        // ============================================
+        // 1. CONFIGURATION
+        // ============================================
+        const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
+
+        const STRIPE_PUBLISHABLE_KEY = 'pk_test_51Tekkn6wfDMIVGHfTWzp5lHp5tI4eZnsQLy0xl0EQNXGDq9dUKyYqAnhfQURu5yxVyA10AJadtuLYWv2xVRwkXAK00itBqEpSx';
+        const ADMIN_EMAIL = 'admin@styleshop.com';
+
+        // ============================================
+        // 2. SUPABASE CLIENT
+        // ============================================
+        // Charger Supabase depuis CDN
+        const supabaseScript = document.createElement('script');
+        supabaseScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+        supabaseScript.onload = () => {
+            window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log('✅ Supabase client initialized');
             init();
-        } else {
-            errorDiv.textContent = '❌ ' + result.error;
-            errorDiv.style.display = 'block';
-        }
-    };
+        };
+        document.head.appendChild(supabaseScript);
 
-    // Formulaire d'inscription
-    document.getElementById('showSignupBtn').onclick = () => showSignupForm();
-}
+        // ============================================
+        // 3. VARIABLES GLOBALES
+        // ============================================
+        let products = [];
+        let orders = [];
+        let promos = [];
+        let currentPage = 'dashboard';
+        let isInitialized = false;
 
-// ============================================
-// FORMULAIRE D'INSCRIPTION
-// ============================================
-function showSignupForm() {
-    const loginBox = document.querySelector('.login-box');
-    loginBox.innerHTML = `
-        <h1>📝 Inscription</h1>
-        <p style="text-align:center;color:#64748b;margin-bottom:1.5rem;">Créer un compte admin</p>
-        
-        <div id="authError" style="color:#ef4444;text-align:center;margin-bottom:1rem;display:none;"></div>
-        <div id="authSuccess" style="color:#22c55e;text-align:center;margin-bottom:1rem;display:none;"></div>
-        
-        <input type="email" id="signupEmail" placeholder="Email" value="test@test.com">
-        <input type="password" id="signupPassword" placeholder="Mot de passe (6+ caractères)" value="Test123!">
-        <input type="password" id="signupConfirm" placeholder="Confirmer le mot de passe" value="Test123!">
-        
-        <button class="btn" id="signupBtn">Créer mon compte</button>
-        
-        <div style="text-align:center;margin-top:1rem;">
-            <span style="color:#94a3b8;font-size:0.8rem;">Déjà un compte ? </span>
-            <span style="color:#3b82f6;cursor:pointer;font-size:0.8rem;" id="showLoginBtn">Se connecter</span>
-        </div>
-    `;
-
-    document.getElementById('signupBtn').onclick = async () => {
-        const email = document.getElementById('signupEmail').value;
-        const password = document.getElementById('signupPassword').value;
-        const confirm = document.getElementById('signupConfirm').value;
-        const errorDiv = document.getElementById('authError');
-        const successDiv = document.getElementById('authSuccess');
-        
-        errorDiv.style.display = 'none';
-        successDiv.style.display = 'none';
-        
-        if (password !== confirm) {
-            errorDiv.textContent = '❌ Les mots de passe ne correspondent pas';
-            errorDiv.style.display = 'block';
-            return;
-        }
-        
-        if (password.length < 6) {
-            errorDiv.textContent = '❌ Le mot de passe doit faire au moins 6 caractères';
-            errorDiv.style.display = 'block';
-            return;
-        }
-        
-        const result = await signUp(email, password);
-        if (result.success) {
-            successDiv.textContent = '✅ Compte créé ! Vérifiez vos emails pour confirmer.';
-            successDiv.style.display = 'block';
-            setTimeout(() => renderLogin(), 3000);
-        } else {
-            errorDiv.textContent = '❌ ' + result.error;
-            errorDiv.style.display = 'block';
-        }
-    };
-
-    document.getElementById('showLoginBtn').onclick = () => renderLogin();
-}
-
-// ============================================
-// FONCTIONS D'AUTH (avec Supabase)
-// ============================================
-async function signIn(email, password) {
-    try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-        
-        if (error) throw error;
-        
-        // Vérifier si c'est un admin (optionnel)
-        const { data: profile } = await supabaseClient
-            .from('profiles')
-            .select('role')
-            .eq('id', data.user.id)
-            .single();
-        
-        // Si tu veux restreindre l'accès aux admins
-        if (profile && profile.role !== 'admin') {
-            await supabaseClient.auth.signOut();
-            throw new Error('Accès non autorisé - Vous devez être admin');
-        }
-        
-        return { success: true, data };
-    } catch (e) {
-        console.error('Sign in error:', e);
-        return { success: false, error: e.message };
-    }
-}
-
-async function signUp(email, password) {
-    try {
-        const { data, error } = await supabaseClient.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                emailRedirectTo: window.location.origin + '/admin.html'
+        // ============================================
+        // 4. AUTHENTIFICATION
+        // ============================================
+        async function isAuthenticated() {
+            if (!window.supabaseClient) return false;
+            try {
+                const { data, error } = await window.supabaseClient.auth.getSession();
+                if (error) throw error;
+                return !!data.session;
+            } catch (e) {
+                console.error('Auth check error:', e);
+                return false;
             }
-        });
-        
-        if (error) throw error;
-        
-        // Si email de confirmation désactivé, connecter directement
-        if (data.user && !data.session) {
-            // L'utilisateur doit confirmer son email
-            return { success: true, data, requiresConfirmation: true };
         }
-        
-        return { success: true, data };
-    } catch (e) {
-        console.error('Sign up error:', e);
-        return { success: false, error: e.message };
-    }
-}
 
-// ============================================
-// VÉRIFIER L'EMAIL DE CONFIRMATION
-// ============================================
-async function handleEmailConfirmation() {
-    // Récupérer le token depuis l'URL
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('confirmation_token');
-    const type = params.get('type');
-    
-    if (token && type === 'signup') {
-        try {
-            const { data, error } = await supabaseClient.auth.verifyOtp({
-                token_hash: token,
-                type: 'signup'
+        async function requireAuth() {
+            if (!window.supabaseClient) return false;
+            const auth = await isAuthenticated();
+            if (!auth) {
+                renderLogin();
+                return false;
+            }
+            return true;
+        }
+
+        async function signIn(email, password) {
+            if (!window.supabaseClient) return { success: false, error: 'Supabase non initialisé' };
+            try {
+                const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                if (error) throw error;
+                
+                // Vérifier le rôle admin
+                const { data: profile } = await window.supabaseClient
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (profile && profile.role !== 'admin') {
+                    await window.supabaseClient.auth.signOut();
+                    throw new Error('Accès non autorisé - Droits admin requis');
+                }
+
+                return { success: true, data };
+            } catch (e) {
+                console.error('Sign in error:', e);
+                return { success: false, error: e.message };
+            }
+        }
+
+        async function signUp(email, password) {
+            if (!window.supabaseClient) return { success: false, error: 'Supabase non initialisé' };
+            try {
+                const { data, error } = await window.supabaseClient.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        emailRedirectTo: window.location.origin + '/admin.html'
+                    }
+                });
+                if (error) throw error;
+                return { success: true, data };
+            } catch (e) {
+                console.error('Sign up error:', e);
+                return { success: false, error: e.message };
+            }
+        }
+
+        async function signOut() {
+            if (!window.supabaseClient) return;
+            await window.supabaseClient.auth.signOut();
+            renderLogin();
+        }
+
+        function renderLogin() {
+            document.getElementById('sidebar').style.display = 'none';
+            document.getElementById('mainContent').innerHTML = `
+                <div class="login-container">
+                    <div class="login-box">
+                        <h1>✦ StyleShop</h1>
+                        <p class="subtitle">Panel d'administration sécurisé</p>
+                        <div id="authError" class="auth-error"></div>
+                        <div id="authSuccess" class="auth-success"></div>
+                        <input type="email" id="loginEmail" placeholder="Email" value="admin@styleshop.com">
+                        <input type="password" id="loginPassword" placeholder="Mot de passe" onkeyup="if(event.key==='Enter') document.getElementById('loginBtn').click()">
+                        <button class="btn" id="loginBtn">🔐 Se connecter</button>
+                        <div class="auth-switch">
+                            Pas encore de compte ? <span id="showSignupBtn">S'inscrire</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('loginBtn').onclick = async () => {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                const errorDiv = document.getElementById('authError');
+                const successDiv = document.getElementById('authSuccess');
+                
+                errorDiv.style.display = 'none';
+                successDiv.style.display = 'none';
+
+                const result = await signIn(email, password);
+                if (result.success) {
+                    document.getElementById('sidebar').style.display = 'flex';
+                    await loadAllData();
+                    await renderDashboard();
+                } else {
+                    errorDiv.textContent = '❌ ' + result.error;
+                    errorDiv.style.display = 'block';
+                }
+            };
+
+            document.getElementById('showSignupBtn').onclick = () => showSignupForm();
+        }
+
+        function showSignupForm() {
+            const loginBox = document.querySelector('.login-box');
+            loginBox.innerHTML = `
+                <h1>✦ StyleShop</h1>
+                <p class="subtitle">Créer un compte administrateur</p>
+                <div id="authError" class="auth-error"></div>
+                <div id="authSuccess" class="auth-success"></div>
+                <input type="email" id="signupEmail" placeholder="Email" value="admin@styleshop.com">
+                <input type="password" id="signupPassword" placeholder="Mot de passe (6+ caractères)">
+                <input type="password" id="signupConfirm" placeholder="Confirmer le mot de passe">
+                <button class="btn" id="signupBtn">📝 Créer mon compte</button>
+                <div class="auth-switch">
+                    Déjà un compte ? <span id="showLoginBtn">Se connecter</span>
+                </div>
+            `;
+
+            document.getElementById('signupBtn').onclick = async () => {
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                const confirm = document.getElementById('signupConfirm').value;
+                const errorDiv = document.getElementById('authError');
+                const successDiv = document.getElementById('authSuccess');
+
+                errorDiv.style.display = 'none';
+                successDiv.style.display = 'none';
+
+                if (password !== confirm) {
+                    errorDiv.textContent = '❌ Les mots de passe ne correspondent pas';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                if (password.length < 6) {
+                    errorDiv.textContent = '❌ Le mot de passe doit faire au moins 6 caractères';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                const result = await signUp(email, password);
+                if (result.success) {
+                    successDiv.textContent = '✅ Compte créé ! Vérifiez vos emails pour confirmer.';
+                    successDiv.style.display = 'block';
+                    setTimeout(() => renderLogin(), 3000);
+                } else {
+                    errorDiv.textContent = '❌ ' + result.error;
+                    errorDiv.style.display = 'block';
+                }
+            };
+
+            document.getElementById('showLoginBtn').onclick = () => renderLogin();
+        }
+
+        // ============================================
+        // 5. FONCTIONS SUPABASE
+        // ============================================
+        async function fetchSupabase(endpoint, options = {}) {
+            const defaultHeaders = {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            };
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+                    ...options,
+                    headers: { ...defaultHeaders, ...options.headers }
+                });
+
+                if (response.status === 204 || response.status === 201) return null;
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${error}`);
+                }
+                const text = await response.text();
+                if (!text) return null;
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('Fetch error:', e);
+                return null;
+            }
+        }
+
+        // ============================================
+        // 6. UPLOAD IMAGES
+        // ============================================
+        async function uploadImageToSupabase(file) {
+            const bucketName = 'products';
+            const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+            
+            try {
+                const { data: buckets } = await fetchSupabase('storage/buckets', { method: 'GET' });
+                const bucketExists = buckets?.some(b => b.name === bucketName);
+                
+                if (!bucketExists) {
+                    await fetchSupabase('storage/buckets', {
+                        method: 'POST',
+                        body: JSON.stringify({ name: bucketName, public: true })
+                    });
+                }
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const uploadResponse = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    },
+                    body: formData
+                });
+
+                if (!uploadResponse.ok) {
+                    const error = await uploadResponse.text();
+                    throw new Error(`Upload failed: ${error}`);
+                }
+
+                return `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
+            } catch (e) {
+                console.error('Upload error:', e);
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        // ============================================
+        // 7. CHARGEMENT DES DONNÉES
+        // ============================================
+        async function loadProducts() {
+            try {
+                const data = await fetchSupabase('products?select=*');
+                if (Array.isArray(data)) {
+                    data.forEach(p => {
+                        if (p.variants && Array.isArray(p.variants)) {
+                            p.variants.forEach(v => { v.stock = parseInt(v.stock) || 0; });
+                        }
+                        if (p.type === 'simple') p.stock = parseInt(p.stock) || 0;
+                        if (!Array.isArray(p.images)) p.images = [];
+                    });
+                    products = data;
+                } else {
+                    products = [];
+                }
+                return products;
+            } catch (e) {
+                console.error('Erreur chargement produits:', e);
+                products = [];
+                return products;
+            }
+        }
+
+        async function loadOrders() {
+            try {
+                const data = await fetchSupabase('orders?select=*');
+                if (Array.isArray(data)) {
+                    orders = data;
+                } else {
+                    orders = [];
+                }
+                return orders;
+            } catch (e) {
+                console.error('Erreur chargement commandes:', e);
+                orders = [];
+                return orders;
+            }
+        }
+
+        async function loadPromos() {
+            try {
+                const data = await fetchSupabase('promos?select=*');
+                if (Array.isArray(data)) {
+                    promos = data;
+                } else {
+                    promos = [];
+                }
+                return promos;
+            } catch (e) {
+                console.error('Erreur chargement promos:', e);
+                promos = [];
+                return promos;
+            }
+        }
+
+        async function loadAllData() {
+            await Promise.all([loadProducts(), loadOrders(), loadPromos()]);
+        }
+
+        // ============================================
+        // 8. UTILITAIRES
+        // ============================================
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function getStockStats() {
+            let totalStock = 0, ruptures = 0, low = 0, stockValue = 0, productRuptures = 0;
+            products.forEach(p => {
+                if (p.type === 'simple') {
+                    const qty = p.stock || 0;
+                    totalStock += qty;
+                    if (qty === 0) ruptures++;
+                    else if (qty <= 2) low++;
+                    stockValue += qty * (p.price || 0);
+                    if (qty === 0) productRuptures++;
+                } else if (p.variants) {
+                    let hasStock = false;
+                    p.variants.forEach(v => {
+                        const qty = v.stock || 0;
+                        totalStock += qty;
+                        if (qty === 0) ruptures++;
+                        else if (qty <= 2) low++;
+                        stockValue += qty * (v.price || p.base_price || 0);
+                        if (qty > 0) hasStock = true;
+                    });
+                    if (!hasStock) productRuptures++;
+                }
             });
-            
-            if (error) throw error;
-            console.log('✅ Email confirmé !');
-            
-            // Rediriger vers la page admin
-            window.location.href = window.location.origin + '/admin.html';
-        } catch (e) {
-            console.error('❌ Erreur confirmation:', e);
+            return { totalStock, ruptures, lowStockItems: low, stockValue, productRuptures };
         }
-    }
-}
 
-// ============================================
-// DÉCONNEXION
-// ============================================
-async function logout() {
-    await supabaseClient.auth.signOut();
-    renderLogin();
-}
+        function getDisplayIcon(product) {
+            if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+                const img = product.images[0];
+                return `<img src="${img}" style="width:42px;height:42px;object-fit:cover;border-radius:8px;">`;
+            } else if (product.icon) {
+                return `<span style="font-size:24px;">${product.icon}</span>`;
+            } else {
+                return `<span style="font-size:24px;">📦</span>`;
+            }
+        }
+
+        // ============================================
+        // 9. NAVIGATION
+        // ============================================
+        function attachNavEvents() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.onclick = () => {
+                    if (item.dataset.page === 'logout') {
+                       
