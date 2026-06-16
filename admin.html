@@ -1,206 +1,1000 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StyleShop - Administration</title>
-
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
-body { background: #f1f5f9; display: flex; min-height: 100vh; }
-
-.sidebar { width: 260px; background: #0f172a; color: #e2e8f0; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 2rem; position: sticky; top: 0; height: 100vh; }
-
-.logo h2 { font-size: 1.6rem; color: white; }
-.logo span { font-size: 0.8rem; color: #94a3b8; }
-
-.nav-item { padding: 0.7rem 1rem; border-radius: 12px; cursor: pointer; transition: 0.2s; font-weight: 500; }
-.nav-item:hover { background: #1e293b; }
-.nav-item.active { background: #3b82f6; color: white; }
-
-.main { flex: 1; padding: 2rem; overflow-y: auto; }
-
-.table-container { background: white; border-radius: 20px; border: 1px solid #e2e8f0; overflow-x: auto; margin-top: 1rem; }
-table { width: 100%; border-collapse: collapse; }
-
-th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0; }
-th { background: #f8fafc; }
-
-.badge { padding: 0.2rem 0.7rem; border-radius: 30px; font-size: 0.75rem; }
-.badge-success { background: #dcfce7; color: #15803d; }
-.badge-warning { background: #fef9c3; color: #854d0e; }
-.badge-danger { background: #fee2e2; color: #dc2626; }
-
-.product-img-list img {
-width: 40px;
-height: 40px;
-object-fit: cover;
-border-radius: 8px;
-}
-
-.toast {
-position: fixed;
-bottom: 20px;
-right: 20px;
-background: #0f172a;
-color: white;
-padding: 0.8rem 1.5rem;
-border-radius: 40px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyleShop - Administration</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
+        body { background: #f1f5f9; display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: #0f172a; color: #e2e8f0; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 2rem; position: sticky; top: 0; height: 100vh; }
+        .logo h2 { font-size: 1.6rem; color: white; }
+        .logo span { font-size: 0.8rem; color: #94a3b8; }
+        .nav-item { padding: 0.7rem 1rem; border-radius: 12px; cursor: pointer; transition: 0.2s; font-weight: 500; }
+        .nav-item:hover { background: #1e293b; }
+        .nav-item.active { background: #3b82f6; color: white; }
+        .footer-sidebar { margin-top: auto; font-size: 0.7rem; color: #94a3b8; }
+        .main { flex: 1; padding: 2rem; overflow-y: auto; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; }
+        .page-header h1 { font-size: 1.8rem; color: #0f172a; }
+        .btn { background: #3b82f6; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 30px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #1e293b; }
+        .btn-danger { background: #ef4444; }
+        .btn-small { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
+        .btn-success { background: #22c55e; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1rem 1.2rem; border-radius: 20px; border: 1px solid #e2e8f0; }
+        .stat-title { font-size: 0.8rem; text-transform: uppercase; color: #475569; font-weight: 600; }
+        .stat-value { font-size: 2rem; font-weight: 700; margin-top: 0.3rem; }
+        .stat-sub { font-size: 0.85rem; color: #64748b; }
+        .table-container { background: white; border-radius: 20px; border: 1px solid #e2e8f0; overflow-x: auto; margin-top: 1rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; font-weight: 600; color: #1e293b; }
+        .badge { padding: 0.2rem 0.7rem; border-radius: 30px; font-size: 0.75rem; font-weight: 500; }
+        .badge-success { background: #dcfce7; color: #15803d; }
+        .badge-warning { background: #fef9c3; color: #854d0e; }
+        .badge-danger { background: #fee2e2; color: #dc2626; }
+        .product-img-list { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 28px; background: #f1f5f9; border-radius: 8px; overflow: hidden; }
+        .product-img-list img { width: 40px; height: 40px; object-fit: cover; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; border-radius: 28px; max-width: 750px; width: 90%; padding: 1.8rem; max-height: 85vh; overflow-y: auto; }
+        .form-group { margin-bottom: 1.2rem; }
+        label { font-weight: 500; display: block; margin-bottom: 0.4rem; }
+        input, select, textarea { width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.95rem; }
+        .variant-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+        .variant-row input { flex: 1; min-width: 80px; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .emoji-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 60px)); gap: 8px; margin: 10px 0; }
+        .emoji-option { font-size: 32px; background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 16px; padding: 5px; text-align: center; cursor: pointer; transition: 0.1s; }
+        .emoji-option:hover { background: #e2e8f0; transform: scale(1.05); }
+        .emoji-option.selected { border-color: #3b82f6; background: #dbeafe; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: white; padding: 0.8rem 1.5rem; border-radius: 40px; z-index: 2000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .image-preview-grid { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
+        .image-preview-grid img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .upload-area { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+        .upload-area input[type="file"] { width: auto; padding: 0.4rem; }
+        .upload-btn { background: #22c55e; color: white; border: none; padding: 0.4rem 1rem; border-radius: 30px; cursor: pointer; }
+        .upload-btn:hover { background: #16a34a; }
+        @media (max-width: 700px) { .sidebar { width: 80px; padding: 1rem 0.5rem; } .sidebar .logo h2 { font-size: 1rem; } .sidebar .logo span, .footer-sidebar { display: none; } .nav-item { font-size: 0.8rem; text-align: center; padding: 0.5rem; } .main { padding: 1rem; } }
+    </style>
 </head>
-
 <body>
 
-<div class="sidebar">
-    <div class="logo">
-        <h2>StyleShop</h2>
-        <span>Admin panel</span>
+    <div class="sidebar">
+        <div class="logo"><h2>StyleShop</h2><span>Admin panel</span></div>
+        <div class="nav">
+            <div class="nav-item active" data-page="dashboard">📊 Dashboard</div>
+            <div class="nav-item" data-page="products">👕 Produits</div>
+            <div class="nav-item" data-page="stock">📦 Stock</div>
+            <div class="nav-item" data-page="orders">📋 Commandes</div>
+            <div class="nav-item" data-page="promos">🏷️ Promos</div>
+        </div>
+        <div class="footer-sidebar">Accès admin via Supabase</div>
     </div>
 
-    <div class="nav">
-        <div class="nav-item active" data-page="dashboard">📊 Dashboard</div>
-        <div class="nav-item" data-page="products">👕 Produits</div>
-        <div class="nav-item" data-page="stock">📦 Stock</div>
-        <div class="nav-item" data-page="orders">📋 Commandes</div>
-        <div class="nav-item" data-page="promos">🏷️ Promos</div>
-    </div>
-</div>
+    <div class="main" id="mainContent"></div>
 
-<div class="main" id="mainContent">
-    <div style="text-align:center;padding:3rem;">Chargement...</div>
-</div>
+    <script>
+        // ============================================
+        // 1. CONFIGURATION SUPABASE
+        // ============================================
+        const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
 
-<script>
-// =========================
-// CONFIG SUPABASE
-// =========================
-const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
-const SUPABASE_KEY = 'YOUR_KEY_HERE';
+        // ============================================
+        // 2. FONCTIONS FETCH
+        // ============================================
+        async function fetchSupabase(endpoint, options = {}) {
+            const defaultHeaders = {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            };
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+                    ...options,
+                    headers: { ...defaultHeaders, ...options.headers }
+                });
 
-// =========================
-function isValidUrl(url) {
-    return typeof url === 'string' &&
-        (url.startsWith('http://') || url.startsWith('https://'));
-}
-
-// =========================
-async function fetchSupabase(endpoint, options = {}) {
-    const headers = {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json'
-    };
-
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
-        ...options,
-        headers
-    });
-
-    if (!res.ok) {
-        console.error(await res.text());
-        return null;
-    }
-
-    return await res.json();
-}
-
-// =========================
-let products = [];
-let orders = [];
-let promos = [];
-
-// =========================
-// LOAD PRODUCTS FIXÉ
-// =========================
-async function loadProducts() {
-    const data = await fetchSupabase('products?select=*');
-
-    if (!Array.isArray(data)) return [];
-
-    data.forEach(p => {
-
-        if (!Array.isArray(p.images)) p.images = [];
-
-        if (isValidUrl(p.image_url)) {
-            if (!p.images.includes(p.image_url)) {
-                p.images.unshift(p.image_url);
+                if (response.status === 204 || response.status === 201) return null;
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${error}`);
+                }
+                const text = await response.text();
+                if (!text) return null;
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('Fetch error:', e);
+                return null;
             }
         }
 
-        if (p.images.length === 0) {
-            p.images = ['https://via.placeholder.com/80?text=No+Image'];
+        // ============================================
+        // 3. UPLOAD VERS SUPABASE STORAGE
+        // ============================================
+        async function uploadImageToStorage(file, productId) {
+            const fileName = `${productId}_${Date.now()}_${file.name}`;
+            const filePath = `products/${fileName}`;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/storage/v1/object/product-images/${filePath}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'apikey': SUPABASE_KEY
+                    },
+                    body: file
+                });
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`Upload error: ${response.status} - ${error}`);
+                }
+
+                // URL publique de l'image
+                const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/product-images/${filePath}`;
+                console.log('✅ Image uploadée:', publicUrl);
+                return publicUrl;
+            } catch (e) {
+                console.error('❌ Erreur upload:', e);
+                showToast('Erreur upload image: ' + e.message);
+                return null;
+            }
         }
 
-        if (p.type === 'simple') {
-            p.stock = parseInt(p.stock) || 0;
+        // ============================================
+        // 4. VARIABLES GLOBALES
+        // ============================================
+        let products = [];
+        let orders = [];
+        let promos = [];
+        let currentPage = 'dashboard';
+
+        // ============================================
+        // 5. CHARGEMENT DES DONNÉES
+        // ============================================
+        async function loadProducts() {
+            try {
+                const data = await fetchSupabase('products?select=*');
+                if (Array.isArray(data)) {
+                    data.forEach(p => {
+                        if (p.variants && Array.isArray(p.variants)) {
+                            p.variants.forEach(v => { v.stock = parseInt(v.stock) || 0; });
+                        }
+                        if (p.type === 'simple') p.stock = parseInt(p.stock) || 0;
+                        if (typeof p.image_url !== 'string') p.image_url = null;
+                        if (!Array.isArray(p.images)) p.images = [];
+                        if (p.image_url && !p.images.includes(p.image_url)) {
+                            p.images.unshift(p.image_url);
+                        }
+                    });
+                    products = data;
+                } else {
+                    products = [];
+                }
+                return products;
+            } catch (e) {
+                console.error('Erreur chargement produits:', e);
+                products = [];
+                return products;
+            }
         }
 
-        if (Array.isArray(p.variants)) {
-            p.variants.forEach(v => {
-                v.stock = parseInt(v.stock) || 0;
+        async function loadOrders() {
+            try {
+                const data = await fetchSupabase('orders?select=*');
+                if (Array.isArray(data)) {
+                    orders = data;
+                } else {
+                    orders = [];
+                }
+                return orders;
+            } catch (e) {
+                console.error('Erreur chargement commandes:', e);
+                orders = [];
+                return orders;
+            }
+        }
+
+        async function loadPromos() {
+            try {
+                const data = await fetchSupabase('promos?select=*');
+                if (Array.isArray(data)) {
+                    promos = data;
+                } else {
+                    promos = [];
+                }
+                return promos;
+            } catch (e) {
+                console.error('Erreur chargement promos:', e);
+                promos = [];
+                return promos;
+            }
+        }
+
+        // ============================================
+        // 6. UTILITAIRES
+        // ============================================
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        function getStockStats() {
+            let totalStock = 0, ruptures = 0, low = 0, stockValue = 0, productRuptures = 0;
+            products.forEach(p => {
+                if (p.type === 'simple') {
+                    const qty = p.stock || 0;
+                    totalStock += qty;
+                    if (qty === 0) ruptures++;
+                    else if (qty <= 2) low++;
+                    stockValue += qty * (p.price || 0);
+                    if (qty === 0) productRuptures++;
+                } else if (p.variants) {
+                    let hasStock = false;
+                    p.variants.forEach(v => {
+                        const qty = v.stock || 0;
+                        totalStock += qty;
+                        if (qty === 0) ruptures++;
+                        else if (qty <= 2) low++;
+                        stockValue += qty * (v.price || p.base_price || 0);
+                        if (qty > 0) hasStock = true;
+                    });
+                    if (!hasStock) productRuptures++;
+                }
+            });
+            return { totalStock, ruptures, lowStockItems: low, stockValue, productRuptures };
+        }
+
+        function getDisplayIcon(product) {
+            if (product.images && product.images.length > 0) {
+                const imgUrl = product.images[0];
+                if (typeof imgUrl === 'string' && (imgUrl.startsWith('http') || imgUrl.startsWith('data:image'))) {
+                    return `<img src="${imgUrl}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+                }
+            }
+            if (product.image_url && typeof product.image_url === 'string' && 
+                (product.image_url.startsWith('http') || product.image_url.startsWith('data:image'))) {
+                return `<img src="${product.image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+            }
+            if (product.icon) {
+                return `<span style="font-size:28px;">${product.icon}</span>`;
+            }
+            return `<span style="font-size:28px;">📦</span>`;
+        }
+
+        // ============================================
+        // 7. NAVIGATION
+        // ============================================
+        function attachNavEvents() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.onclick = () => navigateTo(item.dataset.page);
             });
         }
-    });
 
-    products = data;
-}
+        async function navigateTo(page) {
+            currentPage = page;
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
+            if (page === 'dashboard') await renderDashboard();
+            else if (page === 'products') await renderProducts();
+            else if (page === 'stock') await renderStock();
+            else if (page === 'orders') await renderOrders();
+            else if (page === 'promos') await renderPromos();
+        }
 
-// =========================
-// IMAGE DISPLAY FIXÉ
-// =========================
-function getDisplayIcon(p) {
-    const img = p.images?.[0] || p.image_url;
+        // ============================================
+        // 8. DASHBOARD
+        // ============================================
+        async function renderDashboard() {
+            await Promise.all([loadProducts(), loadOrders(), loadPromos()]);
+            const totalProducts = products.length;
+            const activeProducts = products.filter(p => p.active !== false).length;
+            const paidOrders = orders.filter(o => o.status === 'Payée');
+            const revenue = paidOrders.reduce((s, o) => s + (o.total || 0), 0);
+            const stockStats = getStockStats();
 
-    if (isValidUrl(img)) {
-        return `<img src="${img}" onerror="this.src='https://via.placeholder.com/40'" />`;
-    }
+            const html = `
+                <div class="page-header"><h1>📊 Dashboard</h1></div>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-title">📦 Produits</div><div class="stat-value">${totalProducts}</div><div class="stat-sub">${activeProducts} actifs</div></div>
+                    <div class="stat-card"><div class="stat-title">🛒 Commandes</div><div class="stat-value">${orders.length}</div><div class="stat-sub">${paidOrders.length} payées</div></div>
+                    <div class="stat-card"><div class="stat-title">💰 CA</div><div class="stat-value">${revenue.toFixed(2)} €</div><div class="stat-sub">commandes payées</div></div>
+                    <div class="stat-card"><div class="stat-title">📦 Stock total</div><div class="stat-value">${stockStats.totalStock}</div><div class="stat-sub">unités</div></div>
+                    <div class="stat-card"><div class="stat-title">💵 Valeur du stock</div><div class="stat-value">${stockStats.stockValue.toFixed(2)} €</div><div class="stat-sub">estimation</div></div>
+                    <div class="stat-card"><div class="stat-title">⚠️ Stock bas</div><div class="stat-value">${stockStats.lowStockItems}</div><div class="stat-sub">articles ≤2</div></div>
+                    <div class="stat-card"><div class="stat-title">❌ Ruptures (articles)</div><div class="stat-value">${stockStats.ruptures}</div><div class="stat-sub">produits/variantes à 0</div></div>
+                    <div class="stat-card"><div class="stat-title">📦 Produits en rupture</div><div class="stat-value">${stockStats.productRuptures}</div><div class="stat-sub">produits (toutes variantes à 0)</div></div>
+                </div>
+                <h3 style="margin:1.5rem 0 0.5rem;">Dernières commandes</h3>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>N°</th><th>Client</th><th>Total</th><th>Statut</th></tr></thead>
+                        <tbody>
+                            ${orders.slice(0,5).map(o => `
+                                <tr><td><strong>${o.id}</strong></td><td>${o.client}</td><td>${(o.total||0).toFixed(2)} €</td><td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td></tr>
+                            `).join('')}
+                            ${orders.length === 0 ? '<tr><td colspan="4" style="text-align:center;color:#94a3b8;">Aucune commande</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('mainContent').innerHTML = html;
+            attachNavEvents();
+        }
 
-    return '📦';
-}
+        // ============================================
+        // 9. GESTION PRODUITS
+        // ============================================
+        async function renderProducts() {
+            await loadProducts();
+            const html = `
+                <div class="page-header"><h1>👕 Produits</h1><button class="btn" id="addProductBtn">+ Ajouter</button></div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Icône</th><th>Nom</th><th>Type</th><th>Prix</th><th>Stock</th><th>Actif</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${products.map(p => `
+                                <tr>
+                                    <td><div class="product-img-list">${getDisplayIcon(p)}</div></td>
+                                    <td><strong>${p.name}</strong></td>
+                                    <td>${p.type === 'simple' ? 'Simple' : 'Variantes'}</td>
+                                    <td>${p.type === 'simple' ? (p.price || 0) + ' €' : 'à partir de ' + (p.base_price || 0) + ' €'}</td>
+                                    <td>${p.type === 'simple' ? (p.stock || 0) : (p.variants?.reduce((s,v) => s + (v.stock || 0), 0) || 0)}</td>
+                                    <td>${p.active !== false ? '✅' : '❌'}</td>
+                                    <td>
+                                        <button class="btn-small btn-outline" onclick="editProduct('${p.id}')">Modifier</button>
+                                        <button class="btn-small btn-danger" onclick="deleteProduct('${p.id}')">Supprimer</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                            ${products.length === 0 ? '<tr><td colspan="7" style="text-align:center;color:#94a3b8;">Aucun produit</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('mainContent').innerHTML = html;
+            document.getElementById('addProductBtn').onclick = () => showProductModal();
+            attachNavEvents();
+        }
 
-// =========================
-// DASHBOARD SIMPLE
-// =========================
-async function renderDashboard() {
-    await loadProducts();
+        // ============================================
+        // 10. MODALE PRODUIT (avec upload Storage)
+        // ============================================
+        const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
 
-    document.getElementById('mainContent').innerHTML = `
-        <h1>Dashboard</h1>
+        function showProductModal(product = null) {
+            const isEdit = !!product;
+            let variantsArray = product?.variants ? [...product.variants] : [];
+            let selectedEmoji = product?.icon || '📦';
+            let imagesArray = product?.images ? [...product.images] : [];
+            let uploadedFiles = [];
+            let uploading = false;
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr><th>Image</th><th>Nom</th><th>Stock</th></tr>
-                </thead>
-                <tbody>
-                    ${products.map(p => `
-                        <tr>
-                            <td class="product-img-list">${getDisplayIcon(p)}</td>
-                            <td>${p.name}</td>
-                            <td>${p.stock || 0}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-}
+            const modalDiv = document.createElement('div');
+            modalDiv.className = 'modal';
+            modalDiv.innerHTML = `
+                <div class="modal-content">
+                    <h2>${isEdit ? 'Modifier' : 'Ajouter'} un produit</h2>
+                    <div class="form-group"><label>Nom</label><input id="prodName" value="${product?.name || ''}"></div>
+                    <div class="form-group"><label>Description</label><textarea id="prodDesc" rows="2">${product?.description || ''}</textarea></div>
+                    <div class="form-group"><label>Type</label>
+                        <select id="prodType">
+                            <option value="simple" ${product?.type === 'simple' ? 'selected' : ''}>Simple</option>
+                            <option value="variants" ${product?.type === 'variants' ? 'selected' : ''}>Variantes</option>
+                        </select>
+                    </div>
+                    <div id="simpleFields" style="${product?.type === 'variants' ? 'display:none' : 'block'}">
+                        <div class="form-group"><label>Prix (€)</label><input id="simplePrice" type="number" step="0.01" value="${product?.price || ''}"></div>
+                        <div class="form-group"><label>Stock</label><input id="simpleStock" type="number" value="${product?.stock || 0}"></div>
+                    </div>
+                    <div id="variantsFields" style="${product?.type === 'variants' ? 'block' : 'display:none'}">
+                        <div class="form-group"><label>Prix de base (€)</label><input id="basePrice" type="number" step="0.01" value="${product?.base_price || ''}"></div>
+                        <div class="form-group"><label>Variantes</label><div id="variantsContainer"></div><button type="button" class="btn-small btn-outline" id="addVariantBtn">+ Ajouter variante</button></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Icône / Image</label>
+                        <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:0.5rem;">
+                            <label><input type="radio" name="imgType" value="emoji" ${imagesArray.length === 0 ? 'checked' : ''}> Émoji</label>
+                            <label><input type="radio" name="imgType" value="upload" ${imagesArray.length > 0 ? 'checked' : ''}> Télécharger (PNG/JPG)</label>
+                            <label><input type="radio" name="imgType" value="none" ${(!imagesArray.length && !selectedEmoji) ? 'checked' : ''}> Pas d'icône</label>
+                        </div>
+                        <div id="emojiSelector" style="${imagesArray.length > 0 ? 'display:none' : 'block'}">
+                            <div class="emoji-grid" id="emojiGrid"></div>
+                            <input type="text" id="customEmoji" placeholder="Ou saisis un émoji" maxlength="2" style="width:200px;">
+                            <div>Aperçu : <span id="emojiPreview" style="font-size:2rem;">${selectedEmoji}</span></div>
+                        </div>
+                        <div id="uploadArea" style="display:block; margin-top:0.5rem;">
+                            <input type="file" id="imageUpload" accept="image/png,image/jpeg,image/jpg,image/webp" multiple>
+                            <button type="button" class="upload-btn" id="addImageBtn">📤 Ajouter les images</button>
+                            <button type="button" class="btn-small btn-outline" id="clearImagesBtn">Effacer toutes</button>
+                            <div id="uploadStatus" style="font-size:0.8rem; color:#64748b; margin-top:0.3rem;"></div>
+                            <div class="image-preview-grid" id="imagePreviewGrid">
+                                ${imagesArray.map(url => `<img src="${url}">`).join('')}
+                            </div>
+                            <textarea id="imagesInput" rows="2" placeholder="Ou URLs séparées par des virgules">${imagesArray.join(', ')}</textarea>
+                        </div>
+                    </div>
+                    <div class="form-group"><label><input type="checkbox" id="activeCheck" ${product?.active !== false ? 'checked' : ''}> Actif</label></div>
+                    <div class="flex-between"><button class="btn-outline" id="cancelModal">Annuler</button><button class="btn" id="saveModal">Enregistrer</button></div>
+                </div>
+            `;
+            document.body.appendChild(modalDiv);
 
-// =========================
-// NAV
-// =========================
-document.querySelectorAll('.nav-item').forEach(el => {
-    el.onclick = () => renderDashboard();
-});
+            // Grille émojis
+            const grid = modalDiv.querySelector('#emojiGrid');
+            emojiList.forEach(e => {
+                const div = document.createElement('div');
+                div.className = 'emoji-option' + (e === selectedEmoji ? ' selected' : '');
+                div.textContent = e;
+                div.onclick = () => {
+                    modalDiv.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
+                    div.classList.add('selected');
+                    modalDiv.querySelector('#customEmoji').value = '';
+                    modalDiv.querySelector('#emojiPreview').textContent = e;
+                    selectedEmoji = e;
+                    document.querySelector('input[name="imgType"][value="upload"]').checked = false;
+                    document.querySelector('input[name="imgType"][value="emoji"]').checked = true;
+                };
+                grid.appendChild(div);
+            });
+            modalDiv.querySelector('#customEmoji').addEventListener('input', (e) => {
+                const val = e.target.value.trim();
+                if (val) {
+                    modalDiv.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
+                    modalDiv.querySelector('#emojiPreview').textContent = val;
+                    selectedEmoji = val;
+                }
+            });
 
-// =========================
-// INIT
-// =========================
-renderDashboard();
+            // Radios
+            const radioEmoji = modalDiv.querySelector('input[value="emoji"]');
+            const radioUpload = modalDiv.querySelector('input[value="upload"]');
+            const radioNone = modalDiv.querySelector('input[value="none"]');
+            const emojiDiv = modalDiv.querySelector('#emojiSelector');
+            const uploadDiv = modalDiv.querySelector('#uploadArea');
+            const toggleFields = () => {
+                if (radioEmoji.checked) {
+                    emojiDiv.style.display = 'block';
+                } else {
+                    emojiDiv.style.display = 'none';
+                }
+            };
+            radioEmoji.addEventListener('change', toggleFields);
+            radioUpload.addEventListener('change', toggleFields);
+            radioNone.addEventListener('change', toggleFields);
+            toggleFields();
 
-</script>
+            // Upload image vers Storage
+            const fileInput = modalDiv.querySelector('#imageUpload');
+            const previewGrid = modalDiv.querySelector('#imagePreviewGrid');
+            const imagesInput = modalDiv.querySelector('#imagesInput');
+            const uploadStatus = modalDiv.querySelector('#uploadStatus');
 
+            function updatePreview() {
+                const urls = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
+                previewGrid.innerHTML = urls.map(url => `<img src="${url}">`).join('');
+            }
+
+            modalDiv.querySelector('#addImageBtn').addEventListener('click', async () => {
+                const files = fileInput.files;
+                if (!files || files.length === 0) { showToast('Sélectionnez des images'); return; }
+                if (uploading) { showToast('Upload en cours...'); return; }
+                uploading = true;
+                uploadStatus.textContent = '⏳ Upload en cours...';
+
+                const productId = isEdit ? product.id : 'new_' + Date.now();
+                const uploadedUrls = [];
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (!file.type.startsWith('image/')) continue;
+                    try {
+                        const url = await uploadImageToStorage(file, productId);
+                        if (url) {
+                            uploadedUrls.push(url);
+                        }
+                    } catch (e) {
+                        console.error('Erreur upload:', e);
+                    }
+                }
+
+                if (uploadedUrls.length > 0) {
+                    const existing = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
+                    const all = [...existing, ...uploadedUrls];
+                    imagesInput.value = all.join(', ');
+                    updatePreview();
+                    showToast(`✅ ${uploadedUrls.length} image(s) uploadée(s)`);
+                }
+
+                uploading = false;
+                uploadStatus.textContent = '';
+                fileInput.value = '';
+            });
+
+            modalDiv.querySelector('#clearImagesBtn').addEventListener('click', () => {
+                imagesInput.value = '';
+                updatePreview();
+                showToast('Images effacées');
+            });
+            imagesInput.addEventListener('input', updatePreview);
+
+            // Variantes
+            const variantsContainer = modalDiv.querySelector('#variantsContainer');
+            function renderVariants() {
+                variantsContainer.innerHTML = '';
+                variantsArray.forEach((v, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'variant-row';
+                    div.innerHTML = `
+                        <input type="text" placeholder="Taille/Couleur" value="${v.attributes?.taille || ''}/${v.attributes?.couleur || ''}">
+                        <input type="number" placeholder="Stock" value="${v.stock || 0}" style="width:80px;">
+                        <input type="number" placeholder="Prix €" step="0.01" value="${v.price || 0}" style="width:100px;">
+                        <button class="btn-small btn-danger" data-idx="${idx}">✖</button>
+                    `;
+                    variantsContainer.appendChild(div);
+                });
+                variantsContainer.querySelectorAll('.btn-danger').forEach(btn => {
+                    btn.onclick = () => {
+                        const idx = parseInt(btn.dataset.idx);
+                        variantsArray.splice(idx, 1);
+                        renderVariants();
+                    };
+                });
+            }
+            if (product?.type === 'variants') renderVariants();
+            modalDiv.querySelector('#addVariantBtn')?.addEventListener('click', () => {
+                variantsArray.push({ attributes: { taille: '', couleur: '' }, stock: 0, price: 0 });
+                renderVariants();
+            });
+
+            // Toggle simple/variants
+            const typeSelect = modalDiv.querySelector('#prodType');
+            const simpleDiv = modalDiv.querySelector('#simpleFields');
+            const variantsDiv = modalDiv.querySelector('#variantsFields');
+            typeSelect.addEventListener('change', () => {
+                const isVar = typeSelect.value === 'variants';
+                simpleDiv.style.display = isVar ? 'none' : 'block';
+                variantsDiv.style.display = isVar ? 'block' : 'none';
+            });
+
+            // Sauvegarde
+            modalDiv.querySelector('#saveModal').onclick = async () => {
+                const name = modalDiv.querySelector('#prodName').value.trim();
+                if (!name) return alert('Nom requis');
+                const description = modalDiv.querySelector('#prodDesc').value;
+                const active = modalDiv.querySelector('#activeCheck').checked;
+
+                let icon = null;
+                if (radioEmoji.checked && selectedEmoji) {
+                    icon = selectedEmoji;
+                }
+
+                // Récupérer toutes les images (URLs)
+                const allImages = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
+
+                if (typeSelect.value === 'simple') {
+                    const price = parseFloat(modalDiv.querySelector('#simplePrice').value);
+                    const stock = parseInt(modalDiv.querySelector('#simpleStock').value);
+                    if (isNaN(price)) return alert('Prix invalide');
+                    const newProd = {
+                        id: isEdit ? product.id : Date.now().toString(),
+                        name, description, type: 'simple',
+                        price, stock,
+                        icon, images: allImages, active
+                    };
+                    if (isEdit) {
+                        const idx = products.findIndex(p => p.id === product.id);
+                        if (idx !== -1) products[idx] = newProd;
+                    } else products.push(newProd);
+                } else {
+                    const basePrice = parseFloat(modalDiv.querySelector('#basePrice').value);
+                    if (isNaN(basePrice)) return alert('Prix de base requis');
+                    const finalVariants = [];
+                    const rows = variantsContainer.querySelectorAll('.variant-row');
+                    rows.forEach(row => {
+                        const inputs = row.querySelectorAll('input');
+                        const attrsStr = inputs[0]?.value || '';
+                        const [taille, couleur] = attrsStr.split('/');
+                        const stock = parseInt(inputs[1]?.value || 0);
+                        const price = parseFloat(inputs[2]?.value || 0) || basePrice;
+                        if (taille.trim()) {
+                            finalVariants.push({
+                                id: Date.now() + Math.random().toString(36).substring(2,6),
+                                attributes: { taille: taille.trim(), couleur: couleur.trim() || '' },
+                                stock, price
+                            });
+                        }
+                    });
+                    if (finalVariants.length === 0) return alert('Ajoutez au moins une variante');
+                    const newProd = {
+                        id: isEdit ? product.id : Date.now().toString(),
+                        name, description, type: 'variants',
+                        base_price: basePrice,
+                        variants: finalVariants,
+                        icon, images: allImages, active
+                    };
+                    if (isEdit) {
+                        const idx = products.findIndex(p => p.id === product.id);
+                        if (idx !== -1) products[idx] = newProd;
+                    } else products.push(newProd);
+                }
+
+                try {
+                    if (isEdit) {
+                        await fetchSupabase(`products?id=eq.${product.id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify(products.find(p => p.id === product.id))
+                        });
+                    } else {
+                        await fetchSupabase('products', {
+                            method: 'POST',
+                            body: JSON.stringify(products[products.length - 1])
+                        });
+                    }
+                    await loadProducts();
+                    showToast(isEdit ? '✅ Produit modifié' : '✅ Produit ajouté');
+                    modalDiv.remove();
+                    await renderProducts();
+                } catch (e) {
+                    showToast('❌ Erreur: ' + e.message);
+                }
+            };
+            modalDiv.querySelector('#cancelModal').onclick = () => modalDiv.remove();
+            modalDiv.addEventListener('click', (e) => { if (e.target === modalDiv) modalDiv.remove(); });
+        }
+
+        // ============================================
+        // 11. ACTIONS PRODUITS
+        // ============================================
+        window.editProduct = async function(id) {
+            await loadProducts();
+            const product = products.find(p => p.id === id);
+            if (product) showProductModal(product);
+        };
+
+        window.deleteProduct = async function(id) {
+            if (!confirm('Supprimer ce produit ?')) return;
+            try {
+                await fetchSupabase(`products?id=eq.${id}`, { method: 'DELETE' });
+                await loadProducts();
+                showToast('✅ Produit supprimé');
+                await renderProducts();
+            } catch (e) {
+                showToast('❌ Erreur: ' + e.message);
+            }
+        };
+
+        // ============================================
+        // 12. GESTION STOCK
+        // ============================================
+        async function renderStock() {
+            await loadProducts();
+            let rows = [];
+            products.forEach(p => {
+                if (p.type === 'simple') {
+                    rows.push({ name: p.name, variant: 'Simple', stock: p.stock || 0, productId: p.id, variantId: null, isVariant: false, icon: p.icon, images: p.images || [] });
+                } else if (p.variants) {
+                    p.variants.forEach(v => {
+                        rows.push({ name: p.name, variant: `${v.attributes?.taille || ''} / ${v.attributes?.couleur || ''}`,
+                            stock: v.stock || 0, productId: p.id, variantId: v.id, isVariant: true, icon: p.icon, images: p.images || [] });
+                    });
+                }
+            });
+
+            const html = `
+                <div class="page-header"><h1>📦 Gestion du stock</h1></div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Icône</th><th>Produit</th><th>Variante</th><th>Stock</th><th>Ajuster</th></tr></thead>
+                        <tbody>
+                            ${rows.map(r => {
+                                let iconHtml = '📦';
+                                if (r.images && r.images.length > 0) {
+                                    const imgUrl = r.images[0];
+                                    if (typeof imgUrl === 'string' && imgUrl.startsWith('http')) {
+                                        iconHtml = `<img src="${imgUrl}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+                                    } else if (r.icon) {
+                                        iconHtml = `<span style="font-size:28px;">${r.icon}</span>';
+                                    }
+                                } else if (r.icon) {
+                                    iconHtml = `<span style="font-size:28px;">${r.icon}</span>';
+                                }
+                                return `
+                                    <tr>
+                                        <td><div class="product-img-list">${iconHtml}</div></td>
+                                        <td><strong>${r.name}</strong></td>
+                                        <td>${r.variant}</td>
+                                        <td>${r.stock === 0 ? '<span class="badge badge-danger">Rupture</span>' :
+                                            r.stock <= 2 ? `<span class="badge badge-warning">Bas (${r.stock})</span>` :
+                                            `<span class="badge badge-success">${r.stock}</span>`}</td>
+                                        <td>
+                                            <button class="btn-small btn-outline stock-down" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">-</button>
+                                            <span style="margin:0 8px;font-weight:600;">${r.stock}</span>
+                                            <button class="btn-small btn-outline stock-up" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">+</button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                            ${rows.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Aucun produit</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('mainContent').innerHTML = html;
+
+            document.querySelectorAll('.stock-down, .stock-up').forEach(btn => {
+                btn.onclick = async () => {
+                    const delta = btn.classList.contains('stock-up') ? 1 : -1;
+                    const pid = btn.dataset.pid;
+                    const vid = btn.dataset.vid;
+                    const isVar = btn.dataset.isvar === 'true';
+                    const prod = products.find(p => p.id === pid);
+                    if (!prod) { showToast('Erreur'); return; }
+                    try {
+                        if (!isVar && prod.type === 'simple') {
+                            prod.stock = Math.max(0, (prod.stock || 0) + delta);
+                            await fetchSupabase(`products?id=eq.${pid}`, {
+                                method: 'PATCH',
+                                body: JSON.stringify({ stock: prod.stock })
+                            });
+                        } else if (isVar && prod.variants) {
+                            const variant = prod.variants.find(v => v.id === vid);
+                            if (variant) {
+                                variant.stock = Math.max(0, (variant.stock || 0) + delta);
+                                await fetchSupabase(`products?id=eq.${pid}`, {
+                                    method: 'PATCH',
+                                    body: JSON.stringify({ variants: prod.variants })
+                                });
+                            }
+                        }
+                        await loadProducts();
+                        await renderStock();
+                        showToast('✅ Stock mis à jour');
+                    } catch (e) {
+                        showToast('❌ Erreur: ' + e.message);
+                    }
+                };
+            });
+            attachNavEvents();
+        }
+
+        // ============================================
+        // 13. GESTION COMMANDES
+        // ============================================
+        async function renderOrders() {
+            await loadOrders();
+            const html = `
+                <div class="page-header"><h1>📋 Commandes (${orders.length})</h1></div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>N°</th><th>Client</th><th>Prix original</th><th>Remise</th><th>Total payé</th><th>Code promo</th><th>Statut</th><th>Suivi admin</th><th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orders.map(o => {
+                                const originalTotal = o.total + (o.discount || 0);
+                                return `
+                                    <tr>
+                                        <td><strong>${o.id}</strong></td>
+                                        <td>${o.client}</td>
+                                        <td>${originalTotal.toFixed(2)} €</td>
+                                        <td>${(o.discount || 0).toFixed(2)} €</td>
+                                        <td>${(o.total || 0).toFixed(2)} €</td>
+                                        <td>${o.promo_code ? `<span class="badge badge-success">${o.promo_code}</span>` : '—'}</td>
+                                        <td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td>
+                                        <td>
+                                            <select class="admin-followup" data-id="${o.id}">
+                                                ${['À traiter','En cours','Expédié','Terminé'].map(s => `<option ${o.admin_followup === s ? 'selected' : ''}>${s}</option>`).join('')}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <button class="btn-small btn-outline" onclick="viewOrder('${o.id}')">👁️ Voir</button>
+                                            <button class="btn-small btn-danger" onclick="deleteOrder('${o.id}')">🗑️</button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                            ${orders.length === 0 ? '<tr><td colspan="9" style="text-align:center;color:#94a3b8;">Aucune commande</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('mainContent').innerHTML = html;
+
+            document.querySelectorAll('.admin-followup').forEach(sel => {
+                sel.onchange = async () => {
+                    const order = orders.find(o => o.id === sel.dataset.id);
+                    if (order) {
+                        order.admin_followup = sel.value;
+                        await fetchSupabase(`orders?id=eq.${order.id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ admin_followup: sel.value })
+                        });
+                    }
+                };
+            });
+            attachNavEvents();
+        }
+
+        // ============================================
+        // 14. VUE DÉTAILLÉE D'UNE COMMANDE
+        // ============================================
+        window.viewOrder = function(id) {
+            const order = orders.find(o => o.id === id);
+            if (!order) return;
+
+            const subtotal = order.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const reduction = order.discount || 0;
+            const totalPaye = order.total || 0;
+
+            const itemsList = order.items.map(item => {
+                const product = products.find(p => p.id === item.productId);
+                const name = product ? product.name : 'Produit inconnu';
+                let variantStr = '';
+                if (item.variantId && product && product.variants) {
+                    const variant = product.variants.find(v => v.id === item.variantId);
+                    if (variant) {
+                        variantStr = ` (${variant.attributes.taille}/${variant.attributes.couleur})`;
+                    }
+                }
+                return `${name}${variantStr} × ${item.qty} = ${(item.price * item.qty).toFixed(2)} €`;
+            }).join('<br>');
+
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h2>📋 Détail de la commande</h2>
+                    <p><strong>N° :</strong> ${order.id}</p>
+                    <p><strong>Client :</strong> ${order.client}</p>
+                    <p><strong>Date :</strong> ${order.date || 'non renseignée'} ${order.time ? 'à ' + order.time : ''}</p>
+                    <p><strong>Statut :</strong> ${order.status}</p>
+                    <p><strong>Suivi admin :</strong> ${order.admin_followup || 'À traiter'}</p>
+                    <p><strong>Code promo :</strong> ${order.promo_code ? `<span class="badge badge-success">${order.promo_code}</span>` : 'Aucun'}</p>
+                    <hr>
+                    <p><strong>Articles :</strong></p>
+                    <div style="background:#f8fafc;padding:0.5rem;border-radius:8px;margin:0.5rem 0;">${itemsList}</div>
+                    <hr>
+                    <p><strong>Sous-total :</strong> ${subtotal.toFixed(2)} €</p>
+                    ${reduction > 0 ? `<p><strong>Réduction :</strong> -${reduction.toFixed(2)} €</p>` : ''}
+                    <p><strong>Total payé :</strong> ${totalPaye.toFixed(2)} €</p>
+                    <div style="margin-top:1.5rem;text-align:right;">
+                        <button class="btn-outline" id="closeOrderModal">Fermer</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('closeOrderModal').onclick = () => modal.remove();
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+        };
+
+        // ============================================
+        // 15. SUPPRIMER UNE COMMANDE
+        // ============================================
+        window.deleteOrder = async function(id) {
+            if (!confirm('Supprimer cette commande ?')) return;
+            try {
+                await fetchSupabase(`orders?id=eq.${id}`, { method: 'DELETE' });
+                await loadOrders();
+                showToast('✅ Commande supprimée');
+                await renderOrders();
+            } catch (e) {
+                showToast('❌ Erreur: ' + e.message);
+            }
+        };
+
+        // ============================================
+        // 16. GESTION PROMOS
+        // ============================================
+        async function renderPromos() {
+            await loadPromos();
+            const html = `
+                <div class="page-header"><h1>🏷️ Codes promo</h1><button class="btn" id="addPromoBtn">+ Créer</button></div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Code</th><th>Type</th><th>Valeur</th><th>Actif</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            ${promos.map(p => `
+                                <tr>
+                                    <td><strong>${p.code}</strong></td>
+                                    <td>${p.type === 'fixed' ? '€ fixe' : '%'}</td>
+                                    <td>${p.type === 'fixed' ? p.value + ' €' : p.value + ' %'}</td>
+                                    <td>${p.active ? '✅' : '❌'}</td>
+                                    <td>
+                                        <button class="btn-small btn-outline" onclick="togglePromo('${p.code}')">${p.active ? 'Désactiver' : 'Activer'}</button>
+                                        <button class="btn-small btn-danger" onclick="deletePromo('${p.code}')">Supprimer</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                            ${promos.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Aucun code promo</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            document.getElementById('mainContent').innerHTML = html;
+            document.getElementById('addPromoBtn').onclick = async () => {
+                const code = prompt('Code promo (ex: SOLDES20)');
+                if (!code) return;
+                const type = confirm('Type : OK = Pourcentage (%) / Annuler = Montant fixe (€)') ? 'percent' : 'fixed';
+                const value = parseFloat(prompt('Valeur (ex: 15 pour 15% ou 10€)'));
+                if (isNaN(value) || value <= 0) return alert('Valeur invalide');
+                try {
+                    await fetchSupabase('promos', {
+                        method: 'POST',
+                        body: JSON.stringify({ code: code.toUpperCase(), type, value, active: true })
+                    });
+                    await loadPromos();
+                    showToast('✅ Code promo créé');
+                    await renderPromos();
+                } catch (e) {
+                    showToast('❌ Erreur: ' + e.message);
+                }
+            };
+            attachNavEvents();
+        }
+
+        window.togglePromo = async function(code) {
+            const promo = promos.find(p => p.code === code);
+            if (!promo) return;
+            promo.active = !promo.active;
+            try {
+                await fetchSupabase(`promos?code=eq.${code}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ active: promo.active })
+                });
+                await loadPromos();
+                showToast(promo.active ? '✅ Promo activée' : '⛔ Promo désactivée');
+                await renderPromos();
+            } catch (e) {
+                showToast('❌ Erreur: ' + e.message);
+            }
+        };
+
+        window.deletePromo = async function(code) {
+            if (!confirm('Supprimer ce code promo ?')) return;
+            try {
+                await fetchSupabase(`promos?code=eq.${code}`, { method: 'DELETE' });
+                await loadPromos();
+                showToast('✅ Code promo supprimé');
+                await renderPromos();
+            } catch (e) {
+                showToast('❌ Erreur: ' + e.message);
+            }
+        };
+
+        // ============================================
+        // 17. SYNCHRONISATION INTER-ONGLETS
+        // ============================================
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'shop_products' || e.key === 'shop_promos' || e.key === 'shop_orders' || e.key === 'shop_cart') {
+                console.log('🔄 Changement détecté sur', e.key);
+                if (currentPage === 'dashboard') renderDashboard();
+                else if (currentPage === 'products') renderProducts();
+                else if (currentPage === 'stock') renderStock();
+                else if (currentPage === 'orders') renderOrders();
+                else if (currentPage === 'promos') renderPromos();
+            }
+        });
+
+        // ============================================
+        // 18. INITIALISATION
+        // ============================================
+        async function init() {
+            await renderDashboard();
+            attachNavEvents();
+        }
+        init();
+    </script>
 </body>
 </html>
