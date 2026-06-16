@@ -1,17 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Test Supabase</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyleShop - Boutique</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:system-ui; }
+        body { background:#f8fafc; }
+        .header { background:white; border-bottom:1px solid #e2e8f0; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        .logo { font-size:1.6rem; font-weight:700; cursor:pointer; }
+        .cart-icon { cursor:pointer; font-size:1.8rem; position:relative; }
+        .cart-count { position:absolute; top:-8px; right:-12px; background:#3b82f6; color:white; font-size:0.7rem; border-radius:30px; padding:2px 6px; }
+        .container { max-width:1300px; margin:0 auto; padding:2rem; }
+        .products-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:2rem; margin-top:1.5rem; }
+        .product-card { background:white; border-radius:24px; padding:1.2rem; box-shadow:0 1px 3px rgba(0,0,0,0.05); border:1px solid #e2e8f0; cursor:pointer; transition:0.2s; }
+        .product-card:hover { transform:translateY(-4px); box-shadow:0 10px 25px -5px rgba(0,0,0,0.1); }
+        .product-icon { font-size:3rem; text-align:center; margin-bottom:0.5rem; }
+        .product-title { font-size:1.2rem; font-weight:600; text-align:center; }
+        .product-price { font-weight:700; font-size:1.2rem; margin-top:0.5rem; text-align:center; }
+        .stock-badge { font-size:0.7rem; text-align:center; margin-top:0.5rem; }
+        .stock-ok { color:#15803d; }
+        .stock-out { color:#dc2626; }
+    </style>
 </head>
 <body>
-    <h1>Test de connexion</h1>
-    <div id="result">Chargement...</div>
+
+    <div class="header">
+        <div class="logo" onclick="navigateTo('catalogue')">StyleShop</div>
+        <div class="cart-icon" onclick="navigateTo('cart')">🛒 <span id="cartCount" class="cart-count">0</span></div>
+    </div>
+
+    <div id="app" class="container">
+        <div style="text-align:center;padding:3rem;">Chargement...</div>
+    </div>
 
     <script>
         const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
 
-        async function test() {
+        let products = [];
+
+        async function loadProducts() {
             try {
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*`, {
                     headers: {
@@ -20,19 +49,44 @@
                         'Content-Type': 'application/json'
                     }
                 });
-                if (!response.ok) {
-                    document.getElementById('result').innerHTML = `❌ HTTP ${response.status}: ${await response.text()}`;
-                    return;
-                }
-                const data = await response.json();
-                document.getElementById('result').innerHTML = `✅ ${data.length} produits trouvés !`;
-                console.log('Produits:', data);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                products = await response.json();
+                console.log('✅ Produits chargés:', products.length);
+                renderCatalogue();
             } catch(e) {
-                document.getElementById('result').innerHTML = `❌ Exception: ${e.message}`;
-                console.error(e);
+                console.error('Erreur:', e);
+                document.getElementById('app').innerHTML = `<p style="color:red;">❌ Erreur: ${e.message}</p>`;
             }
         }
-        test();
+
+        function renderCatalogue() {
+            const app = document.getElementById('app');
+            if (!products || products.length === 0) {
+                app.innerHTML = `<p>Aucun produit trouvé.</p>`;
+                return;
+            }
+            const html = `
+                <h1>Catalogue</h1>
+                <div class="products-grid">
+                    ${products.map(p => `
+                        <div class="product-card">
+                            <div class="product-icon">${p.icon || '📦'}</div>
+                            <div class="product-title">${p.name}</div>
+                            <div class="product-price">${(p.price || p.base_price || 0).toFixed(2)} €</div>
+                            <div class="stock-badge ${p.stock > 0 ? 'stock-ok' : 'stock-out'}">${p.stock > 0 ? '✅ En stock' : '❌ Rupture'}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            app.innerHTML = html;
+        }
+
+        function navigateTo(page) {
+            if (page === 'catalogue') renderCatalogue();
+        }
+
+        loadProducts();
+        window.navigateTo = navigateTo;
     </script>
 </body>
 </html>
