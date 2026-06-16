@@ -1,21 +1,3 @@
-
-Parfait ! La boutique est fonctionnelle avec les codes promo, passons maintenant au panel admin.
-
-Je vous propose une version admin complète qui utilise la même architecture fetch que la boutique, pour une cohérence parfaite. Le panel permet de gérer :
-
-· Dashboard : indicateurs clés (produits, commandes, CA, stock)
-· Produits : ajout / modification / suppression (avec variantes et émojis)
-· Stock : ajustement des quantités par produit / variante
-· Commandes : visualisation, suivi admin, suppression
-· Promos : création, activation / désactivation, suppression
-
-Les données sont partagées via Supabase, donc toute modification dans l’admin est immédiatement visible dans la boutique (et inversement).
-
----
-
-📁 admin.html (version finale)
-
-```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
