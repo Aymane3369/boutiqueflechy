@@ -69,14 +69,14 @@
         <div class="auth-box">
             <h2 style="margin-bottom:1rem;">🔐 Admin</h2>
             <div id="authError" style="color:red;margin-bottom:0.5rem;"></div>
-            <input type="email" id="authEmail" placeholder="Email admin" value="admin@styleshop.com">
+            <input type="email" id="authEmail" placeholder="Email admin">
             <input type="password" id="authPassword" placeholder="Mot de passe">
             <button class="btn" id="authLoginBtn">Se connecter</button>
             <button class="btn-outline" id="authSignupBtn" style="margin-top:0.5rem;width:100%;padding:0.5rem;">Créer un compte</button>
         </div>
     </div>
 
-    <div id="adminApp" style="display:none;width:100%;">
+    <div id="adminApp" style="display:none;width:100%;display:flex;">
         <div class="sidebar">
             <div class="logo"><h2>StyleShop</h2><span>Admin</span></div>
             <div class="nav">
@@ -96,7 +96,7 @@
 
     <script>
         // ============================================
-        // 1. CONFIGURATION SUPABASE
+        // 1. CONFIGURATION SUPABASE (UNE SEULE FOIS)
         // ============================================
         const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
@@ -379,7 +379,7 @@
         }
 
         // ============================================
-        // 10. MODALE PRODUIT (avec upload d'images multiples)
+        // 10. MODALE PRODUIT
         // ============================================
         const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
 
@@ -411,7 +411,7 @@
                         <div class="form-group"><label>Variantes</label><div id="variantsContainer"></div><button type="button" class="btn-small btn-outline" id="addVariantBtn">+ Ajouter variante</button></div>
                     </div>
                     <div class="form-group">
-                        <label>Icône / Image</label>
+                        <label>Icône / Images</label>
                         <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:0.5rem;">
                             <label><input type="radio" name="imgType" value="emoji" ${imagesArray.length === 0 ? 'checked' : ''}> Émoji</label>
                             <label><input type="radio" name="imgType" value="upload" ${imagesArray.length > 0 ? 'checked' : ''}> Images (PNG/JPG)</label>
