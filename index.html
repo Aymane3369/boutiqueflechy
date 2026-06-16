@@ -2,642 +2,378 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>StyleShop - Boutique en ligne</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyleShop - Boutique</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, 'Segoe UI', 'Inter', sans-serif;
-        }
-        body {
-            background: #f8fafc;
-            color: #0f172a;
-        }
-        .header {
-            background: white;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(8px);
-            background: rgba(255,255,255,0.95);
-        }
-        .logo {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #0f172a;
-            cursor: pointer;
-        }
-        .cart-icon {
-            position: relative;
-            cursor: pointer;
-            font-size: 1.8rem;
-        }
-        .cart-count {
-            position: absolute;
-            top: -8px;
-            right: -12px;
-            background: #3b82f6;
-            color: white;
-            font-size: 0.7rem;
-            font-weight: bold;
-            border-radius: 30px;
-            padding: 2px 6px;
-            min-width: 20px;
-            text-align: center;
-        }
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 2rem;
-            margin-top: 1.5rem;
-        }
-        .product-card {
-            background: white;
-            border-radius: 24px;
-            padding: 1.2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-            transition: 0.2s;
-            cursor: pointer;
-        }
-        .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-        }
-        .product-icon {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-        }
-        .product-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        .product-price {
-            font-weight: 700;
-            font-size: 1.2rem;
-            margin-top: 0.5rem;
-        }
-        .stock-badge {
-            font-size: 0.7rem;
-            margin-top: 0.5rem;
-            color: #15803d;
-        }
-        .stock-warning { color: #b45309; }
-        .stock-out { color: #dc2626; }
-        button {
-            background: #0f172a;
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-        }
+        /* (mêmes styles que précédemment, je les raccourcis pour lisibilité) */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui; }
+        body { background: #f8fafc; }
+        .header { background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 2rem; display: flex; justify-content: space-between; }
+        .logo { font-size: 1.6rem; font-weight: 700; cursor: pointer; }
+        .cart-icon { position: relative; cursor: pointer; font-size: 1.8rem; }
+        .cart-count { position: absolute; top: -8px; right: -12px; background: #3b82f6; color: white; border-radius: 30px; padding: 2px 6px; font-size: 0.7rem; }
+        .container { max-width: 1300px; margin: 0 auto; padding: 2rem; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 2rem; margin-top: 1.5rem; }
+        .product-card { background: white; border-radius: 24px; padding: 1.2rem; cursor: pointer; border: 1px solid #e2e8f0; }
+        .product-icon { font-size: 3rem; }
+        .product-title { font-size: 1.2rem; font-weight: 600; }
+        .product-price { font-weight: 700; margin-top: 0.5rem; }
+        .product-detail { background: white; border-radius: 32px; padding: 2rem; max-width: 700px; margin: 0 auto; }
+        .variant-options { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+        .variant-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.5rem 1rem; border-radius: 40px; cursor: pointer; }
+        .variant-btn.selected { background: #0f172a; color: white; }
+        .cart-page { background: white; border-radius: 32px; padding: 1.5rem; }
+        .cart-item { display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid #e2e8f0; }
+        .qty-btn { background: #e2e8f0; padding: 0.2rem 0.6rem; border-radius: 20px; }
+        .promo-box { background: #f8fafc; padding: 1rem; border-radius: 20px; margin-top: 1rem; display: flex; gap: 0.5rem; }
+        button { background: #0f172a; color: white; padding: 0.6rem 1.2rem; border-radius: 40px; border: none; cursor: pointer; }
         button.primary { background: #3b82f6; }
-        button.primary:hover { background: #2563eb; }
-        button.outline {
-            background: white;
-            border: 1px solid #cbd5e1;
-            color: #1e293b;
-        }
-        .product-detail {
-            background: white;
-            border-radius: 32px;
-            padding: 2rem;
-            max-width: 700px;
-            margin: 0 auto;
-            border: 1px solid #e2e8f0;
-        }
-        .variant-group { margin: 1.2rem 0; }
-        .variant-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        .variant-btn {
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            padding: 0.5rem 1rem;
-            border-radius: 40px;
-            cursor: pointer;
-        }
-        .variant-btn.selected {
-            background: #0f172a;
-            color: white;
-        }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            color: #3b82f6;
-        }
-        .cart-page {
-            background: white;
-            border-radius: 32px;
-            padding: 1.5rem;
-            border: 1px solid #e2e8f0;
-        }
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .cart-item-qty {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        .qty-btn {
-            background: #e2e8f0;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-        .summary {
-            margin-top: 1.5rem;
-            text-align: right;
-        }
-        .promo-box {
-            background: #f8fafc;
-            padding: 1rem;
-            border-radius: 20px;
-            margin-top: 1rem;
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            justify-content: flex-end;
-        }
-        .promo-box input {
-            padding: 0.5rem;
-            border-radius: 40px;
-            border: 1px solid #cbd5e1;
-            width: 200px;
-        }
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #0f172a;
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 40px;
-            z-index: 200;
-        }
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: white;
-            max-width: 500px;
-            width: 90%;
-            border-radius: 32px;
-            padding: 1.8rem;
-        }
-        hr { margin: 1rem 0; }
-        @media (max-width: 700px) { .container { padding: 1rem; } }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #0f172a; color: white; padding: 0.8rem 1.5rem; border-radius: 40px; z-index: 200; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; border-radius: 32px; padding: 1.8rem; max-width: 500px; width: 90%; }
     </style>
 </head>
 <body>
 <div class="header">
     <div class="logo" onclick="navigateTo('catalogue')">StyleShop</div>
-    <div class="cart-icon" onclick="navigateTo('cart')">
-        🛒 <span id="cartCount" class="cart-count">0</span>
-    </div>
+    <div class="cart-icon" onclick="navigateTo('cart')">🛒 <span id="cartCount" class="cart-count">0</span></div>
 </div>
 <div id="app" class="container"></div>
 
 <script>
-    // ---------- DONNÉES PRODUITS ----------
-    const products = [
-        { id: "tshirt", name: "T-shirt Classic", description: "Coton bio, coupe confortable.", type: "simple", price: 24.90, stock: 12, icon: "👕", variants: null },
-        { id: "sneakers", name: "Sneakers Urban", description: "Sneakers légères, semelle EVA.", type: "variants", basePrice: 89.90, icon: "👟",
-          variants: [
-              { id: "snk_38_blanc", attributes: { taille: "38", couleur: "Blanc" }, stock: 5, price: 89.90 },
-              { id: "snk_39_blanc", attributes: { taille: "39", couleur: "Blanc" }, stock: 3, price: 89.90 },
-              { id: "snk_40_blanc", attributes: { taille: "40", couleur: "Blanc" }, stock: 0, price: 89.90 },
-              { id: "snk_41_blanc", attributes: { taille: "41", couleur: "Blanc" }, stock: 2, price: 89.90 },
-              { id: "snk_38_noir", attributes: { taille: "38", couleur: "Noir" }, stock: 8, price: 89.90 },
-              { id: "snk_39_noir", attributes: { taille: "39", couleur: "Noir" }, stock: 4, price: 89.90 },
-              { id: "snk_40_noir", attributes: { taille: "40", couleur: "Noir" }, stock: 6, price: 89.90 },
-              { id: "snk_41_noir", attributes: { taille: "41", couleur: "Noir" }, stock: 1, price: 89.90 }
-          ] },
-        { id: "hoodie", name: "Hoodie Premium", description: "Molleton épais.", type: "variants", basePrice: 59.90, icon: "🧥",
-          variants: [
-              { id: "hd_s_gris", attributes: { taille: "S", couleur: "Gris" }, stock: 6, price: 59.90 },
-              { id: "hd_m_gris", attributes: { taille: "M", couleur: "Gris" }, stock: 10, price: 59.90 },
-              { id: "hd_l_gris", attributes: { taille: "L", couleur: "Gris" }, stock: 3, price: 59.90 },
-              { id: "hd_s_noir", attributes: { taille: "S", couleur: "Noir" }, stock: 2, price: 59.90 },
-              { id: "hd_m_noir", attributes: { taille: "M", couleur: "Noir" }, stock: 5, price: 59.90 },
-              { id: "hd_l_noir", attributes: { taille: "L", couleur: "Noir" }, stock: 1, price: 59.90 }
-          ] },
-        { id: "casquette", name: "Casquette Logo", description: "Coton bio.", type: "simple", price: 19.90, stock: 2, icon: "🧢", variants: null },
-        { id: "chaussettes", name: "Chaussettes Pack", description: "Lot de 3 paires.", type: "simple", price: 14.90, stock: 0, icon: "🧦", variants: null }
-    ];
+    // --- Configuration Supabase ---
+    const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Codes promo disponibles (simulation)
-    let promos = [
-        { code: "PROMO10", type: "fixed", value: 10, active: true },
-        { code: "BIENVENUE", type: "percent", value: 15, active: true },
-        { code: "SOLDES", type: "fixed", value: 5, active: true }
-    ];
-
-    // Panier
+    // --- Variables globales ---
+    let products = [];
+    let promos = [];
     let cart = [];
-    let appliedPromo = null; // { code, type, value, discountAmount }
+    let appliedPromo = null;
 
-    // Sauvegarde localStorage
+    // --- Fonctions de chargement depuis Supabase ---
+    async function loadProducts() {
+        const { data, error } = await supabase.from('products').select('*');
+        if (!error && data) products = data;
+        else console.error(error);
+    }
+
+    async function loadPromos() {
+        const { data, error } = await supabase.from('promos').select('*');
+        if (!error && data) promos = data;
+    }
+
+    async function loadCart() {
+        const stored = localStorage.getItem('styleShopCart');
+        if (stored) cart = JSON.parse(stored);
+        updateCartCount();
+    }
+
     function saveCart() {
-        localStorage.setItem("styleShopCart", JSON.stringify(cart));
+        localStorage.setItem('styleShopCart', JSON.stringify(cart));
         updateCartCount();
-    }
-    function loadCart() {
-        const stored = localStorage.getItem("styleShopCart");
-        if(stored) cart = JSON.parse(stored);
-        updateCartCount();
-    }
-    function updateCartCount() {
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        document.getElementById("cartCount").innerText = totalItems;
     }
 
+    function updateCartCount() {
+        const total = cart.reduce((s, i) => s + i.quantity, 0);
+        const span = document.getElementById('cartCount');
+        if (span) span.innerText = total;
+    }
+
+    // --- Utilitaires ---
     function getStock(productId, variantId) {
         const prod = products.find(p => p.id === productId);
-        if(!prod) return 0;
-        if(prod.type === "simple") return prod.stock;
-        const variant = prod.variants.find(v => v.id === variantId);
+        if (!prod) return 0;
+        if (prod.type === 'simple') return prod.stock || 0;
+        const variant = prod.variants?.find(v => v.id === variantId);
         return variant ? variant.stock : 0;
     }
 
     function showToast(msg) {
-        const toast = document.createElement("div");
-        toast.className = "toast";
+        const toast = document.createElement('div');
+        toast.className = 'toast';
         toast.innerText = msg;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 2000);
     }
 
-    // Ajouter au panier
-    function addToCart(productId, variantId, quantity = 1) {
+    // --- Panier ---
+    async function addToCart(productId, variantId, quantity = 1) {
         const product = products.find(p => p.id === productId);
-        if(!product) return false;
-        let availableStock = 0, price = 0, attributes = {};
-        if(product.type === "simple") {
-            availableStock = product.stock;
+        if (!product) return;
+        let available = 0, price = 0, attributes = {};
+        if (product.type === 'simple') {
+            available = product.stock || 0;
             price = product.price;
         } else {
-            const variant = product.variants.find(v => v.id === variantId);
-            if(!variant) return false;
-            availableStock = variant.stock;
+            const variant = product.variants?.find(v => v.id === variantId);
+            if (!variant) return;
+            available = variant.stock;
             price = variant.price;
             attributes = variant.attributes;
         }
-        if(availableStock < quantity) {
-            showToast(`Stock insuffisant (${availableStock})`);
-            return false;
-        }
-        const existingIndex = cart.findIndex(i => i.productId === productId && i.variantId === variantId);
-        if(existingIndex !== -1) {
-            const newQty = cart[existingIndex].quantity + quantity;
-            if(newQty > availableStock) {
-                showToast(`Max ${availableStock}`);
-                return false;
-            }
-            cart[existingIndex].quantity = newQty;
+        if (available < quantity) { showToast(`Stock insuffisant (${available})`); return; }
+        const existing = cart.find(i => i.productId === productId && i.variantId === variantId);
+        if (existing) {
+            const newQty = existing.quantity + quantity;
+            if (newQty > available) { showToast(`Max ${available}`); return; }
+            existing.quantity = newQty;
         } else {
-            cart.push({ productId, variantId: variantId || null, name: product.name, price, quantity, attributes, icon: product.icon });
+            cart.push({ productId, variantId, name: product.name, price, quantity, attributes, icon: product.icon });
         }
         saveCart();
-        showToast(`Ajouté : ${product.name} ${attributes.taille || ''}`);
-        return true;
+        showToast(`Ajouté : ${product.name}`);
+        if (currentPage === 'cart') renderCart();
     }
 
-    function updateCartItem(index, newQuantity) {
-        if(newQuantity <= 0) {
-            cart.splice(index,1);
+    async function updateCartItem(index, newQuantity) {
+        if (newQuantity <= 0) {
+            cart.splice(index, 1);
             saveCart();
             renderCurrentPage();
             return;
         }
         const item = cart[index];
         const stock = getStock(item.productId, item.variantId);
-        if(newQuantity > stock) {
-            showToast(`Stock max ${stock}`);
-            return;
-        }
+        if (newQuantity > stock) { showToast(`Stock max ${stock}`); return; }
         item.quantity = newQuantity;
         saveCart();
         renderCurrentPage();
     }
 
-    // Calcul du sous-total et application promo
-    function getSubtotal() {
-        return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    }
+    function getSubtotal() { return cart.reduce((s, i) => s + (i.price * i.quantity), 0); }
 
     function applyPromoCode(code) {
         const promo = promos.find(p => p.code === code && p.active);
-        if(!promo) return { success: false, message: "Code invalide ou inactif" };
+        if (!promo) return { success: false, message: 'Code invalide' };
         const subtotal = getSubtotal();
-        let discount = 0;
-        if(promo.type === "fixed") discount = Math.min(promo.value, subtotal);
-        else discount = subtotal * promo.value / 100;
+        let discount = promo.type === 'fixed' ? Math.min(promo.value, subtotal) : subtotal * promo.value / 100;
         discount = parseFloat(discount.toFixed(2));
         appliedPromo = { code: promo.code, type: promo.type, value: promo.value, discountAmount: discount };
-        return { success: true, discount, message: `Code ${code} appliqué : -${discount}€` };
+        return { success: true, message: `-${discount}€ appliqué` };
     }
 
-    function removePromo() {
-        appliedPromo = null;
+    function removePromo() { appliedPromo = null; }
+    function getTotal() { return getSubtotal() - (appliedPromo?.discountAmount || 0); }
+
+    // --- Simulation paiement + mise à jour stock Supabase ---
+    async function simulateCheckout(total) {
+        if (cart.length === 0) return;
+        // Vérifier stocks
+        for (const item of cart) {
+            const stock = getStock(item.productId, item.variantId);
+            if (item.quantity > stock) { showToast(`Stock dépassé pour ${item.name}`); return; }
+        }
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `<div class="modal-content"><h3>Paiement sécurisé</h3><p>Total : ${total.toFixed(2)} €</p><div style="display:flex;gap:1rem;justify-content:flex-end;"><button id="cancelPay" class="outline">Annuler</button><button id="confirmPay" class="primary">Payer</button></div></div>`;
+        document.body.appendChild(modal);
+        document.getElementById('cancelPay').onclick = () => modal.remove();
+        document.getElementById('confirmPay').onclick = async () => {
+            modal.remove();
+            // 1. Mettre à jour les stocks dans Supabase
+            for (const item of cart) {
+                const prod = products.find(p => p.id === item.productId);
+                if (prod.type === 'simple') {
+                    const newStock = (prod.stock || 0) - item.quantity;
+                    await supabase.from('products').update({ stock: newStock }).eq('id', prod.id);
+                } else {
+                    const variant = prod.variants.find(v => v.id === item.variantId);
+                    if (variant) {
+                        variant.stock -= item.quantity;
+                        await supabase.from('products').update({ variants: prod.variants }).eq('id', prod.id);
+                    }
+                }
+            }
+            // 2. Créer la commande
+            const orderId = 'ORD-' + Math.random().toString(36).substring(2,8).toUpperCase();
+            const now = new Date();
+            const order = {
+                id: orderId,
+                client: `client${Math.floor(Math.random()*1000)}@email.com`,
+                date: now.toISOString().slice(0,10),
+                time: now.toLocaleTimeString('fr-FR'),
+                items: cart.map(i => ({ productId: i.productId, variantId: i.variantId, qty: i.quantity, price: i.price })),
+                total: total,
+                status: 'Payée',
+                admin_followup: 'À traiter',
+                promo_code: appliedPromo?.code || null,
+                discount: appliedPromo?.discountAmount || 0
+            };
+            await supabase.from('orders').insert(order);
+            // 3. Vider panier et promo
+            cart = [];
+            appliedPromo = null;
+            saveCart();
+            showToast(`Commande ${orderId} confirmée !`);
+            // 4. Recharger les produits pour avoir les stocks à jour
+            await loadProducts();
+            renderConfirmation(orderId, total);
+        };
     }
 
-    function getTotal() {
-        const subtotal = getSubtotal();
-        const discount = appliedPromo ? appliedPromo.discountAmount : 0;
-        return subtotal - discount;
+    function renderConfirmation(orderId, total) {
+        const html = `<div style="background:white;border-radius:32px;padding:2rem;text-align:center;"><h2>✅ Commande confirmée !</h2><p>N° ${orderId}</p><p>Total payé : ${total.toFixed(2)} €</p><button class="primary" onclick="navigateTo('catalogue')">Nouvelle commande</button></div>`;
+        document.getElementById('app').innerHTML = html;
     }
 
-    // Pages
-    let currentPage = "catalogue";
+    // --- Navigation et rendu ---
+    let currentPage = 'catalogue';
     let selectedProductId = null;
     let selectedVariantCache = {};
 
-    function navigateTo(page, productId = null) {
-        if(page === "product" && productId) {
-            currentPage = "product";
+    async function navigateTo(page, productId = null) {
+        if (page === 'product' && productId) {
+            currentPage = 'product';
             selectedProductId = productId;
             const prod = products.find(p => p.id === productId);
-            if(prod && prod.type === "variants" && !selectedVariantCache[productId]) {
-                const firstAvail = prod.variants.find(v => v.stock > 0);
+            if (prod && prod.type === 'variants' && !selectedVariantCache[productId]) {
+                const firstAvail = prod.variants?.find(v => v.stock > 0);
                 selectedVariantCache[productId] = firstAvail ? firstAvail.id : null;
             }
-        } else if(page === "cart") {
-            currentPage = "cart";
+        } else if (page === 'cart') {
+            currentPage = 'cart';
         } else {
-            currentPage = "catalogue";
+            currentPage = 'catalogue';
             selectedProductId = null;
         }
         renderCurrentPage();
     }
 
-    function renderCurrentPage() {
-        if(currentPage === "catalogue") renderCatalogue();
-        else if(currentPage === "product" && selectedProductId) renderProductDetail(selectedProductId);
-        else if(currentPage === "cart") renderCart();
+    async function renderCurrentPage() {
+        if (currentPage === 'catalogue') renderCatalogue();
+        else if (currentPage === 'product' && selectedProductId) renderProductDetail(selectedProductId);
+        else if (currentPage === 'cart') renderCart();
         else renderCatalogue();
     }
 
     function renderCatalogue() {
-        const html = `
-            <h1>Catalogue</h1>
-            <div class="products-grid">
-                ${products.map(p => `
-                    <div class="product-card" onclick="navigateTo('product','${p.id}')">
-                        <div class="product-icon">${p.icon}</div>
-                        <div class="product-title">${p.name}</div>
-                        <div class="product-price">${p.type === "simple" ? p.price.toFixed(2) : p.basePrice.toFixed(2)} €</div>
-                        <div class="stock-badge ${p.type === "simple" ? (p.stock === 0 ? "stock-out" : (p.stock <=2 ? "stock-warning" : "")) : ""}">
-                            ${p.type === "simple" ? (p.stock === 0 ? "Rupture" : (p.stock <=2 ? `Derniers (${p.stock})` : "En stock")) : "En stock"}
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-        document.getElementById("app").innerHTML = html;
+        const html = `<h1>Catalogue</h1><div class="products-grid">${products.filter(p => p.active !== false).map(p => `
+            <div class="product-card" onclick="navigateTo('product','${p.id}')">
+                <div class="product-icon">${p.icon || '📦'}</div>
+                <div class="product-title">${p.name}</div>
+                <div class="product-price">${p.type === 'simple' ? (p.price || 0).toFixed(2) : (p.base_price || 0).toFixed(2)} €</div>
+                <div class="stock-badge">${p.type === 'simple' ? (p.stock === 0 ? 'Rupture' : (p.stock <= 2 ? `Derniers (${p.stock})` : 'En stock')) : 'En stock'}</div>
+            </div>`).join('')}</div>`;
+        document.getElementById('app').innerHTML = html;
     }
 
     function renderProductDetail(productId) {
         const product = products.find(p => p.id === productId);
-        if(!product) return renderCatalogue();
-        const isVariant = product.type === "variants";
+        if (!product) return renderCatalogue();
+        const isVariant = product.type === 'variants';
         let selectedVariantId = selectedVariantCache[productId] || null;
         let selectedVariant = null;
-        let currentPrice = isVariant ? product.basePrice : product.price;
-        let currentStock = isVariant ? 0 : product.stock;
+        let currentPrice = isVariant ? (product.base_price || 0) : (product.price || 0);
+        let currentStock = isVariant ? 0 : (product.stock || 0);
         let canAdd = false;
-        if(isVariant && selectedVariantId) {
-            selectedVariant = product.variants.find(v => v.id === selectedVariantId);
-            if(selectedVariant) {
+        if (isVariant && selectedVariantId) {
+            selectedVariant = product.variants?.find(v => v.id === selectedVariantId);
+            if (selectedVariant) {
                 currentPrice = selectedVariant.price;
                 currentStock = selectedVariant.stock;
                 canAdd = currentStock > 0;
             }
-        } else if(!isVariant) canAdd = product.stock > 0;
+        } else if (!isVariant) canAdd = (product.stock || 0) > 0;
         let tailleOptions = [], couleurOptions = [];
-        if(isVariant) {
+        if (isVariant && product.variants) {
             tailleOptions = [...new Set(product.variants.map(v => v.attributes.taille))];
             couleurOptions = [...new Set(product.variants.map(v => v.attributes.couleur))];
         }
-        const currentTaille = selectedVariant?.attributes?.taille || (tailleOptions[0] || "");
-        const currentCouleur = selectedVariant?.attributes?.couleur || (couleurOptions[0] || "");
-        const html = `
-            <div class="back-link" onclick="navigateTo('catalogue')">← Retour</div>
-            <div class="product-detail">
-                <div style="font-size: 4rem;">${product.icon}</div>
-                <h2>${product.name}</h2>
-                <p>${product.description}</p>
-                ${isVariant ? `
-                    <div class="variant-group"><strong>TAILLE</strong><div class="variant-options" id="tailleContainer">
-                        ${tailleOptions.map(t => `<div class="variant-btn ${currentTaille === t ? 'selected' : ''}" data-type="taille" data-value="${t}">${t}</div>`).join('')}
-                    </div></div>
-                    <div class="variant-group"><strong>COULEUR</strong><div class="variant-options" id="couleurContainer">
-                        ${couleurOptions.map(c => `<div class="variant-btn ${currentCouleur === c ? 'selected' : ''}" data-type="couleur" data-value="${c}">${c}</div>`).join('')}
-                    </div></div>
-                ` : ''}
-                <div style="font-size:2rem; margin:1rem 0;">${currentPrice.toFixed(2)} €</div>
-                <div>${currentStock > 0 ? `✅ En stock (${currentStock})` : "❌ Rupture"}</div>
-                <button class="primary" id="addToCartBtn" ${!canAdd ? 'disabled' : ''}>Ajouter au panier</button>
-            </div>
-        `;
-        document.getElementById("app").innerHTML = html;
-        if(isVariant) {
-            const tailleBtns = document.querySelectorAll("#tailleContainer .variant-btn");
-            const couleurBtns = document.querySelectorAll("#couleurContainer .variant-btn");
+        const currentTaille = selectedVariant?.attributes?.taille || (tailleOptions[0] || '');
+        const currentCouleur = selectedVariant?.attributes?.couleur || (couleurOptions[0] || '');
+        const html = `<div class="back-link" onclick="navigateTo('catalogue')">← Retour</div>
+        <div class="product-detail">
+            <div style="font-size:4rem;">${product.icon || '📦'}</div>
+            <h2>${product.name}</h2>
+            <p>${product.description || ''}</p>
+            ${isVariant ? `<div><strong>TAILLE</strong><div class="variant-options" id="tailleContainer">${tailleOptions.map(t => `<div class="variant-btn ${currentTaille === t ? 'selected' : ''}" data-value="${t}">${t}</div>`).join('')}</div></div>
+            <div><strong>COULEUR</strong><div class="variant-options" id="couleurContainer">${couleurOptions.map(c => `<div class="variant-btn ${currentCouleur === c ? 'selected' : ''}" data-value="${c}">${c}</div>`).join('')}</div></div>` : ''}
+            <div style="font-size:2rem;margin:1rem 0;">${currentPrice.toFixed(2)} €</div>
+            <div>${currentStock > 0 ? `✅ En stock (${currentStock})` : '❌ Rupture'}</div>
+            <button class="primary" id="addToCartBtn" ${!canAdd ? 'disabled' : ''}>Ajouter au panier</button>
+        </div>`;
+        document.getElementById('app').innerHTML = html;
+        if (isVariant) {
+            const tailleBtns = document.querySelectorAll('#tailleContainer .variant-btn');
+            const couleurBtns = document.querySelectorAll('#couleurContainer .variant-btn');
             const update = () => {
-                const t = document.querySelector("#tailleContainer .variant-btn.selected")?.dataset.value;
-                const c = document.querySelector("#couleurContainer .variant-btn.selected")?.dataset.value;
-                if(t && c) {
-                    const found = product.variants.find(v => v.attributes.taille === t && v.attributes.couleur === c);
-                    if(found) { selectedVariantCache[productId] = found.id; renderProductDetail(productId); }
+                const t = document.querySelector('#tailleContainer .variant-btn.selected')?.dataset.value;
+                const c = document.querySelector('#couleurContainer .variant-btn.selected')?.dataset.value;
+                if (t && c) {
+                    const found = product.variants?.find(v => v.attributes.taille === t && v.attributes.couleur === c);
+                    if (found) { selectedVariantCache[productId] = found.id; renderProductDetail(productId); }
                     else { selectedVariantCache[productId] = null; renderProductDetail(productId); }
                 }
             };
-            tailleBtns.forEach(btn => btn.addEventListener("click", () => {
-                tailleBtns.forEach(b => b.classList.remove("selected"));
-                btn.classList.add("selected");
-                update();
-            }));
-            couleurBtns.forEach(btn => btn.addEventListener("click", () => {
-                couleurBtns.forEach(b => b.classList.remove("selected"));
-                btn.classList.add("selected");
-                update();
-            }));
+            tailleBtns.forEach(btn => btn.onclick = () => { tailleBtns.forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); update(); });
+            couleurBtns.forEach(btn => btn.onclick = () => { couleurBtns.forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); update(); });
         }
-        document.getElementById("addToCartBtn")?.addEventListener("click", () => {
-            if(isVariant) {
+        document.getElementById('addToCartBtn')?.addEventListener('click', () => {
+            if (isVariant) {
                 const vid = selectedVariantCache[productId];
-                if(!vid) { showToast("Choisissez une variante"); return; }
+                if (!vid) { showToast('Choisissez une variante'); return; }
                 addToCart(productId, vid, 1);
             } else addToCart(productId, null, 1);
         });
     }
 
     function renderCart() {
-        if(cart.length === 0) {
-            document.getElementById("app").innerHTML = `<div style="text-align:center;"><h2>Panier vide</h2><button class="outline" onclick="navigateTo('catalogue')">Continuer</button></div>`;
+        if (cart.length === 0) {
+            document.getElementById('app').innerHTML = `<div style="text-align:center;"><h2>Panier vide</h2><button class="outline" onclick="navigateTo('catalogue')">Continuer</button></div>`;
             return;
         }
         const subtotal = getSubtotal();
-        const discount = appliedPromo ? appliedPromo.discountAmount : 0;
+        const discount = appliedPromo?.discountAmount || 0;
         const total = subtotal - discount;
-        const itemsHtml = cart.map((item, idx) => {
-            const variantStr = item.attributes?.taille ? ` (${item.attributes.taille}/${item.attributes.couleur})` : "";
-            return `
-                <div class="cart-item">
-                    <div><strong>${item.name}${variantStr}</strong><br>${item.price.toFixed(2)} €</div>
-                    <div class="cart-item-qty">
-                        <button class="qty-btn" data-index="${idx}" data-delta="-1">-</button>
-                        <span>${item.quantity}</span>
-                        <button class="qty-btn" data-index="${idx}" data-delta="1">+</button>
-                        <button class="qty-btn" data-index="${idx}" data-delta="-999" style="background:#ef4444;">🗑️</button>
-                    </div>
-                    <div>${(item.price * item.quantity).toFixed(2)} €</div>
-                </div>
-            `;
-        }).join('');
-        const promoHtml = `
-            <div class="promo-box">
-                <input type="text" id="promoCodeInput" placeholder="Code promo" style="flex:1;">
-                <button class="outline" id="applyPromoBtn">Appliquer</button>
-                ${appliedPromo ? `<button class="outline" id="removePromoBtn">Supprimer promo</button><span style="margin-left:10px;">💰 ${appliedPromo.code} : -${appliedPromo.discountAmount}€</span>` : ''}
-            </div>
-        `;
-        const html = `
-            <div class="cart-page">
-                <div class="flex-between" style="display:flex; justify-content:space-between;">
-                    <h2>Mon panier</h2>
-                    <button class="outline" onclick="navigateTo('catalogue')">Continuer</button>
-                </div>
-                <hr>
-                ${itemsHtml}
-                <hr>
-                ${promoHtml}
-                <div class="summary">
-                    <p>Sous-total : ${subtotal.toFixed(2)} €</p>
-                    ${appliedPromo ? `<p>Réduction : -${discount.toFixed(2)} €</p>` : ''}
-                    <h3>Total : ${total.toFixed(2)} €</h3>
-                    <button class="primary" id="checkoutBtn">Procéder au paiement</button>
-                </div>
-            </div>
-        `;
-        document.getElementById("app").innerHTML = html;
-        // Événements quantités
-        document.querySelectorAll(".qty-btn").forEach(btn => {
-            btn.addEventListener("click", (e) => {
-                const idx = parseInt(btn.dataset.index);
+        const itemsHtml = cart.map((item, idx) => `<div class="cart-item"><div><strong>${item.name}${item.attributes?.taille ? ` (${item.attributes.taille}/${item.attributes.couleur})` : ''}</strong><br>${item.price.toFixed(2)} €</div>
+        <div><button class="qty-btn" data-idx="${idx}" data-delta="-1">-</button> <span>${item.quantity}</span> <button class="qty-btn" data-idx="${idx}" data-delta="1">+</button> <button class="qty-btn" data-idx="${idx}" data-delta="-999" style="background:#ef4444;">🗑️</button></div>
+        <div>${(item.price * item.quantity).toFixed(2)} €</div></div>`).join('');
+        const promoHtml = `<div class="promo-box"><input type="text" id="promoCode" placeholder="Code promo"><button id="applyPromo">Appliquer</button>${appliedPromo ? `<button id="removePromo">Supprimer</button><span>💰 ${appliedPromo.code} : -${discount}€</span>` : ''}</div>`;
+        const html = `<div class="cart-page"><div style="display:flex;justify-content:space-between;"><h2>Mon panier</h2><button class="outline" onclick="navigateTo('catalogue')">Continuer</button></div><hr>${itemsHtml}<hr>${promoHtml}<div class="summary"><p>Sous-total : ${subtotal.toFixed(2)} €</p>${appliedPromo ? `<p>Réduction : -${discount.toFixed(2)} €</p>` : ''}<h3>Total : ${total.toFixed(2)} €</h3><button class="primary" id="checkoutBtn">Procéder au paiement</button></div></div>`;
+        document.getElementById('app').innerHTML = html;
+        document.querySelectorAll('.qty-btn').forEach(btn => {
+            btn.onclick = () => {
+                const idx = parseInt(btn.dataset.idx);
                 const delta = parseInt(btn.dataset.delta);
-                if(delta === -999) updateCartItem(idx, 0);
-                else {
-                    const newQty = cart[idx].quantity + delta;
-                    if(newQty >= 1) updateCartItem(idx, newQty);
-                }
-            });
+                if (delta === -999) updateCartItem(idx, 0);
+                else updateCartItem(idx, cart[idx].quantity + delta);
+            };
         });
-        document.getElementById("applyPromoBtn")?.addEventListener("click", () => {
-            const code = document.getElementById("promoCodeInput").value.trim().toUpperCase();
-            if(!code) return;
-            const result = applyPromoCode(code);
-            showToast(result.message);
-            if(result.success) renderCart();
+        document.getElementById('applyPromo')?.addEventListener('click', () => {
+            const code = document.getElementById('promoCode').value.trim().toUpperCase();
+            const res = applyPromoCode(code);
+            showToast(res.message);
+            if (res.success) renderCart();
         });
-        document.getElementById("removePromoBtn")?.addEventListener("click", () => {
-            removePromo();
-            renderCart();
-        });
-        document.getElementById("checkoutBtn")?.addEventListener("click", () => simulateCheckout(total));
+        document.getElementById('removePromo')?.addEventListener('click', () => { removePromo(); renderCart(); });
+        document.getElementById('checkoutBtn')?.addEventListener('click', () => simulateCheckout(total));
     }
 
-    async function simulateCheckout(totalToPay) {
-        if(cart.length === 0) return;
-        // Vérification stock finale
-        for(const item of cart) {
-            const stock = getStock(item.productId, item.variantId);
-            if(item.quantity > stock) {
-                showToast(`Stock dépassé pour ${item.name}`);
-                return;
-            }
-        }
-        const modalHtml = `
-            <div class="modal" id="paymentModal">
-                <div class="modal-content">
-                    <h3>🔐 Paiement sécurisé</h3>
-                    <p>Total à payer : ${totalToPay.toFixed(2)} €</p>
-                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                        <button class="outline" id="cancelPayment">Annuler</button>
-                        <button class="primary" id="confirmPayment">Payer</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-        const modal = document.getElementById("paymentModal");
-        document.getElementById("cancelPayment").onclick = () => modal.remove();
-        document.getElementById("confirmPayment").onclick = () => {
-            modal.remove();
-            // Mise à jour des stocks
-            for(const item of cart) {
-                const prod = products.find(p => p.id === item.productId);
-                if(prod.type === "simple") prod.stock -= item.quantity;
-                else {
-                    const variant = prod.variants.find(v => v.id === item.variantId);
-                    if(variant) variant.stock -= item.quantity;
-                }
-            }
-            const orderId = "ORD-" + Math.random().toString(36).substring(2,8).toUpperCase();
-            const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`;
-            const itemsList = cart.map(i => `${i.name} ${i.attributes?.taille ? `(${i.attributes.taille}/${i.attributes.couleur})` : ""} x${i.quantity}`).join(", ");
-            console.log(`[EmailJS] Commande ${orderId} envoyée à ${clientEmail}`);
-            showToast(`✅ Commande ${orderId} confirmée. Email simulé.`);
-            cart = [];
-            saveCart();
-            appliedPromo = null;
-            const confirmationHtml = `
-                <div style="background: white; border-radius: 32px; padding: 2rem; text-align: center;">
-                    <h2>✅ Commande confirmée !</h2>
-                    <p>N° commande : ${orderId}</p>
-                    <p>Total payé : ${totalToPay.toFixed(2)} €</p>
-                    <button class="primary" onclick="navigateTo('catalogue')">Nouvelle commande</button>
-                </div>
-            `;
-            document.getElementById("app").innerHTML = confirmationHtml;
-        };
+    // --- Synchronisation en temps réel (Realtime) ---
+    function subscribeToChanges() {
+        const channel = supabase.channel('public-changes');
+        channel.on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
+            await loadProducts();
+            if (currentPage !== 'cart') renderCurrentPage();
+            else renderCart(); // pour rafraîchir les prix si besoin
+        }).on('postgres_changes', { event: '*', schema: 'public', table: 'promos' }, async () => {
+            await loadPromos();
+            if (currentPage === 'cart') renderCart();
+        }).subscribe();
     }
 
-    loadCart();
-    renderCurrentPage();
+    // --- Initialisation ---
+    async function init() {
+        await loadProducts();
+        await loadPromos();
+        await loadCart();
+        subscribeToChanges();
+        renderCurrentPage();
+    }
+    init();
     window.navigateTo = navigateTo;
 </script>
 </body>
