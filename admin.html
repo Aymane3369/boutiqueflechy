@@ -1,39 +1,188 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StyleShop - Administration</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui; }
-        body { background: #f1f5f9; display: flex; }
-        .sidebar { width: 260px; background: #0f172a; color: #e2e8f0; padding: 1.5rem; }
-        .sidebar .nav-item { padding: 0.7rem 1rem; border-radius: 12px; cursor: pointer; margin-bottom: 0.5rem; }
-        .sidebar .nav-item.active { background: #3b82f6; color: white; }
-        .main { flex: 1; padding: 2rem; overflow-y: auto; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 1rem; border-radius: 20px; }
-        .table-container { background: white; border-radius: 20px; overflow-x: auto; margin-top: 1rem; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        button { background: #3b82f6; color: white; border: none; padding: 0.4rem 1rem; border-radius: 30px; cursor: pointer; }
-        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #1e293b; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
+        body { background: #f1f5f9; display: flex; min-height: 100vh; }
+        
+        .sidebar {
+            width: 260px;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .logo h2 { font-size: 1.6rem; color: white; }
+        .logo span { font-size: 0.8rem; color: #94a3b8; }
+        .nav-item {
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .nav-item:hover { background: #1e293b; }
+        .nav-item.active { background: #3b82f6; color: white; }
+        
+        .main {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .page-header h1 { font-size: 1.8rem; color: #0f172a; }
+        
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-outline {
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #1e293b;
+        }
         .btn-danger { background: #ef4444; }
-        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; border-radius: 28px; padding: 1.5rem; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; }
-        .form-group { margin-bottom: 1rem; }
-        input, select, textarea { width: 100%; padding: 0.5rem; border-radius: 12px; border: 1px solid #cbd5e1; }
-        .variant-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
-        .product-img-list { width: 40px; height: 40px; font-size: 28px; display: flex; align-items: center; justify-content: center; }
-        .emoji-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px,60px)); gap: 8px; margin: 10px 0; }
-        .emoji-option { font-size: 32px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 16px; text-align: center; cursor: pointer; }
+        .btn-small { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        .stat-title { font-size: 0.8rem; text-transform: uppercase; color: #475569; }
+        .stat-value { font-size: 2rem; font-weight: 700; margin-top: 0.3rem; }
+        
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 1rem; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; font-weight: 600; }
+        
+        .product-img-list {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .badge {
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+        }
+        .badge-success { background: #dcfce7; color: #15803d; }
+        .badge-warning { background: #fef9c3; color: #854d0e; }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 28px;
+            max-width: 700px;
+            width: 90%;
+            padding: 1.8rem;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .form-group { margin-bottom: 1.2rem; }
+        label { font-weight: 500; display: block; margin-bottom: 0.4rem; }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+        }
+        .variant-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .variant-row input { flex: 1; min-width: 100px; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 60px));
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .emoji-option {
+            font-size: 32px;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 5px;
+            text-align: center;
+            cursor: pointer;
+        }
         .emoji-option.selected { border-color: #3b82f6; background: #dbeafe; }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #0f172a;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 40px;
+            z-index: 200;
+        }
+        .image-preview {
+            max-width: 100px;
+            max-height: 100px;
+            margin-top: 8px;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
+
 <div class="sidebar">
-    <div class="logo"><h2>StyleShop Admin</h2></div>
+    <div class="logo"><h2>StyleShop</h2><span>Admin panel</span></div>
     <div class="nav">
         <div class="nav-item active" data-page="dashboard">📊 Dashboard</div>
         <div class="nav-item" data-page="products">👕 Produits</div>
@@ -41,48 +190,91 @@
         <div class="nav-item" data-page="orders">📋 Commandes</div>
         <div class="nav-item" data-page="promos">🏷️ Promos</div>
     </div>
+    <div style="margin-top: auto; font-size: 0.7rem; color:#94a3b8;">Accès admin via Supabase</div>
 </div>
+
 <div class="main" id="mainContent"></div>
 
 <script>
+    // ============================================
+    // 1. CONFIGURATION SUPABASE (identique à la boutique)
+    // ============================================
     const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
 
+    // ============================================
+    // 2. FONCTIONS FETCH
+    // ============================================
+    async function fetchSupabase(endpoint, options = {}) {
+        const defaultHeaders = {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+        };
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+            ...options,
+            headers: { ...defaultHeaders, ...options.headers }
+        });
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(`HTTP ${response.status}: ${error}`);
+        }
+        return response.json();
+    }
+
+    // ============================================
+    // 3. VARIABLES GLOBALES
+    // ============================================
     let products = [];
     let orders = [];
     let promos = [];
+    let currentPage = 'dashboard';
 
+    // ============================================
+    // 4. CHARGEMENT DES DONNÉES
+    // ============================================
     async function loadProducts() {
-        const { data } = await supabase.from('products').select('*');
-        if (data) products = data;
+        try {
+            products = await fetchSupabase('products?select=*');
+            return products;
+        } catch(e) {
+            console.error('Erreur chargement produits:', e);
+            showToast('Erreur chargement produits');
+            return [];
+        }
     }
+
     async function loadOrders() {
-        const { data } = await supabase.from('orders').select('*');
-        if (data) orders = data;
+        try {
+            orders = await fetchSupabase('orders?select=*');
+            return orders;
+        } catch(e) {
+            console.error('Erreur chargement commandes:', e);
+            return [];
+        }
     }
+
     async function loadPromos() {
-        const { data } = await supabase.from('promos').select('*');
-        if (data) promos = data;
-    }
-
-    async function saveProducts() {
-        for (const p of products) {
-            await supabase.from('products').upsert(p);
-        }
-    }
-    async function saveOrders() {
-        for (const o of orders) {
-            await supabase.from('orders').upsert(o);
-        }
-    }
-    async function savePromos() {
-        for (const pr of promos) {
-            await supabase.from('promos').upsert(pr);
+        try {
+            promos = await fetchSupabase('promos?select=*');
+            return promos;
+        } catch(e) {
+            console.error('Erreur chargement promos:', e);
+            return [];
         }
     }
 
-    // --- Dashboard ---
+    // ============================================
+    // 5. UTILITAIRES
+    // ============================================
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
     function getStockStats() {
         let totalStock = 0, ruptures = 0, low = 0;
         products.forEach(p => {
@@ -92,7 +284,7 @@
                 else if (p.stock <= 2) low++;
             } else if (p.variants) {
                 p.variants.forEach(v => {
-                    totalStock += v.stock;
+                    totalStock += v.stock || 0;
                     if (v.stock === 0) ruptures++;
                     else if (v.stock <= 2) low++;
                 });
@@ -101,70 +293,141 @@
         return { totalStock, ruptures, lowStockItems: low };
     }
 
+    // ============================================
+    // 6. RENDU DASHBOARD
+    // ============================================
     async function renderDashboard() {
-        await loadProducts(); await loadOrders(); await loadPromos();
+        await Promise.all([loadProducts(), loadOrders(), loadPromos()]);
         const totalProducts = products.length;
         const activeProducts = products.filter(p => p.active !== false).length;
         const paidOrders = orders.filter(o => o.status === 'Payée');
         const revenue = paidOrders.reduce((s, o) => s + o.total, 0);
         const stockStats = getStockStats();
-        const html = `<h1>Dashboard</h1><div class="stats-grid">
-            <div class="stat-card"><div>📦 PRODUITS</div><div style="font-size:2rem;">${totalProducts}</div><div>${activeProducts} actifs</div></div>
-            <div class="stat-card"><div>🛒 COMMANDES</div><div style="font-size:2rem;">${orders.length}</div><div>${paidOrders.length} payées</div></div>
-            <div class="stat-card"><div>💰 CA</div><div style="font-size:2rem;">${revenue.toFixed(2)} €</div></div>
-            <div class="stat-card"><div>📦 STOCK TOTAL</div><div style="font-size:2rem;">${stockStats.totalStock}</div></div>
-            <div class="stat-card"><div>⚠️ STOCK BAS</div><div style="font-size:2rem;">${stockStats.lowStockItems}</div></div>
-            <div class="stat-card"><div>❌ RUPTURES</div><div style="font-size:2rem;">${stockStats.ruptures}</div></div>
-        </div><div class="table-container"><table><thead><tr><th>N° commande</th><th>Client</th><th>Total</th><th>Statut</th></tr></thead><tbody>
-        ${orders.slice(0,5).map(o => `<tr><td>${o.id}</td><td>${o.client}</td><td>${o.total}€</td><td>${o.status}</td></tr>`).join('')}
-        </tbody></table></div>`;
+
+        const html = `
+            <div class="page-header"><h1>Dashboard</h1></div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-title">📦 PRODUITS</div><div class="stat-value">${totalProducts}</div><div>${activeProducts} actifs</div></div>
+                <div class="stat-card"><div class="stat-title">🛒 COMMANDES</div><div class="stat-value">${orders.length}</div><div>${paidOrders.length} payées</div></div>
+                <div class="stat-card"><div class="stat-title">💰 CA</div><div class="stat-value">${revenue.toFixed(2)} €</div></div>
+                <div class="stat-card"><div class="stat-title">📦 STOCK TOTAL</div><div class="stat-value">${stockStats.totalStock}</div></div>
+                <div class="stat-card"><div class="stat-title">⚠️ STOCK BAS</div><div class="stat-value">${stockStats.lowStockItems}</div></div>
+                <div class="stat-card"><div class="stat-title">❌ RUPTURES</div><div class="stat-value">${stockStats.ruptures}</div></div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>N° commande</th><th>Client</th><th>Total</th><th>Statut</th></tr></thead>
+                    <tbody>
+                        ${orders.slice(0,5).map(o => `<tr><td>${o.id}</td><td>${o.client}</td><td>${o.total}€</td><td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td></tr>`).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
         document.getElementById('mainContent').innerHTML = html;
+        attachNavEvents();
     }
 
-    // --- Gestion produits (avec modale émoji / image) ---
+    // ============================================
+    // 7. GESTION PRODUITS
+    // ============================================
     async function renderProductsList() {
         await loadProducts();
-        const html = `<div style="display:flex;justify-content:space-between;"><h2>Produits</h2><button id="addProductBtn">+ Ajouter</button><button class="btn-outline" onclick="renderDashboard()">← Dashboard</button></div>
-        <div class="table-container"><table><thead><tr><th>Icône</th><th>Nom</th><th>Type</th><th>Prix</th><th>Stock</th><th>Actif</th><th>Actions</th></tr></thead><tbody>
-        ${products.map(p => `<tr><td><div class="product-img-list">${p.icon || '📦'}</div></td><td>${p.name}</td><td>${p.type}</td><td>${p.type === 'simple' ? (p.price || 0)+'€' : 'à partir de '+ (p.base_price || 0)+'€'}</td>
-        <td>${p.type === 'simple' ? (p.stock || 0) : (p.variants?.reduce((s,v)=>s+v.stock,0) || 0)}</td><td>${p.active ? '✅' : '❌'}</td>
-        <td><button onclick="editProduct('${p.id}')">Modifier</button> <button onclick="deleteProduct('${p.id}')" class="btn-danger">Supprimer</button></td></tr>`).join('')}
-        </tbody></table></div>`;
+        const html = `
+            <div class="page-header"><h1>Produits</h1><button class="btn" id="addProductBtn">+ Ajouter</button></div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Icône</th><th>Nom</th><th>Type</th><th>Prix</th><th>Stock</th><th>Actif</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${products.map(p => `
+                            <tr>
+                                <td><div class="product-img-list">${p.icon || '📦'}</div></td>
+                                <td>${p.name}</td>
+                                <td>${p.type === 'simple' ? 'Simple' : 'Variantes'}</td>
+                                <td>${p.type === 'simple' ? (p.price || 0)+'€' : 'à partir de '+(p.base_price || 0)+'€'}</td>
+                                <td>${p.type === 'simple' ? (p.stock || 0) : (p.variants?.reduce((s,v)=>s+v.stock,0) || 0)}</td>
+                                <td>${p.active !== false ? '✅' : '❌'}</td>
+                                <td>
+                                    <button class="btn-small btn-outline" onclick="editProduct('${p.id}')">Modifier</button>
+                                    <button class="btn-small btn-danger" onclick="deleteProduct('${p.id}')">Supprimer</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
         document.getElementById('mainContent').innerHTML = html;
         document.getElementById('addProductBtn').onclick = () => showProductModal();
+        attachNavEvents();
     }
 
-    async function deleteProduct(id) {
-        if (confirm('Supprimer ce produit ?')) {
-            await supabase.from('products').delete().eq('id', id);
-            await loadProducts();
+    // Supprimer un produit
+    window.deleteProduct = async function(id) {
+        if (!confirm('Supprimer ce produit ?')) return;
+        try {
+            await fetchSupabase(`products?id=eq.${id}`, { method: 'DELETE' });
+            showToast('Produit supprimé');
             renderProductsList();
+        } catch(e) {
+            showToast('Erreur: ' + e.message);
         }
-    }
+    };
 
+    // Modifier un produit
+    window.editProduct = async function(id) {
+        await loadProducts();
+        const product = products.find(p => p.id === id);
+        if (product) showProductModal(product);
+    };
+
+    // ============================================
+    // 8. MODALE PRODUIT
+    // ============================================
     function showProductModal(product = null) {
         const isEdit = !!product;
         let variantsArray = product?.variants ? [...product.variants] : [];
         let selectedEmoji = product?.icon || '📦';
+        const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑'];
+
         const modalDiv = document.createElement('div');
         modalDiv.className = 'modal';
-        modalDiv.innerHTML = `<div class="modal-content"><h2>${isEdit ? 'Modifier' : 'Ajouter'} produit</h2>
-        <div class="form-group"><label>Nom</label><input id="prodName" value="${product?.name || ''}"></div>
-        <div class="form-group"><label>Description</label><textarea id="prodDesc">${product?.description || ''}</textarea></div>
-        <div class="form-group"><label>Type</label><select id="prodType"><option value="simple" ${product?.type === 'simple' ? 'selected' : ''}>Simple</option><option value="variants" ${product?.type === 'variants' ? 'selected' : ''}>Variantes</option></select></div>
-        <div id="simpleFields" style="${product?.type === 'variants' ? 'display:none' : 'block'}"><div class="form-group"><label>Prix (€)</label><input id="simplePrice" type="number" step="0.01" value="${product?.price || ''}"></div><div class="form-group"><label>Stock</label><input id="simpleStock" type="number" value="${product?.stock || 0}"></div></div>
-        <div id="variantsFields" style="${product?.type === 'variants' ? 'block' : 'display:none'}"><div class="form-group"><label>Prix de base (€)</label><input id="basePrice" type="number" step="0.01" value="${product?.base_price || ''}"></div><div id="variantsContainer"></div><button type="button" id="addVariantBtn">+ Ajouter variante</button></div>
-        <div class="form-group"><label>Icône</label><div class="emoji-grid" id="emojiGrid"></div><input type="text" id="customEmoji" placeholder="Ou saisis un émoji" maxlength="2"><div>Aperçu: <span id="emojiPreview">${selectedEmoji}</span></div></div>
-        <div class="form-group"><label><input type="checkbox" id="activeCheck" ${product?.active !== false ? 'checked' : ''}> Actif</label></div>
-        <div style="display:flex;justify-content:space-between;"><button class="btn-outline" id="cancelModal">Annuler</button><button id="saveModal">Enregistrer</button></div></div>`;
+        modalDiv.innerHTML = `
+            <div class="modal-content">
+                <h2>${isEdit ? 'Modifier' : 'Ajouter'} un produit</h2>
+                <div class="form-group"><label>Nom</label><input id="prodName" value="${product?.name || ''}"></div>
+                <div class="form-group"><label>Description</label><textarea id="prodDesc">${product?.description || ''}</textarea></div>
+                <div class="form-group"><label>Type</label>
+                    <select id="prodType">
+                        <option value="simple" ${product?.type === 'simple' ? 'selected' : ''}>Produit simple</option>
+                        <option value="variants" ${product?.type === 'variants' ? 'selected' : ''}>Avec variantes</option>
+                    </select>
+                </div>
+                <div id="simpleFields" style="${product?.type === 'variants' ? 'display:none' : 'block'}">
+                    <div class="form-group"><label>Prix (€)</label><input id="simplePrice" type="number" step="0.01" value="${product?.price || ''}"></div>
+                    <div class="form-group"><label>Stock</label><input id="simpleStock" type="number" value="${product?.stock || 0}"></div>
+                </div>
+                <div id="variantsFields" style="${product?.type === 'variants' ? 'block' : 'display:none'}">
+                    <div class="form-group"><label>Prix de base (€)</label><input id="basePrice" type="number" step="0.01" value="${product?.base_price || ''}"></div>
+                    <div class="form-group"><label>Variantes</label><div id="variantsContainer"></div><button type="button" class="btn-small" id="addVariantBtn">+ Ajouter variante</button></div>
+                </div>
+                <div class="form-group">
+                    <label>Icône</label>
+                    <div class="emoji-grid" id="emojiGrid"></div>
+                    <input type="text" id="customEmoji" placeholder="Ou saisis un émoji" maxlength="2">
+                    <div>Aperçu: <span id="emojiPreview" style="font-size:2rem;">${selectedEmoji}</span></div>
+                </div>
+                <div class="form-group"><label><input type="checkbox" id="activeCheck" ${product?.active !== false ? 'checked' : ''}> Actif</label></div>
+                <div class="flex-between"><button class="btn-outline" id="cancelModal">Annuler</button><button class="btn" id="saveModal">Enregistrer</button></div>
+            </div>
+        `;
         document.body.appendChild(modalDiv);
-        const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔'];
+
+        // Grille d'émojis
         const grid = modalDiv.querySelector('#emojiGrid');
         emojiList.forEach(e => {
             const div = document.createElement('div');
-            div.className = 'emoji-option';
+            div.className = 'emoji-option' + (e === selectedEmoji ? ' selected' : '');
             div.textContent = e;
-            if (e === selectedEmoji) div.classList.add('selected');
             div.onclick = () => {
                 modalDiv.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
                 div.classList.add('selected');
@@ -174,14 +437,17 @@
             };
             grid.appendChild(div);
         });
-        const customInput = modalDiv.querySelector('#customEmoji');
-        customInput.addEventListener('input', (e) => {
-            if (e.target.value) {
+
+        // Saisie personnalisée
+        modalDiv.querySelector('#customEmoji').addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            if (val) {
                 modalDiv.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
-                modalDiv.querySelector('#emojiPreview').textContent = e.target.value;
-                selectedEmoji = e.target.value;
+                modalDiv.querySelector('#emojiPreview').textContent = val;
+                selectedEmoji = val;
             }
         });
+
         // Variantes
         const variantsContainer = modalDiv.querySelector('#variantsContainer');
         function renderVariants() {
@@ -189,11 +455,16 @@
             variantsArray.forEach((v, idx) => {
                 const div = document.createElement('div');
                 div.className = 'variant-row';
-                div.innerHTML = `<input type="text" placeholder="Taille/Couleur" value="${v.attributes?.taille || ''}/${v.attributes?.couleur || ''}" data-idx="${idx}"><input type="number" placeholder="Stock" value="${v.stock}" style="width:80px"><input type="number" placeholder="Prix" step="0.01" value="${v.price}" style="width:100px"><button class="btn-danger" data-idx="${idx}">✖</button>`;
+                div.innerHTML = `
+                    <input type="text" placeholder="Taille/Couleur" value="${v.attributes?.taille || ''}/${v.attributes?.couleur || ''}">
+                    <input type="number" placeholder="Stock" value="${v.stock || 0}" style="width:80px">
+                    <input type="number" placeholder="Prix €" step="0.01" value="${v.price || 0}" style="width:100px">
+                    <button class="btn-small btn-danger" data-idx="${idx}">✖</button>
+                `;
                 variantsContainer.appendChild(div);
             });
             variantsContainer.querySelectorAll('.btn-danger').forEach(btn => {
-                btn.onclick = (e) => {
+                btn.onclick = () => {
                     const idx = parseInt(btn.dataset.idx);
                     variantsArray.splice(idx, 1);
                     renderVariants();
@@ -201,10 +472,13 @@
             });
         }
         if (product?.type === 'variants') renderVariants();
+
         modalDiv.querySelector('#addVariantBtn')?.addEventListener('click', () => {
             variantsArray.push({ attributes: { taille: '', couleur: '' }, stock: 0, price: 0 });
             renderVariants();
         });
+
+        // Toggle simple/variants
         const typeSelect = modalDiv.querySelector('#prodType');
         const simpleDiv = modalDiv.querySelector('#simpleFields');
         const variantsDiv = modalDiv.querySelector('#variantsFields');
@@ -213,179 +487,335 @@
             simpleDiv.style.display = isVar ? 'none' : 'block';
             variantsDiv.style.display = isVar ? 'block' : 'none';
         });
+
+        // Sauvegarde
         modalDiv.querySelector('#saveModal').onclick = async () => {
             const name = modalDiv.querySelector('#prodName').value.trim();
             if (!name) return alert('Nom requis');
             const description = modalDiv.querySelector('#prodDesc').value;
             const active = modalDiv.querySelector('#activeCheck').checked;
-            const icon = selectedEmoji;
+
             if (typeSelect.value === 'simple') {
                 const price = parseFloat(modalDiv.querySelector('#simplePrice').value);
                 const stock = parseInt(modalDiv.querySelector('#simpleStock').value);
-                if (isNaN(price)) return;
-                const newProd = { id: isEdit ? product.id : Date.now().toString(), name, description, type: 'simple', price, stock, icon, active };
+                if (isNaN(price)) return alert('Prix invalide');
+                const newProd = {
+                    id: isEdit ? product.id : Date.now().toString(),
+                    name, description, type: 'simple', price, stock,
+                    icon: selectedEmoji, active
+                };
                 if (isEdit) {
                     const idx = products.findIndex(p => p.id === product.id);
                     if (idx !== -1) products[idx] = newProd;
                 } else products.push(newProd);
             } else {
                 const basePrice = parseFloat(modalDiv.querySelector('#basePrice').value);
-                if (isNaN(basePrice)) return;
+                if (isNaN(basePrice)) return alert('Prix de base requis');
                 const finalVariants = [];
                 const rows = variantsContainer.querySelectorAll('.variant-row');
-                rows.forEach((row, idx) => {
-                    const attrsStr = row.querySelector(`input[data-idx="${idx}"]`)?.value || '';
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    const attrsStr = inputs[0]?.value || '';
                     const [taille, couleur] = attrsStr.split('/');
-                    const stock = parseInt(row.querySelectorAll('input[type="number"]')[0]?.value || 0);
-                    const price = parseFloat(row.querySelectorAll('input[type="number"]')[1]?.value || 0) || basePrice;
+                    const stock = parseInt(inputs[1]?.value || 0);
+                    const price = parseFloat(inputs[2]?.value || 0) || basePrice;
                     if (taille.trim()) {
-                        finalVariants.push({ id: Date.now() + idx + Math.random(), attributes: { taille: taille.trim(), couleur: couleur.trim() }, stock, price });
+                        finalVariants.push({
+                            id: Date.now() + Math.random(),
+                            attributes: { taille: taille.trim(), couleur: couleur.trim() || '' },
+                            stock, price
+                        });
                     }
                 });
-                if (finalVariants.length === 0) return alert('Au moins une variante');
-                const newProd = { id: isEdit ? product.id : Date.now().toString(), name, description, type: 'variants', base_price: basePrice, variants: finalVariants, icon, active };
+                if (finalVariants.length === 0) return alert('Ajoutez au moins une variante');
+                const newProd = {
+                    id: isEdit ? product.id : Date.now().toString(),
+                    name, description, type: 'variants',
+                    base_price: basePrice, variants: finalVariants,
+                    icon: selectedEmoji, active
+                };
                 if (isEdit) {
                     const idx = products.findIndex(p => p.id === product.id);
                     if (idx !== -1) products[idx] = newProd;
                 } else products.push(newProd);
             }
-            await saveProducts();
-            modalDiv.remove();
-            renderProductsList();
-        };
-        modalDiv.querySelector('#cancelModal').onclick = () => modalDiv.remove();
-    }
-    window.editProduct = async (id) => {
-        await loadProducts();
-        const prod = products.find(p => p.id === id);
-        if (prod) showProductModal(prod);
-    };
 
-    // --- Gestion stock (avec ajustement +/-) ---
+            // Sauvegarde dans Supabase
+            try {
+                if (isEdit) {
+                    await fetchSupabase(`products?id=eq.${product.id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify(products.find(p => p.id === product.id))
+                    });
+                } else {
+                    await fetchSupabase('products', {
+                        method: 'POST',
+                        body: JSON.stringify(products[products.length - 1])
+                    });
+                }
+                showToast(isEdit ? 'Produit modifié' : 'Produit ajouté');
+                modalDiv.remove();
+                renderProductsList();
+            } catch(e) {
+                showToast('Erreur: ' + e.message);
+            }
+        };
+
+        modalDiv.querySelector('#cancelModal').onclick = () => modalDiv.remove();
+        modalDiv.addEventListener('click', (e) => { if (e.target === modalDiv) modalDiv.remove(); });
+    }
+
+    // ============================================
+    // 9. GESTION STOCK
+    // ============================================
     async function renderStock() {
         await loadProducts();
         let rows = [];
         products.forEach(p => {
-            if (p.type === 'simple') rows.push({ name: p.name, variant: 'Simple', stock: p.stock, productId: p.id, variantId: null, isVariant: false, icon: p.icon });
-            else if (p.variants) {
-                p.variants.forEach(v => rows.push({ name: p.name, variant: `${v.attributes.taille} / ${v.attributes.couleur}`, stock: v.stock, productId: p.id, variantId: v.id, isVariant: true, icon: p.icon }));
+            if (p.type === 'simple') {
+                rows.push({ name: p.name, variant: 'Simple', stock: p.stock || 0, productId: p.id, variantId: null, isVariant: false, icon: p.icon });
+            } else if (p.variants) {
+                p.variants.forEach(v => {
+                    rows.push({ name: p.name, variant: `${v.attributes?.taille || ''} / ${v.attributes?.couleur || ''}`, stock: v.stock || 0, productId: p.id, variantId: v.id, isVariant: true, icon: p.icon });
+                });
             }
         });
-        const html = `<div><button class="btn-outline" onclick="renderDashboard()">← Dashboard</button><h2>Gestion stock</h2></div><div class="table-container"><table><thead><tr><th>Icône</th><th>Produit</th><th>Variante</th><th>Stock</th><th>Ajuster</th></tr></thead><tbody>
-        ${rows.map(r => `<tr><td><div class="product-img-list">${r.icon || '📦'}</div></td><td>${r.name}</td><td>${r.variant}</td><td>${r.stock === 0 ? 'Rupture' : r.stock <= 2 ? `Bas (${r.stock})` : r.stock}</td>
-        <td><button class="stock-down" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">-</button> <span>${r.stock}</span> <button class="stock-up" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">+</button></td></tr>`).join('')}
-        </tbody></table></div>`;
+
+        const html = `
+            <div class="page-header"><h1>Gestion du stock</h1></div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Icône</th><th>Produit</th><th>Variante</th><th>Stock actuel</th><th>Ajuster</th></tr></thead>
+                    <tbody>
+                        ${rows.map(r => `
+                            <tr>
+                                <td><div class="product-img-list">${r.icon || '📦'}</div></td>
+                                <td>${r.name}</td>
+                                <td>${r.variant}</td>
+                                <td>${r.stock === 0 ? 'Rupture' : r.stock <= 2 ? `Bas (${r.stock})` : r.stock}</td>
+                                <td>
+                                    <button class="btn-small stock-down" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">-</button>
+                                    <span style="margin:0 8px;">${r.stock}</span>
+                                    <button class="btn-small stock-up" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">+</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
         document.getElementById('mainContent').innerHTML = html;
-        document.querySelectorAll('.stock-up, .stock-down').forEach(btn => {
-            btn.onclick = async () => {
+
+        // Événements pour les boutons +/- 
+        document.querySelectorAll('.stock-down, .stock-up').forEach(btn => {
+            btn.addEventListener('click', async () => {
                 const delta = btn.classList.contains('stock-up') ? 1 : -1;
                 const pid = btn.dataset.pid;
                 const vid = btn.dataset.vid;
                 const isVar = btn.dataset.isvar === 'true';
                 const prod = products.find(p => p.id === pid);
                 if (!prod) return;
-                if (!isVar && prod.type === 'simple') prod.stock = Math.max(0, (prod.stock || 0) + delta);
-                else if (isVar && prod.variants) {
+
+                if (!isVar && prod.type === 'simple') {
+                    prod.stock = Math.max(0, (prod.stock || 0) + delta);
+                    await fetchSupabase(`products?id=eq.${pid}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ stock: prod.stock })
+                    });
+                } else if (isVar && prod.variants) {
                     const variant = prod.variants.find(v => v.id === vid);
-                    if (variant) variant.stock = Math.max(0, variant.stock + delta);
+                    if (variant) {
+                        variant.stock = Math.max(0, variant.stock + delta);
+                        await fetchSupabase(`products?id=eq.${pid}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ variants: prod.variants })
+                        });
+                    }
                 }
-                await saveProducts();
                 renderStock();
-            };
+            });
         });
+        attachNavEvents();
     }
 
-    // --- Commandes (détail, suppression, suivi admin) ---
+    // ============================================
+    // 10. GESTION COMMANDES
+    // ============================================
     async function renderOrders() {
         await loadOrders();
-        const html = `<div><button class="btn-outline" onclick="renderDashboard()">← Dashboard</button><h2>Commandes (${orders.length})</h2></div>
-        <div class="table-container"><table><thead><tr><th>N°</th><th>Client</th><th>Total</th><th>Statut</th><th>Suivi admin</th><th>Détail</th><th>Actions</th></tr></thead><tbody>
-        ${orders.map(o => `<tr><td>${o.id}</td><td>${o.client}</td><td>${o.total}€</td><td>${o.status}</td>
-        <td><select data-id="${o.id}" class="admin-followup">${['À traiter','En cours','Expédié','Terminé'].map(s => `<option ${o.admin_followup === s ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
-        <td><button onclick="viewOrder('${o.id}')">Voir</button></td><td><button class="btn-danger" onclick="deleteOrder('${o.id}')">Supprimer</button></td></tr>`).join('')}
-        </tbody></table></div>`;
+        const html = `
+            <div class="page-header"><h1>Commandes (${orders.length})</h1></div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>N°</th><th>Client</th><th>Total</th><th>Statut</th><th>Suivi admin</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${orders.map(o => `
+                            <tr>
+                                <td>${o.id}</td>
+                                <td>${o.client}</td>
+                                <td>${o.total}€</td>
+                                <td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td>
+                                <td>
+                                    <select class="admin-followup" data-id="${o.id}">
+                                        ${['À traiter','En cours','Expédié','Terminé'].map(s => `
+                                            <option ${o.admin_followup === s ? 'selected' : ''}>${s}</option>
+                                        `).join('')}
+                                    </select>
+                                </td>
+                                <td>
+                                    <button class="btn-small btn-outline" onclick="viewOrder('${o.id}')">Voir</button>
+                                    <button class="btn-small btn-danger" onclick="deleteOrder('${o.id}')">Supprimer</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
         document.getElementById('mainContent').innerHTML = html;
+
+        // Suivi admin
         document.querySelectorAll('.admin-followup').forEach(sel => {
-            sel.onchange = async () => {
+            sel.addEventListener('change', async () => {
                 const order = orders.find(o => o.id === sel.dataset.id);
-                if (order) { order.admin_followup = sel.value; await saveOrders(); }
-            };
+                if (order) {
+                    order.admin_followup = sel.value;
+                    await fetchSupabase(`orders?id=eq.${order.id}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ admin_followup: sel.value })
+                    });
+                }
+            });
         });
+        attachNavEvents();
     }
-    window.viewOrder = (id) => {
+
+    window.viewOrder = function(id) {
         const order = orders.find(o => o.id === id);
         if (!order) return;
         const items = order.items.map(i => `${i.productId} ${i.variantId ? `(${i.variantId})` : ''} x${i.qty}`).join(', ');
-        alert(`Détail commande ${id}\nClient: ${order.client}\nDate: ${order.date} ${order.time}\nArticles: ${items}\nTotal: ${order.total}€\nPromo: ${order.promo_code || 'aucun'}`);
+        alert(`📋 Commande ${id}\nClient: ${order.client}\nDate: ${order.date} ${order.time}\nArticles: ${items}\nTotal: ${order.total}€\nPromo: ${order.promo_code || 'aucun'}`);
     };
-    window.deleteOrder = async (id) => {
-        if (confirm('Supprimer cette commande ?')) {
-            await supabase.from('orders').delete().eq('id', id);
-            await loadOrders();
+
+    window.deleteOrder = async function(id) {
+        if (!confirm('Supprimer cette commande ?')) return;
+        try {
+            await fetchSupabase(`orders?id=eq.${id}`, { method: 'DELETE' });
+            showToast('Commande supprimée');
             renderOrders();
+        } catch(e) {
+            showToast('Erreur: ' + e.message);
         }
     };
 
-    // --- Promos ---
+    // ============================================
+    // 11. GESTION PROMOS
+    // ============================================
     async function renderPromos() {
         await loadPromos();
-        const html = `<div><button class="btn-outline" onclick="renderDashboard()">← Dashboard</button><h2>Codes promo</h2><button id="addPromoBtn">+ Créer</button></div>
-        <div class="table-container"><table><thead><tr><th>Code</th><th>Type</th><th>Valeur</th><th>Actif</th><th>Actions</th></tr></thead><tbody>
-        ${promos.map(p => `<tr><td>${p.code}</td><td>${p.type === 'fixed' ? '€' : '%'}</td><td>${p.value}${p.type === 'fixed' ? '€' : '%'}</td><td>${p.active ? '✅' : '❌'}</td>
-        <td><button onclick="togglePromo('${p.code}')">Toggle actif</button> <button class="btn-danger" onclick="deletePromo('${p.code}')">Supprimer</button></td></tr>`).join('')}
-        </tbody></table></div>`;
+        const html = `
+            <div class="page-header"><h1>Codes promo</h1><button class="btn" id="addPromoBtn">+ Créer</button></div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Code</th><th>Type</th><th>Valeur</th><th>Actif</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${promos.map(p => `
+                            <tr>
+                                <td><strong>${p.code}</strong></td>
+                                <td>${p.type === 'fixed' ? '€ fixe' : '%'}</td>
+                                <td>${p.type === 'fixed' ? p.value+'€' : p.value+'%'}</td>
+                                <td>${p.active ? '✅' : '❌'}</td>
+                                <td>
+                                    <button class="btn-small btn-outline" onclick="togglePromo('${p.code}')">Toggle actif</button>
+                                    <button class="btn-small btn-danger" onclick="deletePromo('${p.code}')">Supprimer</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
         document.getElementById('mainContent').innerHTML = html;
         document.getElementById('addPromoBtn').onclick = async () => {
-            const code = prompt('Code promo');
+            const code = prompt('Code promo (ex: SOLDES20)');
             if (!code) return;
-            const type = confirm('Type: OK pour % / Annuler pour €') ? 'percent' : 'fixed';
-            const val = parseFloat(prompt('Valeur'));
-            if (isNaN(val)) return;
-            await supabase.from('promos').insert({ code: code.toUpperCase(), type, value: val, active: true });
-            await loadPromos();
-            renderPromos();
+            const type = confirm('Type: OK = % / Annuler = €') ? 'percent' : 'fixed';
+            const value = parseFloat(prompt('Valeur (ex: 15 pour 15% ou 10€)'));
+            if (isNaN(value) || value <= 0) return alert('Valeur invalide');
+            try {
+                const newPromo = { code: code.toUpperCase(), type, value, active: true };
+                await fetchSupabase('promos', {
+                    method: 'POST',
+                    body: JSON.stringify(newPromo)
+                });
+                showToast('Code promo créé');
+                renderPromos();
+            } catch(e) {
+                showToast('Erreur: ' + e.message);
+            }
         };
+        attachNavEvents();
     }
-    window.togglePromo = async (code) => {
+
+    window.togglePromo = async function(code) {
         const promo = promos.find(p => p.code === code);
-        if (promo) {
-            promo.active = !promo.active;
-            await supabase.from('promos').update({ active: promo.active }).eq('code', code);
-            await loadPromos();
+        if (!promo) return;
+        promo.active = !promo.active;
+        try {
+            await fetchSupabase(`promos?code=eq.${code}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ active: promo.active })
+            });
             renderPromos();
-        }
-    };
-    window.deletePromo = async (code) => {
-        if (confirm('Supprimer ce code promo ?')) {
-            await supabase.from('promos').delete().eq('code', code);
-            await loadPromos();
-            renderPromos();
+        } catch(e) {
+            showToast('Erreur: ' + e.message);
         }
     };
 
-    // --- Navigation ---
-    let currentAdminPage = 'dashboard';
-    async function setAdminPage(page) {
-        currentAdminPage = page;
+    window.deletePromo = async function(code) {
+        if (!confirm('Supprimer ce code promo ?')) return;
+        try {
+            await fetchSupabase(`promos?code=eq.${code}`, { method: 'DELETE' });
+            showToast('Code promo supprimé');
+            renderPromos();
+        } catch(e) {
+            showToast('Erreur: ' + e.message);
+        }
+    };
+
+    // ============================================
+    // 12. NAVIGATION
+    // ============================================
+    function attachNavEvents() {
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.onclick = () => navigateTo(item.dataset.page);
+        });
+    }
+
+    async function navigateTo(page) {
+        currentPage = page;
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
+        document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
+
         if (page === 'dashboard') await renderDashboard();
         else if (page === 'products') await renderProductsList();
         else if (page === 'stock') await renderStock();
         else if (page === 'orders') await renderOrders();
         else if (page === 'promos') await renderPromos();
     }
-    document.querySelectorAll('.nav-item').forEach(btn => {
-        btn.onclick = () => setAdminPage(btn.dataset.page);
-    });
-    setAdminPage('dashboard');
-    window.renderDashboard = renderDashboard;
-    window.renderProductsList = renderProductsList;
-    window.renderStock = renderStock;
-    window.renderOrders = renderOrders;
-    window.renderPromos = renderPromos;
-    window.deleteProduct = deleteProduct;
-    window.editProduct = editProduct;
+
+    // ============================================
+    // 13. INITIALISATION
+    // ============================================
+    async function init() {
+        await renderDashboard();
+        attachNavEvents();
+    }
+
+    init();
 </script>
 </body>
 </html>
+```
+
+-
