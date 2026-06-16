@@ -77,13 +77,13 @@
 
     <script>
         // ============================================
-        // 1. CONFIGURATION SUPABASE (fetch direct)
+        // 1. CONFIGURATION SUPABASE
         // ============================================
         const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
 
         // ============================================
-        // 2. FONCTIONS FETCH
+        // 2. FONCTION FETCH (avec gestion des réponses vides)
         // ============================================
         async function fetchSupabase(endpoint, options = {}) {
             const defaultHeaders = {
@@ -91,15 +91,29 @@
                 'Authorization': `Bearer ${SUPABASE_KEY}`,
                 'Content-Type': 'application/json'
             };
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
-                ...options,
-                headers: { ...defaultHeaders, ...options.headers }
-            });
-            if (!response.ok) {
-                const error = await response.text();
-                throw new Error(`HTTP ${response.status}: ${error}`);
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
+                    ...options,
+                    headers: { ...defaultHeaders, ...options.headers }
+                });
+
+                // Gérer les réponses vides (204 No Content, 201 Created)
+                if (response.status === 204 || response.status === 201) {
+                    return null;
+                }
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${error}`);
+                }
+
+                const text = await response.text();
+                if (!text) return null;
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('Fetch error:', e);
+                return null;
             }
-            return response.json();
         }
 
         // ============================================
@@ -111,7 +125,7 @@
         let currentPage = 'dashboard';
 
         // ============================================
-        // 4. CHARGEMENT DES DONNÉES (fetch)
+        // 4. CHARGEMENT DES DONNÉES
         // ============================================
         async function loadProducts() {
             try {
@@ -311,7 +325,7 @@
         }
 
         // ============================================
-        // 9. MODALE PRODUIT (avec upload image)
+        // 9. MODALE PRODUIT
         // ============================================
         const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
 
@@ -559,6 +573,8 @@
                             body: JSON.stringify(products[products.length - 1])
                         });
                     }
+                    // Recharger les données pour être sûr
+                    await loadProducts();
                     showToast(isEdit ? '✅ Produit modifié' : '✅ Produit ajouté');
                     modalDiv.remove();
                     await renderProducts();
@@ -583,6 +599,8 @@
             if (!confirm('Supprimer ce produit ?')) return;
             try {
                 await fetchSupabase(`products?id=eq.${id}`, { method: 'DELETE' });
+                // Recharger les données
+                await loadProducts();
                 showToast('✅ Produit supprimé');
                 await renderProducts();
             } catch (e) {
@@ -646,7 +664,7 @@
                     const vid = btn.dataset.vid;
                     const isVar = btn.dataset.isvar === 'true';
                     const prod = products.find(p => p.id === pid);
-                    if (!prod) { showToast('Erreur'); return; }
+                    if (!prod) { showToast('Erreur: produit non trouvé'); return; }
                     try {
                         if (!isVar && prod.type === 'simple') {
                             prod.stock = Math.max(0, (prod.stock || 0) + delta);
@@ -664,7 +682,10 @@
                                 });
                             }
                         }
+                        // Forcer le rechargement des données
+                        await loadProducts();
                         await renderStock();
+                        showToast('✅ Stock mis à jour');
                     } catch (e) {
                         showToast('❌ Erreur: ' + e.message);
                     }
@@ -674,7 +695,7 @@
         }
 
         // ============================================
-        // 12. GESTION COMMANDES (avec détails)
+        // 12. GESTION COMMANDES
         // ============================================
         async function renderOrders() {
             await loadOrders();
@@ -775,13 +796,14 @@
             `;
             document.body.appendChild(modal);
             document.getElementById('closeOrderModal').onclick = () => modal.remove();
-            modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+            modal.addEventListener('click', (e) => { if (e.target === modal) modalDiv.remove(); });
         };
 
         window.deleteOrder = async function(id) {
             if (!confirm('Supprimer cette commande ?')) return;
             try {
                 await fetchSupabase(`orders?id=eq.${id}`, { method: 'DELETE' });
+                await loadOrders();
                 showToast('✅ Commande supprimée');
                 await renderOrders();
             } catch (e) {
@@ -829,6 +851,7 @@
                         method: 'POST',
                         body: JSON.stringify({ code: code.toUpperCase(), type, value, active: true })
                     });
+                    await loadPromos();
                     showToast('✅ Code promo créé');
                     await renderPromos();
                 } catch (e) {
@@ -847,6 +870,7 @@
                     method: 'PATCH',
                     body: JSON.stringify({ active: promo.active })
                 });
+                await loadPromos();
                 showToast(promo.active ? '✅ Promo activée' : '⛔ Promo désactivée');
                 await renderPromos();
             } catch (e) {
@@ -858,6 +882,7 @@
             if (!confirm('Supprimer ce code promo ?')) return;
             try {
                 await fetchSupabase(`promos?code=eq.${code}`, { method: 'DELETE' });
+                await loadPromos();
                 showToast('✅ Code promo supprimé');
                 await renderPromos();
             } catch (e) {
