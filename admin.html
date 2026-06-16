@@ -21,7 +21,6 @@
         .btn-outline { background: white; border: 1px solid #cbd5e1; color: #1e293b; }
         .btn-danger { background: #ef4444; }
         .btn-small { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
-        .btn-success { background: #22c55e; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         .stat-card { background: white; padding: 1rem 1.2rem; border-radius: 20px; border: 1px solid #e2e8f0; }
         .stat-title { font-size: 0.8rem; text-transform: uppercase; color: #475569; font-weight: 600; }
@@ -29,7 +28,7 @@
         .stat-sub { font-size: 0.85rem; color: #64748b; }
         .table-container { background: white; border-radius: 20px; border: 1px solid #e2e8f0; overflow-x: auto; margin-top: 1rem; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; padding: 1rem; border-bottom: 1px solid #e2e8f0; }
+        th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0; }
         th { background: #f8fafc; font-weight: 600; color: #1e293b; }
         .badge { padding: 0.2rem 0.7rem; border-radius: 30px; font-size: 0.75rem; font-weight: 500; }
         .badge-success { background: #dcfce7; color: #15803d; }
@@ -175,29 +174,44 @@
             setTimeout(() => toast.remove(), 2500);
         }
 
+        // Calcul des statistiques de stock
         function getStockStats() {
             let totalStock = 0, ruptures = 0, low = 0, stockValue = 0;
+            let productRuptures = 0; // produits (entiers) en rupture
+
             products.forEach(p => {
+                let totalQty = 0;
                 if (p.type === 'simple') {
                     const qty = p.stock || 0;
+                    totalQty = qty;
                     totalStock += qty;
                     if (qty === 0) ruptures++;
                     else if (qty <= 2) low++;
                     stockValue += qty * (p.price || 0);
                 } else if (p.variants) {
+                    let hasStock = false;
                     p.variants.forEach(v => {
                         const qty = v.stock || 0;
+                        totalQty += qty;
                         totalStock += qty;
                         if (qty === 0) ruptures++;
                         else if (qty <= 2) low++;
                         stockValue += qty * (v.price || p.basePrice || 0);
+                        if (qty > 0) hasStock = true;
                     });
+                    // Si aucune variante n'a de stock, ce produit est en rupture
+                    if (!hasStock) productRuptures++;
+                } else {
+                    // cas improbable
                 }
+                // Pour les produits simples, on compte comme produit en rupture si stock = 0
+                if (p.type === 'simple' && (p.stock || 0) === 0) productRuptures++;
             });
-            return { totalStock, ruptures, lowStockItems: low, stockValue };
+
+            return { totalStock, ruptures, lowStockItems: low, stockValue, productRuptures };
         }
 
-        // AFFICHAGE ICÔNE : priorité à l'image
+        // Affichage icône (image prioritaire)
         function getDisplayIcon(product) {
             if (product.images && product.images.length > 0) {
                 return `<img src="${product.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
@@ -229,7 +243,7 @@
         }
 
         // ============================================
-        // 5. DASHBOARD
+        // 5. DASHBOARD (avec produits en rupture)
         // ============================================
         function renderDashboard() {
             products = loadProducts();
@@ -240,6 +254,7 @@
             const paidOrders = orders.filter(o => o.status === 'Payée');
             const revenue = paidOrders.reduce((s, o) => s + (o.total || 0), 0);
             const stockStats = getStockStats();
+
             const html = `
                 <div class="page-header"><h1>📊 Dashboard</h1></div>
                 <div class="stats-grid">
@@ -249,7 +264,8 @@
                     <div class="stat-card"><div class="stat-title">📦 Stock total</div><div class="stat-value">${stockStats.totalStock}</div><div class="stat-sub">unités</div></div>
                     <div class="stat-card"><div class="stat-title">💵 Valeur du stock</div><div class="stat-value">${stockStats.stockValue.toFixed(2)} €</div><div class="stat-sub">estimation</div></div>
                     <div class="stat-card"><div class="stat-title">⚠️ Stock bas</div><div class="stat-value">${stockStats.lowStockItems}</div><div class="stat-sub">articles ≤2</div></div>
-                    <div class="stat-card"><div class="stat-title">❌ Ruptures</div><div class="stat-value">${stockStats.ruptures}</div><div class="stat-sub">à 0</div></div>
+                    <div class="stat-card"><div class="stat-title">❌ Ruptures (articles)</div><div class="stat-value">${stockStats.ruptures}</div><div class="stat-sub">produits/variantes à 0</div></div>
+                    <div class="stat-card"><div class="stat-title">📦 Produits en rupture</div><div class="stat-value">${stockStats.productRuptures}</div><div class="stat-sub">produits (toutes variantes à 0)</div></div>
                 </div>
                 <h3 style="margin:1.5rem 0 0.5rem;">Dernières commandes</h3>
                 <div class="table-container">
@@ -269,7 +285,7 @@
         }
 
         // ============================================
-        // 6. GESTION PRODUITS
+        // 6. GESTION PRODUITS (inchangé)
         // ============================================
         function renderProducts() {
             products = loadProducts();
@@ -304,7 +320,7 @@
         }
 
         // ============================================
-        // 7. MODALE PRODUIT (avec upload d'images)
+        // 7. MODALE PRODUIT (identique)
         // ============================================
         const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
 
@@ -540,7 +556,7 @@
         };
 
         // ============================================
-        // 9. GESTION STOCK
+        // 9. GESTION STOCK (inchangé)
         // ============================================
         function renderStock() {
             products = loadProducts();
@@ -608,7 +624,7 @@
         }
 
         // ============================================
-        // 10. GESTION COMMANDES
+        // 10. GESTION COMMANDES (avec promo et prix original)
         // ============================================
         function renderOrders() {
             orders = loadOrders();
@@ -616,26 +632,44 @@
                 <div class="page-header"><h1>📋 Commandes (${orders.length})</h1></div>
                 <div class="table-container">
                     <table>
-                        <thead><tr><th>N°</th><th>Client</th><th>Total</th><th>Statut</th><th>Suivi admin</th><th>Actions</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>Client</th>
+                                <th>Prix original</th>
+                                <th>Remise</th>
+                                <th>Total payé</th>
+                                <th>Code promo</th>
+                                <th>Statut</th>
+                                <th>Suivi admin</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
                         <tbody>
-                            ${orders.map(o => `
-                                <tr>
-                                    <td><strong>${o.id}</strong></td>
-                                    <td>${o.client}</td>
-                                    <td>${(o.total||0).toFixed(2)} €</td>
-                                    <td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td>
-                                    <td>
-                                        <select class="admin-followup" data-id="${o.id}">
-                                            ${['À traiter','En cours','Expédié','Terminé'].map(s => `<option ${o.adminFollowup === s ? 'selected' : ''}>${s}</option>`).join('')}
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <button class="btn-small btn-outline" onclick="viewOrder('${o.id}')">👁️ Voir</button>
-                                        <button class="btn-small btn-danger" onclick="deleteOrder('${o.id}')">🗑️</button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                            ${orders.length === 0 ? '<tr><td colspan="6" style="text-align:center;color:#94a3b8;">Aucune commande</td></tr>' : ''}
+                            ${orders.map(o => {
+                                const originalTotal = o.total + (o.discount || 0);
+                                return `
+                                    <tr>
+                                        <td><strong>${o.id}</strong></td>
+                                        <td>${o.client}</td>
+                                        <td>${originalTotal.toFixed(2)} €</td>
+                                        <td>${(o.discount || 0).toFixed(2)} €</td>
+                                        <td>${(o.total || 0).toFixed(2)} €</td>
+                                        <td>${o.promoCode ? `<span class="badge badge-success">${o.promoCode}</span>` : '—'}</td>
+                                        <td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td>
+                                        <td>
+                                            <select class="admin-followup" data-id="${o.id}">
+                                                ${['À traiter','En cours','Expédié','Terminé'].map(s => `<option ${o.adminFollowup === s ? 'selected' : ''}>${s}</option>`).join('')}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <button class="btn-small btn-outline" onclick="viewOrder('${o.id}')">👁️ Voir</button>
+                                            <button class="btn-small btn-danger" onclick="deleteOrder('${o.id}')">🗑️</button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                            ${orders.length === 0 ? '<tr><td colspan="9" style="text-align:center;color:#94a3b8;">Aucune commande</td></tr>' : ''}
                         </tbody>
                     </table>
                 </div>
@@ -657,7 +691,8 @@
             const order = orders.find(o => o.id === id);
             if (!order) return;
             const items = order.items.map(i => `${i.productId} ${i.variantId ? `(${i.variantId})` : ''} x${i.qty}`).join(', ');
-            alert(`📋 Commande ${id}\nClient: ${order.client}\nDate: ${order.date} ${order.time}\nStatut: ${order.status}\nSuivi: ${order.adminFollowup || 'À traiter'}\nArticles: ${items}\nTotal: ${order.total}€`);
+            const originalTotal = order.total + (order.discount || 0);
+            alert(`📋 Commande ${id}\nClient: ${order.client}\nDate: ${order.date} ${order.time}\nStatut: ${order.status}\nSuivi: ${order.adminFollowup || 'À traiter'}\nArticles: ${items}\nPrix original: ${originalTotal.toFixed(2)}€\nRemise: ${(order.discount||0).toFixed(2)}€\nTotal payé: ${order.total}€\nCode promo: ${order.promoCode || 'aucun'}`);
         };
 
         window.deleteOrder = function(id) {
@@ -669,7 +704,7 @@
         };
 
         // ============================================
-        // 11. GESTION PROMOS
+        // 11. GESTION PROMOS (inchangé)
         // ============================================
         function renderPromos() {
             promos = loadPromos();
