@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>StyleShop - Boutique en ligne</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* Vos styles existants (inchangés) */
         * {
             margin: 0;
             padding: 0;
@@ -15,7 +17,6 @@
             background: #f8fafc;
             color: #0f172a;
         }
-        /* Header */
         .header {
             background: white;
             border-bottom: 1px solid #e2e8f0;
@@ -34,6 +35,7 @@
             font-weight: 700;
             color: #0f172a;
             text-decoration: none;
+            cursor: pointer;
         }
         .cart-icon {
             position: relative;
@@ -58,7 +60,6 @@
             margin: 0 auto;
             padding: 2rem;
         }
-        /* Catalogue grid */
         .products-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -128,7 +129,6 @@
             border: 1px solid #cbd5e1;
             color: #1e293b;
         }
-        /* Fiche produit */
         .product-detail {
             background: white;
             border-radius: 32px;
@@ -170,7 +170,6 @@
             cursor: pointer;
             color: #3b82f6;
         }
-        /* Panier */
         .cart-page {
             background: white;
             border-radius: 32px;
@@ -197,6 +196,8 @@
             padding: 0.2rem 0.6rem;
             border-radius: 20px;
             font-weight: bold;
+            cursor: pointer;
+            border: none;
         }
         .summary {
             margin-top: 1.5rem;
@@ -255,78 +256,44 @@
 </div>
 
 <script>
-    // ---------- DONNÉES PRODUITS (avec variantes et stock) ----------
-    const products = [
-        {
-            id: "tshirt",
-            name: "T-shirt Classic",
-            description: "Coton bio, coupe confortable.",
-            type: "simple",
-            price: 24.90,
-            stock: 12,
-            icon: "👕",
-            variants: null
-        },
-        {
-            id: "sneakers",
-            name: "Sneakers Urban",
-            description: "Sneakers légères, semelle EVA, disponibles en plusieurs coloris.",
-            type: "variants",
-            basePrice: 89.90,
-            icon: "👟",
-            variants: [
-                { id: "snk_38_blanc", attributes: { taille: "38", couleur: "Blanc" }, stock: 5, price: 89.90 },
-                { id: "snk_39_blanc", attributes: { taille: "39", couleur: "Blanc" }, stock: 3, price: 89.90 },
-                { id: "snk_40_blanc", attributes: { taille: "40", couleur: "Blanc" }, stock: 0, price: 89.90 },
-                { id: "snk_41_blanc", attributes: { taille: "41", couleur: "Blanc" }, stock: 2, price: 89.90 },
-                { id: "snk_38_noir", attributes: { taille: "38", couleur: "Noir" }, stock: 8, price: 89.90 },
-                { id: "snk_39_noir", attributes: { taille: "39", couleur: "Noir" }, stock: 4, price: 89.90 },
-                { id: "snk_40_noir", attributes: { taille: "40", couleur: "Noir" }, stock: 6, price: 89.90 },
-                { id: "snk_41_noir", attributes: { taille: "41", couleur: "Noir" }, stock: 1, price: 89.90 }
-            ]
-        },
-        {
-            id: "hoodie",
-            name: "Hoodie Premium",
-            description: "Molleton épais, capuche ajustable.",
-            type: "variants",
-            basePrice: 59.90,
-            icon: "🧥",
-            variants: [
-                { id: "hd_s_gris", attributes: { taille: "S", couleur: "Gris" }, stock: 6, price: 59.90 },
-                { id: "hd_m_gris", attributes: { taille: "M", couleur: "Gris" }, stock: 10, price: 59.90 },
-                { id: "hd_l_gris", attributes: { taille: "L", couleur: "Gris" }, stock: 3, price: 59.90 },
-                { id: "hd_s_noir", attributes: { taille: "S", couleur: "Noir" }, stock: 2, price: 59.90 },
-                { id: "hd_m_noir", attributes: { taille: "M", couleur: "Noir" }, stock: 5, price: 59.90 },
-                { id: "hd_l_noir", attributes: { taille: "L", couleur: "Noir" }, stock: 1, price: 59.90 }
-            ]
-        },
-        {
-            id: "casquette",
-            name: "Casquette Logo",
-            description: "Coton bio, ajustable.",
-            type: "simple",
-            price: 19.90,
-            stock: 2,
-            icon: "🧢",
-            variants: null
-        },
-        {
-            id: "chaussettes",
-            name: "Chaussettes Pack",
-            description: "Lot de 3 paires, coton doux.",
-            type: "simple",
-            price: 14.90,
-            stock: 0,
-            icon: "🧦",
-            variants: null
-        }
-    ];
+    // ============================================
+    // 1. CONNEXION À SUPABASE (AJOUTÉ)
+    // ============================================
+    const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Panier : { productId, variantId, quantity, name, price, attributes }
+    // ============================================
+    // 2. VARIABLES GLOBALES
+    // ============================================
+    let products = [];
     let cart = [];
+    let currentPage = "catalogue";
+    let selectedProductId = null;
+    let selectedVariantCache = {};
 
-    // Sauvegarde / chargement localStorage
+    // ============================================
+    // 3. CHARGEMENT DES PRODUITS DEPUIS SUPABASE
+    // ============================================
+    async function loadProductsFromSupabase() {
+        try {
+            const { data, error } = await supabase.from('products').select('*');
+            if (error) {
+                console.error('❌ Erreur Supabase:', error);
+                showToast('Erreur de chargement des produits');
+                return [];
+            }
+            console.log('✅ Produits chargés depuis Supabase:', data?.length || 0);
+            return data || [];
+        } catch (e) {
+            console.error('❌ Exception:', e);
+            return [];
+        }
+    }
+
+    // ============================================
+    // 4. PANIER (localStorage)
+    // ============================================
     function saveCart() {
         localStorage.setItem("styleShopCart", JSON.stringify(cart));
         updateCartCount();
@@ -341,28 +308,28 @@
         document.getElementById("cartCount").innerText = totalItems;
     }
 
-    // Trouver un produit et sa variante
-    function findProduct(productId, variantId = null) {
-        const product = products.find(p => p.id === productId);
-        if(!product) return null;
-        if(product.type === "simple") return { product, variant: null, price: product.price, stock: product.stock };
-        if(variantId) {
-            const variant = product.variants.find(v => v.id === variantId);
-            return { product, variant, price: variant.price, stock: variant.stock };
-        }
-        return { product, variant: null };
-    }
-
-    // Vérifier stock disponible pour un produit/variante
+    // ============================================
+    // 5. UTILITAIRES
+    // ============================================
     function getStock(productId, variantId) {
         const prod = products.find(p => p.id === productId);
         if(!prod) return 0;
-        if(prod.type === "simple") return prod.stock;
-        const variant = prod.variants.find(v => v.id === variantId);
+        if(prod.type === "simple") return prod.stock || 0;
+        const variant = prod.variants?.find(v => v.id === variantId);
         return variant ? variant.stock : 0;
     }
 
-    // Ajouter au panier (avec contrôle stock)
+    function showToast(msg) {
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    // ============================================
+    // 6. AJOUT / MODIFICATION PANIER
+    // ============================================
     function addToCart(productId, variantId, quantity = 1) {
         const product = products.find(p => p.id === productId);
         if(!product) return false;
@@ -372,15 +339,15 @@
         let attributes = {};
 
         if(product.type === "simple") {
-            availableStock = product.stock;
-            price = product.price;
+            availableStock = product.stock || 0;
+            price = product.price || 0;
             attributes = { type: "simple" };
         } else {
-            variant = product.variants.find(v => v.id === variantId);
+            variant = product.variants?.find(v => v.id === variantId);
             if(!variant) return false;
-            availableStock = variant.stock;
-            price = variant.price;
-            attributes = variant.attributes;
+            availableStock = variant.stock || 0;
+            price = variant.price || 0;
+            attributes = variant.attributes || {};
         }
 
         if(availableStock < quantity) {
@@ -388,7 +355,6 @@
             return false;
         }
 
-        // Vérifier si déjà dans le panier
         const existingIndex = cart.findIndex(item => item.productId === productId && item.variantId === variantId);
         if(existingIndex !== -1) {
             const newQty = cart[existingIndex].quantity + quantity;
@@ -405,7 +371,7 @@
                 price: price,
                 quantity: quantity,
                 attributes: attributes,
-                imageIcon: product.icon
+                imageIcon: product.icon || '📦'
             });
         }
         saveCart();
@@ -413,7 +379,6 @@
         return true;
     }
 
-    // Modifier quantité panier
     function updateCartItem(index, newQuantity) {
         if(newQuantity <= 0) {
             cart.splice(index,1);
@@ -432,27 +397,16 @@
         renderCurrentPage();
     }
 
-    function showToast(msg) {
-        const toast = document.createElement("div");
-        toast.className = "toast";
-        toast.innerText = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 2000);
-    }
-
-    // ---------------- RENDUS PAGES ----------------
-    let currentPage = "catalogue";
-    let selectedProductId = null;
-    let selectedVariantCache = {}; // pour garder sélection dans fiche produit
-
+    // ============================================
+    // 7. NAVIGATION ET RENDU
+    // ============================================
     function navigateTo(page, productId = null) {
         if(page === "product" && productId) {
             currentPage = "product";
             selectedProductId = productId;
-            // initialiser la sélection par défaut (première variante dispo ou aucune)
             const prod = products.find(p => p.id === productId);
             if(prod && prod.type === "variants" && !selectedVariantCache[productId]) {
-                const firstAvailable = prod.variants.find(v => v.stock > 0);
+                const firstAvailable = prod.variants?.find(v => v.stock > 0);
                 if(firstAvailable) selectedVariantCache[productId] = firstAvailable.id;
                 else selectedVariantCache[productId] = null;
             }
@@ -472,18 +426,30 @@
         else renderCatalogue();
     }
 
-    // Catalogue
+    // ============================================
+    // 8. RENDU CATALOGUE
+    // ============================================
     function renderCatalogue() {
+        if(products.length === 0) {
+            document.getElementById("app").innerHTML = `
+                <div style="text-align: center; padding: 3rem;">
+                    <h2>📦 Chargement des produits...</h2>
+                    <p style="color: #475569; margin-top: 1rem;">Vérifiez que votre base Supabase contient des produits.</p>
+                </div>
+            `;
+            return;
+        }
+
         const html = `
             <h1 style="margin-bottom: 1rem;">Catalogue</h1>
             <p style="margin-bottom: 1.5rem; color: #475569;">Cliquez sur un produit pour voir les détails</p>
             <div class="products-grid">
-                ${products.map(p => `
+                ${products.filter(p => p.active !== false).map(p => `
                     <div class="product-card" onclick="navigateTo('product','${p.id}')">
-                        <div class="product-icon">${p.icon}</div>
+                        <div class="product-icon">${p.icon || '📦'}</div>
                         <div class="product-title">${p.name}</div>
                         <div class="product-type">${p.type === "simple" ? "Produit simple" : "Avec variantes"}</div>
-                        <div class="product-price">${p.type === "simple" ? p.price.toFixed(2) : p.basePrice.toFixed(2)} € ${p.type === "variants" ? "+" : ""}</div>
+                        <div class="product-price">${p.type === "simple" ? (p.price || 0).toFixed(2) : (p.base_price || 0).toFixed(2)} € ${p.type === "variants" ? "+" : ""}</div>
                         <div class="stock-badge ${p.type === "simple" ? (p.stock === 0 ? "stock-out" : (p.stock <= 2 ? "stock-warning" : "")) : ""}">
                             ${p.type === "simple" ? (p.stock === 0 ? "Rupture" : (p.stock <= 2 ? `Derniers (${p.stock})` : "En stock")) : "En stock"}
                         </div>
@@ -494,47 +460,47 @@
         document.getElementById("app").innerHTML = html;
     }
 
-    // Fiche produit (variantes)
+    // ============================================
+    // 9. RENDU FICHE PRODUIT
+    // ============================================
     function renderProductDetail(productId) {
         const product = products.find(p => p.id === productId);
         if(!product) return renderCatalogue();
         const isVariantProduct = product.type === "variants";
         let selectedVariantId = selectedVariantCache[productId] || null;
         let selectedVariant = null;
-        let currentPrice = product.type === "simple" ? product.price : product.basePrice;
-        let currentStock = product.type === "simple" ? product.stock : 0;
+        let currentPrice = product.type === "simple" ? (product.price || 0) : (product.base_price || 0);
+        let currentStock = product.type === "simple" ? (product.stock || 0) : 0;
         let canAdd = false;
 
         if(isVariantProduct && selectedVariantId) {
-            selectedVariant = product.variants.find(v => v.id === selectedVariantId);
+            selectedVariant = product.variants?.find(v => v.id === selectedVariantId);
             if(selectedVariant) {
-                currentPrice = selectedVariant.price;
-                currentStock = selectedVariant.stock;
+                currentPrice = selectedVariant.price || 0;
+                currentStock = selectedVariant.stock || 0;
                 canAdd = currentStock > 0;
             }
         } else if(!isVariantProduct) {
-            canAdd = product.stock > 0;
+            canAdd = (product.stock || 0) > 0;
         }
 
-        // Générer les options taille / couleur
         let tailleOptions = [], couleurOptions = [];
-        if(isVariantProduct) {
-            const tailles = [...new Set(product.variants.map(v => v.attributes.taille))];
-            const couleurs = [...new Set(product.variants.map(v => v.attributes.couleur))];
+        if(isVariantProduct && product.variants) {
+            const tailles = [...new Set(product.variants.map(v => v.attributes?.taille).filter(Boolean))];
+            const couleurs = [...new Set(product.variants.map(v => v.attributes?.couleur).filter(Boolean))];
             tailleOptions = tailles;
             couleurOptions = couleurs;
         }
 
-        // Déterminer variante actuelle pour pré-sélection
         const currentTaille = selectedVariant?.attributes?.taille || (tailleOptions[0] || "");
         const currentCouleur = selectedVariant?.attributes?.couleur || (couleurOptions[0] || "");
 
         const detailHtml = `
             <div class="back-link" onclick="navigateTo('catalogue')">← Retour au catalogue</div>
             <div class="product-detail">
-                <div style="font-size: 3rem;">${product.icon}</div>
+                <div style="font-size: 3rem;">${product.icon || '📦'}</div>
                 <h2>${product.name}</h2>
-                <p style="margin: 0.5rem 0; color: #334155;">${product.description}</p>
+                <p style="margin: 0.5rem 0; color: #334155;">${product.description || ''}</p>
                 ${isVariantProduct ? `
                     <div class="variant-group">
                         <strong>TAILLE</strong>
@@ -566,7 +532,6 @@
         document.getElementById("app").innerHTML = detailHtml;
 
         if(isVariantProduct) {
-            // Événements pour les boutons taille/couleur
             const tailleBtns = document.querySelectorAll("#tailleContainer .variant-btn");
             const couleurBtns = document.querySelectorAll("#couleurContainer .variant-btn");
 
@@ -574,12 +539,11 @@
                 const selectedTaille = document.querySelector("#tailleContainer .variant-btn.selected")?.dataset.value;
                 const selectedCouleur = document.querySelector("#couleurContainer .variant-btn.selected")?.dataset.value;
                 if(selectedTaille && selectedCouleur) {
-                    const foundVariant = product.variants.find(v => v.attributes.taille === selectedTaille && v.attributes.couleur === selectedCouleur);
+                    const foundVariant = product.variants?.find(v => v.attributes?.taille === selectedTaille && v.attributes?.couleur === selectedCouleur);
                     if(foundVariant) {
                         selectedVariantCache[productId] = foundVariant.id;
-                        renderProductDetail(productId); // rafraîchit avec nouvelle sélection
+                        renderProductDetail(productId);
                     } else {
-                        // combinaison inexistante
                         selectedVariantCache[productId] = null;
                         renderProductDetail(productId);
                     }
@@ -619,7 +583,9 @@
         }
     }
 
-    // Panier
+    // ============================================
+    // 10. RENDU PANIER
+    // ============================================
     function renderCart() {
         if(cart.length === 0) {
             document.getElementById("app").innerHTML = `
@@ -654,7 +620,7 @@
             `;
         }).join('');
 
-        const total = subtotal; // livraison gratuite
+        const total = subtotal;
         const html = `
             <div class="cart-page">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -668,13 +634,12 @@
                     <p>Livraison : Gratuite</p>
                     <h3>Total : ${total.toFixed(2)} €</h3>
                     <button class="primary" id="checkoutBtn" style="margin-top:1rem;">Procéder au paiement</button>
-                    <p style="font-size:0.7rem; margin-top:0.5rem;">Le total sera re-calculé et validé par le backend (Edge Function Supabase)</p>
+                    <p style="font-size:0.7rem; margin-top:0.5rem;">Le total sera re-calculé et validé par le backend</p>
                 </div>
             </div>
         `;
         document.getElementById("app").innerHTML = html;
 
-        // Gestion des quantités
         document.querySelectorAll(".qty-btn").forEach(btn => {
             btn.addEventListener("click", (e) => {
                 const idx = parseInt(btn.dataset.index);
@@ -692,23 +657,20 @@
         document.getElementById("checkoutBtn")?.addEventListener("click", simulateCheckout);
     }
 
-    // Simulation du processus de paiement (Stripe, Edge Function, EmailJS)
+    // ============================================
+    // 11. SIMULATION PAIEMENT AVEC SUPABASE
+    // ============================================
     async function simulateCheckout() {
         if(cart.length === 0) return showToast("Panier vide");
 
-        // 1. Vérification des stocks auprès du "backend" (simulation)
-        let stockOk = true;
         for(const item of cart) {
             const currentStock = getStock(item.productId, item.variantId);
             if(item.quantity > currentStock) {
                 showToast(`Stock dépassé pour ${item.name} : disponible ${currentStock}`);
-                stockOk = false;
-                break;
+                return;
             }
         }
-        if(!stockOk) return;
 
-        // 2. Simulation d'un appel à Stripe (modal paiement factice)
         const modalHtml = `
             <div class="modal" id="paymentModal">
                 <div class="modal-content">
@@ -725,34 +687,59 @@
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         const modal = document.getElementById("paymentModal");
         document.getElementById("cancelPayment")?.addEventListener("click", () => modal.remove());
+
         document.getElementById("confirmPayment")?.addEventListener("click", async () => {
             modal.remove();
 
-            // 3. Simulation webhook / mise à jour des stocks (décrémentation)
+            // Mise à jour des stocks dans Supabase
             for(const item of cart) {
                 const product = products.find(p => p.id === item.productId);
+                if(!product) continue;
+
                 if(product.type === "simple") {
-                    product.stock -= item.quantity;
-                } else {
+                    const newStock = Math.max(0, (product.stock || 0) - item.quantity);
+                    await supabase.from('products').update({ stock: newStock }).eq('id', product.id);
+                    product.stock = newStock;
+                } else if(product.variants) {
                     const variant = product.variants.find(v => v.id === item.variantId);
-                    if(variant) variant.stock -= item.quantity;
+                    if(variant) {
+                        variant.stock = Math.max(0, variant.stock - item.quantity);
+                        await supabase.from('products').update({ variants: product.variants }).eq('id', product.id);
+                    }
                 }
             }
-            // Génération commande
+
+            // Création commande dans Supabase
             const orderId = "ORD-" + Math.random().toString(36).substring(2,8).toUpperCase();
-            const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`; // simule email saisi
-            const totalPaid = cart.reduce((s,i)=>s+i.price*i.quantity,0).toFixed(2);
+            const now = new Date();
+            const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`;
+            const totalPaid = cart.reduce((s,i)=>s+i.price*i.quantity,0);
+
+            const order = {
+                id: orderId,
+                client: clientEmail,
+                date: now.toISOString().slice(0,10),
+                time: now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+                items: cart.map(i => ({
+                    productId: i.productId,
+                    variantId: i.variantId,
+                    qty: i.quantity,
+                    price: i.price
+                })),
+                total: totalPaid,
+                status: 'Payée',
+                admin_followup: 'À traiter',
+                promo_code: null,
+                discount: 0
+            };
+
+            await supabase.from('orders').insert(order);
+
             const itemsList = cart.map(i => `${i.name} ${i.attributes?.taille ? `(${i.attributes.taille}/${i.attributes.couleur})` : ""} x${i.quantity}`).join(", ");
-
-            // 4. Simuler envoi email via EmailJS (affichage console + toast)
-            console.log(`[EmailJS] Envoi à ${clientEmail} : Commande ${orderId} confirmée. Total ${totalPaid}€`);
-            showToast(`📧 Email de confirmation envoyé à ${clientEmail} (simulation EmailJS)`);
-
-            // Vider le panier
             cart = [];
             saveCart();
 
-            // Afficher page de confirmation
+            // Confirmation
             const confirmationHtml = `
                 <div style="background: white; border-radius: 32px; padding: 2rem; text-align: center;">
                     <h2>✅ Commande confirmée !</h2>
@@ -760,7 +747,7 @@
                     <p><strong>N° commande</strong><br>${orderId}</p>
                     <p><strong>Statut</strong><br>Payée</p>
                     <p><strong>Articles</strong><br>${itemsList}</p>
-                    <p><strong>Total payé</strong><br>${totalPaid} €</p>
+                    <p><strong>Total payé</strong><br>${totalPaid.toFixed(2)} €</p>
                     <p style="font-size:0.8rem;">Email envoyé via EmailJS à ${clientEmail}</p>
                     <button class="primary" onclick="navigateTo('catalogue')">Nouvelle commande</button>
                 </div>
@@ -769,13 +756,24 @@
         });
     }
 
-    // Initialisation
-    loadCart();
-    renderCurrentPage();
+    // ============================================
+    // 12. INITIALISATION
+    // ============================================
+    async function init() {
+        console.log('🚀 Initialisation...');
+        products = await loadProductsFromSupabase();
+        loadCart();
+        renderCurrentPage();
+    }
+
+    // Exposer les fonctions
     window.navigateTo = navigateTo;
     window.addToCart = addToCart;
     window.updateCartItem = updateCartItem;
     window.simulateCheckout = simulateCheckout;
+
+    // Lancer l'application
+    init();
 </script>
 </body>
-</html>
+</html> 
