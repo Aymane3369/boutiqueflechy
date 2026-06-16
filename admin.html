@@ -56,12 +56,17 @@
         .upload-area input[type="file"] { width: auto; padding: 0.4rem; }
         .upload-btn { background: #22c55e; color: white; border: none; padding: 0.4rem 1rem; border-radius: 30px; cursor: pointer; }
         .upload-btn:hover { background: #16a34a; }
+        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f1f5f9; }
+        .login-box { background: white; padding: 2.5rem; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        .login-box h1 { text-align: center; margin-bottom: 1.5rem; color: #0f172a; }
+        .login-box input { margin-bottom: 1rem; }
+        .login-box .btn { width: 100%; justify-content: center; }
         @media (max-width: 700px) { .sidebar { width: 80px; padding: 1rem 0.5rem; } .sidebar .logo h2 { font-size: 1rem; } .sidebar .logo span, .footer-sidebar { display: none; } .nav-item { font-size: 0.8rem; text-align: center; padding: 0.5rem; } .main { padding: 1rem; } }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <div class="logo"><h2>StyleShop</h2><span>Admin panel</span></div>
         <div class="nav">
             <div class="nav-item active" data-page="dashboard">📊 Dashboard</div>
@@ -69,6 +74,7 @@
             <div class="nav-item" data-page="stock">📦 Stock</div>
             <div class="nav-item" data-page="orders">📋 Commandes</div>
             <div class="nav-item" data-page="promos">🏷️ Promos</div>
+            <div class="nav-item" data-page="logout" style="color:#ef4444;margin-top:1rem;">🚪 Déconnexion</div>
         </div>
         <div class="footer-sidebar">Accès admin via Supabase</div>
     </div>
@@ -83,7 +89,60 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
 
         // ============================================
-        // 2. FONCTION FETCH (avec gestion des réponses vides)
+        // 2. AUTHENTIFICATION ADMIN
+        // ============================================
+        const ADMIN_EMAIL = 'admin@styleshop.com';
+        const ADMIN_PASSWORD = 'Admin123!';
+
+        function isAuthenticated() {
+            return sessionStorage.getItem('admin_authenticated') === 'true';
+        }
+
+        function requireAuth() {
+            if (!isAuthenticated()) {
+                renderLogin();
+                return false;
+            }
+            return true;
+        }
+
+        function renderLogin() {
+            document.getElementById('sidebar').style.display = 'none';
+            document.getElementById('mainContent').innerHTML = `
+                <div class="login-container">
+                    <div class="login-box">
+                        <h1>🔐 Admin</h1>
+                        <p style="text-align:center;color:#64748b;margin-bottom:1.5rem;">StyleShop - Panel d'administration</p>
+                        <input type="email" id="loginEmail" placeholder="Email" value="admin@styleshop.com">
+                        <input type="password" id="loginPassword" placeholder="Mot de passe" value="Admin123!">
+                        <button class="btn" id="loginBtn">Se connecter</button>
+                        <p style="text-align:center;color:#94a3b8;font-size:0.8rem;margin-top:1rem;">admin@styleshop.com / Admin123!</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('loginBtn').onclick = () => {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+                    sessionStorage.setItem('admin_authenticated', 'true');
+                    document.getElementById('sidebar').style.display = 'flex';
+                    init();
+                } else {
+                    alert('❌ Email ou mot de passe incorrect');
+                }
+            };
+            document.getElementById('loginPassword').addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') document.getElementById('loginBtn').click();
+            });
+        }
+
+        function logout() {
+            sessionStorage.removeItem('admin_authenticated');
+            renderLogin();
+        }
+
+        // ============================================
+        // 3. FONCTION FETCH
         // ============================================
         async function fetchSupabase(endpoint, options = {}) {
             const defaultHeaders = {
@@ -112,7 +171,58 @@
         }
 
         // ============================================
-        // 3. VARIABLES GLOBALES
+        // 4. UPLOAD IMAGE VERS SUPABASE STORAGE
+        // ============================================
+        async function uploadImageToSupabase(file) {
+            const bucketName = 'products';
+            const fileName = `${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+            
+            try {
+                // Vérifier si le bucket existe, sinon le créer
+                const { data: buckets } = await fetchSupabase('storage/buckets', { method: 'GET' });
+                const bucketExists = buckets?.some(b => b.name === bucketName);
+                
+                if (!bucketExists) {
+                    await fetchSupabase('storage/buckets', {
+                        method: 'POST',
+                        body: JSON.stringify({ name: bucketName, public: true })
+                    });
+                }
+
+                // Upload du fichier
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const uploadResponse = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucketName}/${fileName}`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    },
+                    body: formData
+                });
+
+                if (!uploadResponse.ok) {
+                    const error = await uploadResponse.text();
+                    throw new Error(`Upload failed: ${error}`);
+                }
+
+                // Récupérer l'URL publique
+                const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${bucketName}/${fileName}`;
+                return publicUrl;
+            } catch (e) {
+                console.error('Upload error:', e);
+                // Fallback: utiliser base64
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        // ============================================
+        // 5. VARIABLES GLOBALES
         // ============================================
         let products = [];
         let orders = [];
@@ -120,7 +230,7 @@
         let currentPage = 'dashboard';
 
         // ============================================
-        // 4. CHARGEMENT DES DONNÉES
+        // 6. CHARGEMENT DES DONNÉES
         // ============================================
         async function loadProducts() {
             try {
@@ -133,7 +243,6 @@
                         if (p.type === 'simple') p.stock = parseInt(p.stock) || 0;
                         if (typeof p.image_url !== 'string') p.image_url = null;
                         if (!Array.isArray(p.images)) p.images = [];
-                        // Si image_url existe et n'est pas dans images, on l'ajoute en premier
                         if (p.image_url && !p.images.includes(p.image_url)) {
                             p.images.unshift(p.image_url);
                         }
@@ -183,7 +292,7 @@
         }
 
         // ============================================
-        // 5. UTILITAIRES
+        // 7. UTILITAIRES
         // ============================================
         function showToast(msg) {
             const toast = document.createElement('div');
@@ -219,10 +328,17 @@
             return { totalStock, ruptures, lowStockItems: low, stockValue, productRuptures };
         }
 
-        // === Affichage icône (priorité aux images) ===
+        // ============================================
+        // 8. AFFICHAGE ICÔNE (CORRIGÉ)
+        // ============================================
         function getDisplayIcon(product) {
-            if (product.images && product.images.length > 0) {
-                return `<img src="${product.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+            // Vérifie d'abord si images existe
+            if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+                const img = product.images[0];
+                if (img && img.startsWith('data:image')) {
+                    return `<img src="${img}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+                }
+                return `<img src="${img}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
             } else if (product.image_url) {
                 return `<img src="${product.image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
             } else if (product.icon) {
@@ -233,15 +349,22 @@
         }
 
         // ============================================
-        // 6. NAVIGATION
+        // 9. NAVIGATION
         // ============================================
         function attachNavEvents() {
             document.querySelectorAll('.nav-item').forEach(item => {
-                item.onclick = () => navigateTo(item.dataset.page);
+                item.onclick = () => {
+                    if (item.dataset.page === 'logout') {
+                        logout();
+                        return;
+                    }
+                    navigateTo(item.dataset.page);
+                };
             });
         }
 
         async function navigateTo(page) {
+            if (!isAuthenticated()) { renderLogin(); return; }
             currentPage = page;
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
@@ -253,7 +376,7 @@
         }
 
         // ============================================
-        // 7. DASHBOARD
+        // 10. DASHBOARD
         // ============================================
         async function renderDashboard() {
             await Promise.all([loadProducts(), loadOrders(), loadPromos()]);
@@ -293,9 +416,10 @@
         }
 
         // ============================================
-        // 8. GESTION PRODUITS
+        // 11. GESTION PRODUITS
         // ============================================
         async function renderProducts() {
+            if (!isAuthenticated()) { renderLogin(); return; }
             await loadProducts();
             const html = `
                 <div class="page-header"><h1>👕 Produits</h1><button class="btn" id="addProductBtn">+ Ajouter</button></div>
@@ -328,11 +452,12 @@
         }
 
         // ============================================
-        // 9. MODALE PRODUIT (avec upload d'images multiples)
+        // 12. MODALE PRODUIT (CORRIGÉE AVEC UPLOAD)
         // ============================================
         const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
 
         function showProductModal(product = null) {
+            if (!isAuthenticated()) { renderLogin(); return; }
             const isEdit = !!product;
             let variantsArray = product?.variants ? [...product.variants] : [];
             let selectedEmoji = product?.icon || '📦';
@@ -408,29 +533,43 @@
                 }
             });
 
-            // Images
+            // Images avec upload vers Supabase
             const previewGrid = modalDiv.querySelector('#imagePreviewGrid');
             const imagesInput = modalDiv.querySelector('#imagesInput');
             const fileInput = modalDiv.querySelector('#imageUpload');
 
             function updatePreview() {
-                const urls = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
-                const all = [...uploadedImages, ...urls];
+                const textareaUrls = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
+                const all = [...uploadedImages, ...textareaUrls];
                 previewGrid.innerHTML = all.map(url => `<img src="${url}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;">`).join('');
+                // Mettre à jour le textarea avec toutes les URLs
                 imagesInput.value = all.join(', ');
             }
 
-            modalDiv.querySelector('#addImageBtn').addEventListener('click', () => {
+            modalDiv.querySelector('#addImageBtn').addEventListener('click', async () => {
                 const files = fileInput.files;
                 if (!files || files.length === 0) { showToast('Sélectionnez des images'); return; }
+                
+                // Upload des images vers Supabase
                 for (let f of files) {
                     if (f.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => { uploadedImages.push(e.target.result); updatePreview(); };
-                        reader.readAsDataURL(f);
+                        try {
+                            const url = await uploadImageToSupabase(f);
+                            uploadedImages.push(url);
+                            showToast(`✅ ${f.name} uploadé`);
+                        } catch (e) {
+                            // Fallback base64
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                uploadedImages.push(e.target.result);
+                                updatePreview();
+                            };
+                            reader.readAsDataURL(f);
+                        }
                     }
                 }
                 fileInput.value = '';
+                updatePreview();
             });
 
             modalDiv.querySelector('#clearImagesBtn').addEventListener('click', () => {
@@ -479,18 +618,16 @@
                 variantsDiv.style.display = isVar ? 'block' : 'none';
             });
 
-            // Sauvegarde
+            // Sauvegarde (CORRIGÉ)
             modalDiv.querySelector('#saveModal').onclick = async () => {
                 const name = modalDiv.querySelector('#prodName').value.trim();
                 if (!name) return alert('Nom requis');
                 const description = modalDiv.querySelector('#prodDesc').value;
                 const active = modalDiv.querySelector('#activeCheck').checked;
 
-                // Récupérer les images
-                const allImages = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
-                // Si le produit a des images existantes et qu'on n'a pas modifié, on les garde
-                // Mais on utilise allImages comme tableau final
-                const images = allImages;
+                // ✅ CORRECTION : Récupérer les images depuis le textarea ET uploadedImages
+                const textareaImages = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
+                const allImages = [...uploadedImages, ...textareaImages];
 
                 if (typeSelect.value === 'simple') {
                     const price = parseFloat(modalDiv.querySelector('#simplePrice').value);
@@ -501,7 +638,7 @@
                         name, description, type: 'simple',
                         price, stock,
                         icon: selectedEmoji,
-                        images: images,
+                        images: allImages,
                         active
                     };
                     if (isEdit) {
@@ -534,7 +671,7 @@
                         base_price: basePrice,
                         variants: finalVariants,
                         icon: selectedEmoji,
-                        images: images,
+                        images: allImages,
                         active
                     };
                     if (isEdit) {
@@ -544,15 +681,16 @@
                 }
 
                 try {
+                    const prodToSave = products.find(p => p.id === (isEdit ? product.id : products[products.length - 1].id));
                     if (isEdit) {
                         await fetchSupabase(`products?id=eq.${product.id}`, {
                             method: 'PATCH',
-                            body: JSON.stringify(products.find(p => p.id === product.id))
+                            body: JSON.stringify(prodToSave)
                         });
                     } else {
                         await fetchSupabase('products', {
                             method: 'POST',
-                            body: JSON.stringify(products[products.length - 1])
+                            body: JSON.stringify(prodToSave)
                         });
                     }
                     await loadProducts();
@@ -568,15 +706,17 @@
         }
 
         // ============================================
-        // 10. ACTIONS PRODUITS
+        // 13. ACTIONS PRODUITS
         // ============================================
         window.editProduct = async function(id) {
+            if (!isAuthenticated()) { renderLogin(); return; }
             await loadProducts();
             const product = products.find(p => p.id === id);
             if (product) showProductModal(product);
         };
 
         window.deleteProduct = async function(id) {
+            if (!isAuthenticated()) { renderLogin(); return; }
             if (!confirm('Supprimer ce produit ?')) return;
             try {
                 await fetchSupabase(`products?id=eq.${id}`, { method: 'DELETE' });
@@ -589,9 +729,10 @@
         };
 
         // ============================================
-        // 11. GESTION STOCK
+        // 14. GESTION STOCK
         // ============================================
         async function renderStock() {
+            if (!isAuthenticated()) { renderLogin(); return; }
             await loadProducts();
             let rows = [];
             products.forEach(p => {
@@ -674,9 +815,10 @@
         }
 
         // ============================================
-        // 12. GESTION COMMANDES
+        // 15. GESTION COMMANDES
         // ============================================
         async function renderOrders() {
+            if (!isAuthenticated()) { renderLogin(); return; }
             await loadOrders();
             const html = `
                 <div class="page-header"><h1>📋 Commandes (${orders.length})</h1></div>
@@ -779,6 +921,7 @@
         };
 
         window.deleteOrder = async function(id) {
+            if (!isAuthenticated()) { renderLogin(); return; }
             if (!confirm('Supprimer cette commande ?')) return;
             try {
                 await fetchSupabase(`orders?id=eq.${id}`, { method: 'DELETE' });
@@ -791,9 +934,10 @@
         };
 
         // ============================================
-        // 13. GESTION PROMOS
+        // 16. GESTION PROMOS
         // ============================================
         async function renderPromos() {
+            if (!isAuthenticated()) { renderLogin(); return; }
             await loadPromos();
             const html = `
                 <div class="page-header"><h1>🏷️ Codes promo</h1><button class="btn" id="addPromoBtn">+ Créer</button></div>
@@ -841,6 +985,7 @@
         }
 
         window.togglePromo = async function(code) {
+            if (!isAuthenticated()) { renderLogin(); return; }
             const promo = promos.find(p => p.code === code);
             if (!promo) return;
             promo.active = !promo.active;
@@ -858,6 +1003,7 @@
         };
 
         window.deletePromo = async function(code) {
+            if (!isAuthenticated()) { renderLogin(); return; }
             if (!confirm('Supprimer ce code promo ?')) return;
             try {
                 await fetchSupabase(`promos?code=eq.${code}`, { method: 'DELETE' });
@@ -870,12 +1016,11 @@
         };
 
         // ============================================
-        // 14. SYNCHRONISATION INTER-ONGLETS
+        // 17. SYNCHRONISATION INTER-ONGLETS
         // ============================================
         window.addEventListener('storage', function(e) {
             if (e.key === 'shop_products' || e.key === 'shop_promos' || e.key === 'shop_orders' || e.key === 'shop_cart') {
                 console.log('🔄 Changement détecté sur', e.key);
-                // Recharger les données depuis Supabase
                 if (e.key === 'shop_products' || e.key === 'shop_cart') {
                     loadProducts().then(() => {
                         if (currentPage === 'dashboard') renderDashboard();
@@ -900,9 +1045,14 @@
         });
 
         // ============================================
-        // 15. INITIALISATION
+        // 18. INITIALISATION
         // ============================================
         async function init() {
+            if (!isAuthenticated()) {
+                renderLogin();
+                return;
+            }
+            document.getElementById('sidebar').style.display = 'flex';
             await renderDashboard();
             attachNavEvents();
         }
