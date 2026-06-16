@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>StyleShop - Boutique en ligne</title>
     <style>
-        /* ===== STYLES COMPLETS (inchangés) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -79,25 +78,38 @@
         }
         .product-icon {
             font-size: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 0.5rem;
+        }
+        .product-icon img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
         }
         .product-title {
             font-size: 1.2rem;
             font-weight: 600;
+            text-align: center;
         }
         .product-type {
             font-size: 0.75rem;
             color: #475569;
             margin: 0.25rem 0;
+            text-align: center;
         }
         .product-price {
             font-weight: 700;
             font-size: 1.2rem;
             margin-top: 0.5rem;
+            text-align: center;
         }
         .stock-badge {
             font-size: 0.7rem;
             margin-top: 0.5rem;
+            text-align: center;
         }
         .stock-ok { color: #15803d; }
         .stock-warning { color: #b45309; }
@@ -125,6 +137,13 @@
             max-width: 700px;
             margin: 0 auto;
             border: 1px solid #e2e8f0;
+        }
+        .product-detail .product-icon {
+            font-size: 4rem;
+        }
+        .product-detail .product-icon img {
+            width: 100px;
+            height: 100px;
         }
         .variant-group { margin: 1.2rem 0; }
         .variant-options {
@@ -282,18 +301,41 @@
         }
 
         // ============================================
-        // 3. VARIABLES GLOBALES
+        // 3. UTILITAIRE AFFICHAGE ICÔNE / IMAGE
+        // ============================================
+        function getProductDisplayIcon(product) {
+            if (product.image_url) {
+                return `<img src="${product.image_url}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">`;
+            } else if (product.icon) {
+                return `<span style="font-size:3rem;">${product.icon}</span>`;
+            } else {
+                return `<span style="font-size:3rem;">📦</span>`;
+            }
+        }
+
+        function getProductDetailIcon(product) {
+            if (product.image_url) {
+                return `<img src="${product.image_url}" style="width:100px;height:100px;object-fit:cover;border-radius:12px;">`;
+            } else if (product.icon) {
+                return `<span style="font-size:4rem;">${product.icon}</span>`;
+            } else {
+                return `<span style="font-size:4rem;">📦</span>`;
+            }
+        }
+
+        // ============================================
+        // 4. VARIABLES GLOBALES
         // ============================================
         let products = [];
-        let promos = [];         // liste des codes promo actifs
+        let promos = [];
         let cart = [];
-        let appliedPromo = null; // { code, type, value, discountAmount }
+        let appliedPromo = null;
         let currentPage = 'catalogue';
         let selectedProductId = null;
         let selectedVariantCache = {};
 
         // ============================================
-        // 4. PANIER (localStorage)
+        // 5. PANIER (localStorage)
         // ============================================
         function saveCart() {
             try {
@@ -324,17 +366,8 @@
         }
 
         // ============================================
-        // 5. CHARGEMENT DES DONNÉES
+        // 6. CHARGEMENT DES DONNÉES
         // ============================================
-        function getProductDisplayIcon(product) {
-    if (product.image_url) {
-        return `<img src="${product.image_url}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">`;
-    } else if (product.icon) {
-        return `<span style="font-size: 3rem;">${product.icon}</span>`;
-    } else {
-        return `<span style="font-size: 3rem;">📦</span>`;
-    }
-}
         async function loadProducts() {
             try {
                 const data = await fetchSupabase('products?select=*');
@@ -370,7 +403,7 @@
         }
 
         // ============================================
-        // 6. UTILITAIRES
+        // 7. UTILITAIRES
         // ============================================
         function getStock(productId, variantId) {
             const prod = products.find(p => p.id === productId);
@@ -389,7 +422,7 @@
         }
 
         // ============================================
-        // 7. AJOUT AU PANIER
+        // 8. AJOUT AU PANIER
         // ============================================
         function addToCart(productId, variantId, quantity = 1) {
             const product = products.find(p => p.id === productId);
@@ -437,7 +470,8 @@
                     price: price,
                     quantity: quantity,
                     attributes: attributes,
-                    imageIcon: product.icon || '📦'
+                    imageIcon: product.icon || '📦',
+                    imageUrl: product.image_url || null
                 });
             }
             saveCart();
@@ -448,7 +482,7 @@
         }
 
         // ============================================
-        // 8. MODIFICATION PANIER
+        // 9. MODIFICATION PANIER
         // ============================================
         function updateCartItem(index, newQuantity) {
             if (!Array.isArray(cart) || index < 0 || index >= cart.length) return;
@@ -456,7 +490,6 @@
             if (newQuantity <= 0) {
                 cart.splice(index, 1);
                 saveCart();
-                // Si on supprime le dernier article, on efface aussi le code promo appliqué
                 if (cart.length === 0) appliedPromo = null;
                 renderCurrentPage();
                 return;
@@ -474,7 +507,7 @@
         }
 
         // ============================================
-        // 9. GESTION DES CODES PROMO
+        // 10. GESTION DES CODES PROMO
         // ============================================
         function getSubtotal() {
             return Array.isArray(cart) ? cart.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0) : 0;
@@ -521,7 +554,7 @@
         }
 
         // ============================================
-        // 10. NAVIGATION
+        // 11. NAVIGATION
         // ============================================
         function navigateTo(page, productId = null) {
             if (page === 'product' && productId) {
@@ -542,7 +575,7 @@
         }
 
         // ============================================
-        // 11. RENDU CATALOGUE
+        // 12. RENDU CATALOGUE
         // ============================================
         function renderCatalogue() {
             const app = document.getElementById('app');
@@ -565,7 +598,7 @@
                 <div class="products-grid">
                     ${activeProducts.map(p => `
                         <div class="product-card" onclick="navigateTo('product','${p.id}')">
-                       <div class="product-icon">${getProductDisplayIcon(p)}</div>
+                            <div class="product-icon">${getProductDisplayIcon(p)}</div>
                             <div class="product-title">${p.name}</div>
                             <div class="product-type">${p.type === 'simple' ? 'Produit simple' : 'Avec variantes'}</div>
                             <div class="product-price">${p.type === 'simple' ? (p.price || 0).toFixed(2) : (p.base_price || 0).toFixed(2)} € ${p.type === 'variants' ? '+' : ''}</div>
@@ -584,7 +617,7 @@
         }
 
         // ============================================
-        // 12. RENDU FICHE PRODUIT
+        // 13. RENDU FICHE PRODUIT
         // ============================================
         function renderProductDetail(productId) {
             const app = document.getElementById('app');
@@ -629,7 +662,7 @@
             const detailHtml = `
                 <div class="back-link" onclick="navigateTo('catalogue')">← Retour au catalogue</div>
                 <div class="product-detail">
-                   <div style="font-size: 3rem;">${getProductDisplayIcon(product)}</div>
+                    <div class="product-icon">${getProductDetailIcon(product)}</div>
                     <h2>${product.name}</h2>
                     <p style="margin: 0.5rem 0; color: #334155;">${product.description || ''}</p>
                     ${isVariantProduct ? `
@@ -715,14 +748,14 @@
         }
 
         // ============================================
-        // 13. RENDU PANIER (avec code promo)
+        // 14. RENDU PANIER (avec code promo)
         // ============================================
         function renderCart() {
             const app = document.getElementById('app');
             if (!app) return;
 
             if (!Array.isArray(cart) || cart.length === 0) {
-                appliedPromo = null; // reset promo si panier vide
+                appliedPromo = null;
                 app.innerHTML = `
                     <div style="text-align:center; padding:2rem;">
                         <h2>Panier vide</h2>
@@ -740,11 +773,16 @@
                 const totalItem = (item.price || 0) * (item.quantity || 0);
                 let variantStr = '';
                 if (item.attributes && item.attributes.taille) variantStr = ` ${item.attributes.taille}/${item.attributes.couleur}`;
+                let iconHtml = item.imageUrl ? `<img src="${item.imageUrl}" style="width:30px;height:30px;object-fit:cover;border-radius:4px;margin-right:8px;">` :
+                                (item.imageIcon ? `<span style="font-size:1.5rem;margin-right:8px;">${item.imageIcon}</span>` : '');
                 return `
                     <div class="cart-item">
-                        <div class="cart-item-info">
-                            <strong>${item.name}${variantStr}</strong><br>
-                            ${(item.price || 0).toFixed(2)} €
+                        <div class="cart-item-info" style="display:flex;align-items:center;">
+                            ${iconHtml}
+                            <div>
+                                <strong>${item.name}${variantStr}</strong><br>
+                                ${(item.price || 0).toFixed(2)} €
+                            </div>
                         </div>
                         <div class="cart-item-qty">
                             <button class="qty-btn" data-index="${idx}" data-delta="-1">-</button>
@@ -757,7 +795,6 @@
                 `;
             }).join('');
 
-            // Zone code promo
             let promoHtml = `
                 <div class="promo-box">
                     <input type="text" id="promoCodeInput" placeholder="Code promo (ex: PROMO10)" style="flex:1;">
@@ -792,7 +829,6 @@
             `;
             app.innerHTML = html;
 
-            // Événements quantités
             document.querySelectorAll('.qty-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const idx = parseInt(btn.dataset.index);
@@ -807,7 +843,6 @@
                 });
             });
 
-            // Événement application code promo
             const applyBtn = document.getElementById('applyPromoBtn');
             const inputCode = document.getElementById('promoCodeInput');
             if (applyBtn && inputCode) {
@@ -821,7 +856,6 @@
                     showToast(result.message);
                     if (result.success) renderCart();
                 });
-                // Permet l'action avec la touche Entrée
                 inputCode.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
                         applyBtn.click();
@@ -829,7 +863,6 @@
                 });
             }
 
-            // Événement suppression promo
             const removeBtn = document.getElementById('removePromoBtn');
             if (removeBtn) {
                 removeBtn.addEventListener('click', () => {
@@ -838,12 +871,11 @@
                 });
             }
 
-            // Paiement
             document.getElementById('checkoutBtn')?.addEventListener('click', () => simulateCheckout(total));
         }
 
         // ============================================
-        // 14. SIMULATION PAIEMENT (avec promo)
+        // 15. SIMULATION PAIEMENT
         // ============================================
         async function simulateCheckout(total) {
             if (!Array.isArray(cart) || cart.length === 0) {
@@ -851,7 +883,6 @@
                 return;
             }
 
-            // Vérification des stocks
             for (const item of cart) {
                 const currentStock = getStock(item.productId, item.variantId);
                 if ((item.quantity || 0) > currentStock) {
@@ -881,7 +912,6 @@
             document.getElementById('confirmPayment')?.addEventListener('click', async () => {
                 modal.remove();
 
-                // Mise à jour des stocks
                 for (const item of cart) {
                     const product = products.find(p => p.id === item.productId);
                     if (!product) continue;
@@ -915,11 +945,10 @@
                     }
                 }
 
-                // Création de la commande
                 const orderId = 'ORD-' + Math.random().toString(36).substring(2, 8).toUpperCase();
                 const now = new Date();
                 const clientEmail = `client${Math.floor(Math.random() * 1000)}@email.com`;
-                const totalPaid = total; // total déjà réduit
+                const totalPaid = total;
 
                 const order = {
                     id: orderId,
@@ -974,7 +1003,7 @@
         }
 
         // ============================================
-        // 15. RENDU PAGE COURANTE
+        // 16. RENDU PAGE COURANTE
         // ============================================
         function renderCurrentPage() {
             if (currentPage === 'catalogue') renderCatalogue();
@@ -984,7 +1013,7 @@
         }
 
         // ============================================
-        // 16. EXPOSER LES FONCTIONS
+        // 17. EXPOSER LES FONCTIONS
         // ============================================
         window.navigateTo = navigateTo;
         window.addToCart = addToCart;
@@ -992,7 +1021,7 @@
         window.simulateCheckout = simulateCheckout;
 
         // ============================================
-        // 17. INITIALISATION
+        // 18. INITIALISATION
         // ============================================
         async function init() {
             console.log('🚀 Initialisation...');
@@ -1018,4 +1047,3 @@
 
 </body>
 </html>
-
