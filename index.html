@@ -646,12 +646,18 @@
         }
 
         // ============================================
-        // 13. SIMULATION PAIEMENT (avec Stripe)
+        // 13. PAIEMENT (avec Stripe)
         // ============================================
-        async function stripeCheckout() {
-            if (!Array.isArray(cart) || cart.length === 0) { 
-                showToast('Panier vide'); 
-                return; 
+      async function stripeCheckout() {
+    const res = await fetch("https://ton-backend.com/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart })
+    });
+
+    const data = await res.json();
+    window.location.href = data.url;
+}
             }
 
             // Vérifier les stocks
