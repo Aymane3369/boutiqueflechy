@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -69,7 +71,7 @@
         <div class="auth-box">
             <h2 style="margin-bottom:1rem;">🔐 Admin</h2>
             <div id="authError" style="color:red;margin-bottom:0.5rem;"></div>
-            <input type="email" id="authEmail" placeholder="Email admin">
+            <input type="email" id="authEmail" placeholder="Email admin" value="aymaneabidine@gmail.com">
             <input type="password" id="authPassword" placeholder="Mot de passe">
             <button class="btn" id="authLoginBtn">Se connecter</button>
             <button class="btn-outline" id="authSignupBtn" style="margin-top:0.5rem;width:100%;padding:0.5rem;">Créer un compte</button>
@@ -96,10 +98,13 @@
 
     <script>
         // ============================================
-        // 1. CONFIGURATION SUPABASE (UNE SEULE FOIS)
+        // 1. CONFIGURATION SUPABASE (CORRIGÉ)
         // ============================================
-        // ATTENTION : La variable supabase est déjà créée par le script chargé en haut.
-        // On l'utilise directement, on ne la redéclare PAS.
+        const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
+        
+        // Création du client Supabase avec un nom différent pour éviter les conflits
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // ============================================
         // 2. ÉTAT
@@ -111,18 +116,24 @@
         let user = null;
 
         // ============================================
-        // 3. AUTHENTIFICATION
+        // 3. AUTHENTIFICATION (avec supabaseClient)
         // ============================================
         async function checkAdminAuth() {
-            const { data: { user: currentUser } } = await supabase.auth.getUser();
-            user = currentUser;
-            if (user) {
-                document.getElementById('adminApp').style.display = 'flex';
-                document.getElementById('authContainer').style.display = 'none';
-                document.getElementById('adminUserEmail').textContent = user.email;
-                await renderDashboard();
-                attachNavEvents();
-            } else {
+            try {
+                const { data: { user: currentUser } } = await supabaseClient.auth.getUser();
+                user = currentUser;
+                if (user) {
+                    document.getElementById('adminApp').style.display = 'flex';
+                    document.getElementById('authContainer').style.display = 'none';
+                    document.getElementById('adminUserEmail').textContent = user.email;
+                    await renderDashboard();
+                    attachNavEvents();
+                } else {
+                    document.getElementById('adminApp').style.display = 'none';
+                    document.getElementById('authContainer').style.display = 'block';
+                }
+            } catch (e) {
+                console.error('Auth error:', e);
                 document.getElementById('adminApp').style.display = 'none';
                 document.getElementById('authContainer').style.display = 'block';
             }
@@ -134,7 +145,7 @@
             const errorEl = document.getElementById('authError');
             errorEl.textContent = '';
             if (!email || !password) { errorEl.textContent = 'Email et mot de passe requis'; return; }
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) { errorEl.textContent = '❌ ' + error.message; return; }
             await checkAdminAuth();
         });
@@ -145,13 +156,13 @@
             const errorEl = document.getElementById('authError');
             errorEl.textContent = '';
             if (!email || !password) { errorEl.textContent = 'Email et mot de passe requis'; return; }
-            const { error } = await supabase.auth.signUp({ email, password });
+            const { error } = await supabaseClient.auth.signUp({ email, password });
             if (error) { errorEl.textContent = '❌ ' + error.message; return; }
             alert('✅ Compte créé ! Vérifiez votre email pour confirmer, puis connectez-vous.');
         });
 
         document.getElementById('adminLogoutBtn').addEventListener('click', async () => {
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             user = null;
             await checkAdminAuth();
         });
