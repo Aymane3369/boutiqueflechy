@@ -98,9 +98,8 @@
         // ============================================
         // 1. CONFIGURATION SUPABASE (UNE SEULE FOIS)
         // ============================================
-        const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // ATTENTION : La variable supabase est déjà créée par le script chargé en haut.
+        // On l'utilise directement, on ne la redéclare PAS.
 
         // ============================================
         // 2. ÉTAT
