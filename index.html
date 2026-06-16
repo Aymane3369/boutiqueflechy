@@ -107,26 +107,28 @@
         // ============================================
         // 2. CHARGEMENT / SAUVEGARDE LOCALSTORAGE
         // ============================================
-        function loadData() {
-            let products = localStorage.getItem('shop_products');
-            if (!products) {
-                products = getDefaultProducts();
-                localStorage.setItem('shop_products', JSON.stringify(products));
-            } else {
-                products = JSON.parse(products);
+        function loadProducts() {
+            let data = localStorage.getItem('shop_products');
+            if (!data) {
+                const def = getDefaultProducts();
+                localStorage.setItem('shop_products', JSON.stringify(def));
+                return def;
             }
-            let promos = localStorage.getItem('shop_promos');
-            if (!promos) {
-                promos = getDefaultPromos();
-                localStorage.setItem('shop_promos', JSON.stringify(promos));
-            } else {
-                promos = JSON.parse(promos);
-            }
-            return { products, promos };
+            try { return JSON.parse(data); } catch(e) { return getDefaultProducts(); }
         }
 
         function saveProducts(products) {
             localStorage.setItem('shop_products', JSON.stringify(products));
+        }
+
+        function loadPromos() {
+            let data = localStorage.getItem('shop_promos');
+            if (!data) {
+                const def = getDefaultPromos();
+                localStorage.setItem('shop_promos', JSON.stringify(def));
+                return def;
+            }
+            try { return JSON.parse(data); } catch(e) { return getDefaultPromos(); }
         }
 
         function savePromos(promos) {
@@ -136,9 +138,8 @@
         // ============================================
         // 3. VARIABLES GLOBALES
         // ============================================
-        let data = loadData();
-        let products = data.products;
-        let promos = data.promos;
+        let products = loadProducts();
+        let promos = loadPromos();
         let cart = [];
         let appliedPromo = null;
         let currentPage = 'catalogue';
@@ -186,6 +187,7 @@
             setTimeout(() => toast.remove(), 2000);
         }
 
+        // AFFICHAGE ICÔNE : priorité à l'image
         function getProductDisplayIcon(product) {
             if (product.images && product.images.length > 0) {
                 return `<img src="${product.images[0]}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">`;
@@ -505,7 +507,7 @@
         }
 
         // ============================================
-        // 12. SIMULATION PAIEMENT
+        // 12. SIMULATION PAIEMENT AVEC SAUVEGARDE COMMANDE
         // ============================================
         function simulateCheckout() {
             if (!cart || cart.length === 0) { showToast('Panier vide'); return; }
@@ -516,7 +518,36 @@
             // Simuler paiement
             const total = getTotal();
             const orderId = 'ORD-' + Math.random().toString(36).substring(2,8).toUpperCase();
+            const now = new Date();
             const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`;
+
+            // Créer la commande
+            const order = {
+                id: orderId,
+                client: clientEmail,
+                date: now.toISOString().slice(0,10),
+                time: now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+                items: cart.map(i => ({
+                    productId: i.productId,
+                    variantId: i.variantId,
+                    qty: i.quantity,
+                    price: i.price
+                })),
+                total: total,
+                status: 'Payée',
+                adminFollowup: 'À traiter',
+                promoCode: appliedPromo?.code || null,
+                discount: appliedPromo?.discountAmount || 0
+            };
+
+            // Sauvegarder la commande
+            let orders = localStorage.getItem('shop_orders');
+            if (orders) {
+                try { orders = JSON.parse(orders); if (!Array.isArray(orders)) orders = []; } catch(e){ orders = []; }
+            } else { orders = []; }
+            orders.unshift(order);
+            localStorage.setItem('shop_orders', JSON.stringify(orders));
+
             // Mise à jour des stocks
             for (const item of cart) {
                 const prod = products.find(p => p.id === item.productId);
@@ -529,8 +560,10 @@
                 }
             }
             saveProducts(products);
+
             const itemsList = cart.map(i => `${i.name} ${i.attributes?.taille ? `(${i.attributes.taille}/${i.attributes.couleur})` : ''} x${i.quantity}`).join(', ');
             cart = []; appliedPromo = null; saveCart();
+
             document.getElementById('app').innerHTML = `
                 <div style="background:white;border-radius:32px;padding:2rem;text-align:center;">
                     <h2>✅ Commande confirmée !</h2>
@@ -540,12 +573,16 @@
                     <button class="primary" onclick="navigateTo('catalogue')">Nouvelle commande</button>
                 </div>
             `;
+            showToast(`Commande ${orderId} enregistrée`);
         }
 
         // ============================================
         // 13. RENDU PAGE COURANTE
         // ============================================
         function renderCurrentPage() {
+            // Recharger les produits depuis localStorage (pour refléter les changements)
+            products = loadProducts();
+            promos = loadPromos();
             if (currentPage === 'catalogue') renderCatalogue();
             else if (currentPage === 'product' && selectedProductId) renderProductDetail(selectedProductId);
             else if (currentPage === 'cart') renderCart();
