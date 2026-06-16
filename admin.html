@@ -97,16 +97,11 @@
                     headers: { ...defaultHeaders, ...options.headers }
                 });
 
-                // Gérer les réponses vides (204 No Content, 201 Created)
-                if (response.status === 204 || response.status === 201) {
-                    return null;
-                }
-
+                if (response.status === 204 || response.status === 201) return null;
                 if (!response.ok) {
                     const error = await response.text();
                     throw new Error(`HTTP ${response.status}: ${error}`);
                 }
-
                 const text = await response.text();
                 if (!text) return null;
                 return JSON.parse(text);
@@ -137,6 +132,11 @@
                         }
                         if (p.type === 'simple') p.stock = parseInt(p.stock) || 0;
                         if (typeof p.image_url !== 'string') p.image_url = null;
+                        if (!Array.isArray(p.images)) p.images = [];
+                        // Si image_url existe et n'est pas dans images, on l'ajoute en premier
+                        if (p.image_url && !p.images.includes(p.image_url)) {
+                            p.images.unshift(p.image_url);
+                        }
                     });
                     products = data;
                 } else {
@@ -219,8 +219,11 @@
             return { totalStock, ruptures, lowStockItems: low, stockValue, productRuptures };
         }
 
+        // === Affichage icône (priorité aux images) ===
         function getDisplayIcon(product) {
-            if (product.image_url) {
+            if (product.images && product.images.length > 0) {
+                return `<img src="${product.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+            } else if (product.image_url) {
                 return `<img src="${product.image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
             } else if (product.icon) {
                 return `<span style="font-size:28px;">${product.icon}</span>`;
@@ -325,7 +328,7 @@
         }
 
         // ============================================
-        // 9. MODALE PRODUIT
+        // 9. MODALE PRODUIT (avec upload d'images multiples)
         // ============================================
         const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
 
@@ -333,7 +336,8 @@
             const isEdit = !!product;
             let variantsArray = product?.variants ? [...product.variants] : [];
             let selectedEmoji = product?.icon || '📦';
-            let selectedImage = product?.image_url || null;
+            let imagesArray = product?.images ? [...product.images] : [];
+            let uploadedImages = [];
 
             const modalDiv = document.createElement('div');
             modalDiv.className = 'modal';
@@ -357,21 +361,22 @@
                         <div class="form-group"><label>Variantes</label><div id="variantsContainer"></div><button type="button" class="btn-small btn-outline" id="addVariantBtn">+ Ajouter variante</button></div>
                     </div>
                     <div class="form-group">
-                        <label>Icône / Image</label>
-                        <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:0.5rem;">
-                            <label><input type="radio" name="imgType" value="emoji" ${!selectedImage ? 'checked' : ''}> Émoji</label>
-                            <label><input type="radio" name="imgType" value="upload" ${selectedImage ? 'checked' : ''}> Télécharger (PNG/JPG)</label>
-                            <label><input type="radio" name="imgType" value="none" ${(!selectedImage && !selectedEmoji) ? 'checked' : ''}> Pas d'icône</label>
+                        <label>Icône / Émoji (optionnel)</label>
+                        <div class="emoji-grid" id="emojiGrid"></div>
+                        <input type="text" id="customEmoji" placeholder="Ou saisis un émoji" maxlength="2" style="width:200px;">
+                        <div>Aperçu : <span id="emojiPreview" style="font-size:2rem;">${selectedEmoji}</span></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Images (jusqu'à 5)</label>
+                        <div class="upload-area">
+                            <input type="file" id="imageUpload" accept="image/png,image/jpeg,image/jpg" multiple>
+                            <button type="button" class="upload-btn" id="addImageBtn">📤 Ajouter les images</button>
+                            <button type="button" class="btn-small btn-outline" id="clearImagesBtn">Effacer toutes</button>
                         </div>
-                        <div id="emojiSelector" style="${selectedImage ? 'display:none' : 'block'}">
-                            <div class="emoji-grid" id="emojiGrid"></div>
-                            <input type="text" id="customEmoji" placeholder="Ou saisis un émoji" maxlength="2" style="width:200px;">
-                            <div>Aperçu : <span id="emojiPreview" style="font-size:2rem;">${selectedEmoji}</span></div>
+                        <div class="image-preview-grid" id="imagePreviewGrid">
+                            ${imagesArray.map(url => `<img src="${url}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;">`).join('')}
                         </div>
-                        <div id="uploadArea" style="${selectedImage ? 'block' : 'display:none'}; margin-top:0.5rem;">
-                            <input type="file" id="imageUpload" accept="image/png,image/jpeg,image/jpg">
-                            <img id="previewImg" src="${selectedImage || ''}" style="max-width:100px;max-height:100px;margin-top:8px;border-radius:8px;display:${selectedImage ? 'block' : 'none'};">
-                        </div>
+                        <textarea id="imagesInput" rows="2" placeholder="Ou URLs séparées par des virgules">${imagesArray.join(', ')}</textarea>
                     </div>
                     <div class="form-group"><label><input type="checkbox" id="activeCheck" ${product?.active !== false ? 'checked' : ''}> Actif</label></div>
                     <div class="flex-between"><button class="btn-outline" id="cancelModal">Annuler</button><button class="btn" id="saveModal">Enregistrer</button></div>
@@ -391,11 +396,6 @@
                     modalDiv.querySelector('#customEmoji').value = '';
                     modalDiv.querySelector('#emojiPreview').textContent = e;
                     selectedEmoji = e;
-                    document.querySelector('input[name="imgType"][value="upload"]').checked = false;
-                    document.querySelector('input[name="imgType"][value="emoji"]').checked = true;
-                    document.getElementById('uploadArea').style.display = 'none';
-                    document.getElementById('emojiSelector').style.display = 'block';
-                    selectedImage = null;
                 };
                 grid.appendChild(div);
             });
@@ -405,59 +405,40 @@
                     modalDiv.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
                     modalDiv.querySelector('#emojiPreview').textContent = val;
                     selectedEmoji = val;
-                    document.querySelector('input[name="imgType"][value="upload"]').checked = false;
-                    document.querySelector('input[name="imgType"][value="emoji"]').checked = true;
-                    document.getElementById('uploadArea').style.display = 'none';
-                    document.getElementById('emojiSelector').style.display = 'block';
-                    selectedImage = null;
                 }
             });
 
-            // Radios
-            const radioEmoji = modalDiv.querySelector('input[value="emoji"]');
-            const radioUpload = modalDiv.querySelector('input[value="upload"]');
-            const radioNone = modalDiv.querySelector('input[value="none"]');
-            const emojiDiv = modalDiv.querySelector('#emojiSelector');
-            const uploadDiv = modalDiv.querySelector('#uploadArea');
-            const toggleFields = () => {
-                if (radioEmoji.checked) {
-                    emojiDiv.style.display = 'block';
-                    uploadDiv.style.display = 'none';
-                    selectedImage = null;
-                } else if (radioUpload.checked) {
-                    emojiDiv.style.display = 'none';
-                    uploadDiv.style.display = 'block';
-                    selectedEmoji = null;
-                } else {
-                    emojiDiv.style.display = 'none';
-                    uploadDiv.style.display = 'none';
-                    selectedEmoji = null;
-                    selectedImage = null;
-                }
-            };
-            radioEmoji.addEventListener('change', toggleFields);
-            radioUpload.addEventListener('change', toggleFields);
-            radioNone.addEventListener('change', toggleFields);
-            toggleFields();
-
-            // Upload image
+            // Images
+            const previewGrid = modalDiv.querySelector('#imagePreviewGrid');
+            const imagesInput = modalDiv.querySelector('#imagesInput');
             const fileInput = modalDiv.querySelector('#imageUpload');
-            const previewImg = modalDiv.querySelector('#previewImg');
-            fileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file && (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/jpg')) {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        previewImg.src = ev.target.result;
-                        previewImg.style.display = 'block';
-                        selectedImage = ev.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    alert('Seulement PNG ou JPG');
-                    fileInput.value = '';
+
+            function updatePreview() {
+                const urls = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
+                const all = [...uploadedImages, ...urls];
+                previewGrid.innerHTML = all.map(url => `<img src="${url}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;">`).join('');
+                imagesInput.value = all.join(', ');
+            }
+
+            modalDiv.querySelector('#addImageBtn').addEventListener('click', () => {
+                const files = fileInput.files;
+                if (!files || files.length === 0) { showToast('Sélectionnez des images'); return; }
+                for (let f of files) {
+                    if (f.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => { uploadedImages.push(e.target.result); updatePreview(); };
+                        reader.readAsDataURL(f);
+                    }
                 }
+                fileInput.value = '';
             });
+
+            modalDiv.querySelector('#clearImagesBtn').addEventListener('click', () => {
+                uploadedImages = [];
+                imagesInput.value = '';
+                updatePreview();
+            });
+            imagesInput.addEventListener('input', updatePreview);
 
             // Variantes
             const variantsContainer = modalDiv.querySelector('#variantsContainer');
@@ -505,14 +486,11 @@
                 const description = modalDiv.querySelector('#prodDesc').value;
                 const active = modalDiv.querySelector('#activeCheck').checked;
 
-                let image_url = null;
-                if (radioUpload.checked && selectedImage) {
-                    image_url = selectedImage;
-                }
-                let icon = null;
-                if (radioEmoji.checked && selectedEmoji) {
-                    icon = selectedEmoji;
-                }
+                // Récupérer les images
+                const allImages = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
+                // Si le produit a des images existantes et qu'on n'a pas modifié, on les garde
+                // Mais on utilise allImages comme tableau final
+                const images = allImages;
 
                 if (typeSelect.value === 'simple') {
                     const price = parseFloat(modalDiv.querySelector('#simplePrice').value);
@@ -522,7 +500,9 @@
                         id: isEdit ? product.id : Date.now().toString(),
                         name, description, type: 'simple',
                         price, stock,
-                        icon, image_url, active
+                        icon: selectedEmoji,
+                        images: images,
+                        active
                     };
                     if (isEdit) {
                         const idx = products.findIndex(p => p.id === product.id);
@@ -553,7 +533,9 @@
                         name, description, type: 'variants',
                         base_price: basePrice,
                         variants: finalVariants,
-                        icon, image_url, active
+                        icon: selectedEmoji,
+                        images: images,
+                        active
                     };
                     if (isEdit) {
                         const idx = products.findIndex(p => p.id === product.id);
@@ -573,7 +555,6 @@
                             body: JSON.stringify(products[products.length - 1])
                         });
                     }
-                    // Recharger les données pour être sûr
                     await loadProducts();
                     showToast(isEdit ? '✅ Produit modifié' : '✅ Produit ajouté');
                     modalDiv.remove();
@@ -599,7 +580,6 @@
             if (!confirm('Supprimer ce produit ?')) return;
             try {
                 await fetchSupabase(`products?id=eq.${id}`, { method: 'DELETE' });
-                // Recharger les données
                 await loadProducts();
                 showToast('✅ Produit supprimé');
                 await renderProducts();
@@ -616,11 +596,11 @@
             let rows = [];
             products.forEach(p => {
                 if (p.type === 'simple') {
-                    rows.push({ name: p.name, variant: 'Simple', stock: p.stock || 0, productId: p.id, variantId: null, isVariant: false, icon: p.icon, image_url: p.image_url });
+                    rows.push({ name: p.name, variant: 'Simple', stock: p.stock || 0, productId: p.id, variantId: null, isVariant: false, icon: p.icon, images: p.images || [] });
                 } else if (p.variants) {
                     p.variants.forEach(v => {
                         rows.push({ name: p.name, variant: `${v.attributes?.taille || ''} / ${v.attributes?.couleur || ''}`,
-                            stock: v.stock || 0, productId: p.id, variantId: v.id, isVariant: true, icon: p.icon, image_url: p.image_url });
+                            stock: v.stock || 0, productId: p.id, variantId: v.id, isVariant: true, icon: p.icon, images: p.images || [] });
                     });
                 }
             });
@@ -632,7 +612,7 @@
                         <thead><tr><th>Icône</th><th>Produit</th><th>Variante</th><th>Stock</th><th>Ajuster</th></tr></thead>
                         <tbody>
                             ${rows.map(r => {
-                                let iconHtml = r.image_url ? `<img src="${r.image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">` :
+                                let iconHtml = (r.images && r.images.length > 0) ? `<img src="${r.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">` :
                                                 (r.icon ? `<span style="font-size:28px;">${r.icon}</span>` : '📦');
                                 return `
                                     <tr>
@@ -682,7 +662,6 @@
                                 });
                             }
                         }
-                        // Forcer le rechargement des données
                         await loadProducts();
                         await renderStock();
                         showToast('✅ Stock mis à jour');
@@ -796,7 +775,7 @@
             `;
             document.body.appendChild(modal);
             document.getElementById('closeOrderModal').onclick = () => modal.remove();
-            modal.addEventListener('click', (e) => { if (e.target === modal) modalDiv.remove(); });
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
         };
 
         window.deleteOrder = async function(id) {
