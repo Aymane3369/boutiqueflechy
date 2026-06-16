@@ -58,12 +58,14 @@
         .upload-btn { background: #22c55e; color: white; border: none; padding: 0.4rem 1rem; border-radius: 30px; cursor: pointer; }
         .upload-btn:hover { background: #16a34a; }
         .error-message { background: #fee2e2; color: #dc2626; padding: 1rem; border-radius: 12px; margin: 1rem 0; border: 1px solid #fecaca; }
+        .stock-input { width:70px; padding:0.3rem; border:1px solid #cbd5e1; border-radius:8px; text-align:center; }
         @media (max-width: 700px) {
             .sidebar { width: 80px; padding: 1rem 0.5rem; }
             .sidebar .logo h2 { font-size: 1rem; }
             .sidebar .logo span, .footer-sidebar { display: none; }
             .nav-item { font-size: 0.8rem; text-align: center; padding: 0.5rem; }
             .main { padding: 1rem; }
+            .stock-input { width: 50px; }
         }
     </style>
 </head>
@@ -622,7 +624,7 @@
         };
 
         // ============================================
-        // 12. GESTION STOCK (CORRIGÉE)
+        // 12. GESTION STOCK (CORRIGÉE AVEC CHAMP DE SAISIE)
         // ============================================
         async function renderStock() {
             await loadProducts();
@@ -660,8 +662,8 @@
                 <div class="table-container">
                     <table>
                         <thead><tr><th>Icône</th><th>Produit</th><th>Variante</th><th>Stock</th><th>Ajuster</th></tr></thead>
-                        <tbody>
-                            ${rows.map(r => {
+                        <tbody id="stockTableBody">
+                            ${rows.map((r, index) => {
                                 let iconHtml = '📦';
                                 if (r.images && r.images.length > 0) {
                                     iconHtml = `<img src="${r.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
@@ -669,17 +671,24 @@
                                     iconHtml = `<span style="font-size:28px;">${r.icon}</span>`;
                                 }
                                 return `
-                                    <tr>
+                                    <tr data-index="${index}">
                                         <td><div class="product-img-list">${iconHtml}</div></td>
                                         <td><strong>${r.name}</strong></td>
                                         <td>${r.variant}</td>
-                                        <td>${r.stock === 0 ? '<span class="badge badge-danger">Rupture</span>' :
-                                            r.stock <= 2 ? `<span class="badge badge-warning">Bas (${r.stock})</span>` :
-                                            `<span class="badge badge-success">${r.stock}</span>`}</td>
                                         <td>
-                                            <button class="btn-small btn-outline stock-down" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">-</button>
-                                            <span style="margin:0 8px;font-weight:600;">${r.stock}</span>
-                                            <button class="btn-small btn-outline stock-up" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">+</button>
+                                            <span class="stock-display" id="stockDisplay-${index}">
+                                                ${r.stock === 0 ? '<span class="badge badge-danger">Rupture</span>' :
+                                                r.stock <= 2 ? `<span class="badge badge-warning">Bas (${r.stock})</span>` :
+                                                `<span class="badge badge-success">${r.stock}</span>`}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                                                <button class="btn-small btn-outline stock-btn" data-action="down" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}" data-index="${index}">-</button>
+                                                <input type="number" class="stock-input" data-index="${index}" value="${r.stock}" min="0" step="1">
+                                                <button class="btn-small btn-outline stock-btn" data-action="up" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}" data-index="${index}">+</button>
+                                                <button class="btn-small btn-success stock-set-btn" data-index="${index}">Appliquer</button>
+                                            </div>
                                         </td>
                                     </tr>
                                 `;
@@ -691,39 +700,109 @@
             `;
             document.getElementById('mainContent').innerHTML = html;
 
-            document.querySelectorAll('.stock-down, .stock-up').forEach(btn => {
-                btn.onclick = async () => {
-                    const delta = btn.classList.contains('stock-up') ? 1 : -1;
-                    const pid = btn.dataset.pid;
-                    const vid = btn.dataset.vid;
-                    const isVar = btn.dataset.isvar === 'true';
-                    const prod = products.find(p => p.id === pid);
-                    if (!prod) { showToast('Erreur'); return; }
-                    try {
-                        if (!isVar && prod.type === 'simple') {
-                            prod.stock = Math.max(0, (prod.stock || 0) + delta);
+            // ============================================
+            // GESTION DES ÉVÉNEMENTS (DÉLÉGATION)
+            // ============================================
+            const tableBody = document.getElementById('stockTableBody');
+            if (!tableBody) return;
+
+            // Fonction pour mettre à jour l'affichage d'une ligne
+            function updateRowDisplay(index, newStock) {
+                const displaySpan = document.getElementById(`stockDisplay-${index}`);
+                if (!displaySpan) return;
+                if (newStock === 0) {
+                    displaySpan.innerHTML = `<span class="badge badge-danger">Rupture</span>`;
+                } else if (newStock <= 2) {
+                    displaySpan.innerHTML = `<span class="badge badge-warning">Bas (${newStock})</span>`;
+                } else {
+                    displaySpan.innerHTML = `<span class="badge badge-success">${newStock}</span>`;
+                }
+                // Mettre à jour la valeur dans l'input
+                const input = document.querySelector(`.stock-input[data-index="${index}"]`);
+                if (input) input.value = newStock;
+            }
+
+            // Gestion des clics sur les boutons +/- et "Appliquer"
+            tableBody.addEventListener('click', async function(e) {
+                const target = e.target.closest('.stock-btn, .stock-set-btn');
+                if (!target) return;
+
+                const index = parseInt(target.dataset.index);
+                if (isNaN(index)) return;
+
+                // Récupérer la ligne correspondante
+                const row = document.querySelector(`tr[data-index="${index}"]`);
+                if (!row) return;
+
+                // Récupérer l'input de cette ligne
+                const input = row.querySelector('.stock-input');
+                if (!input) return;
+
+                let currentStock = parseInt(input.value) || 0;
+                let newStock = currentStock;
+
+                if (target.classList.contains('stock-btn')) {
+                    const action = target.dataset.action;
+                    if (action === 'up') {
+                        newStock = currentStock + 1;
+                    } else if (action === 'down') {
+                        newStock = Math.max(0, currentStock - 1);
+                    }
+                } else if (target.classList.contains('stock-set-btn')) {
+                    newStock = parseInt(input.value) || 0;
+                    if (newStock < 0) newStock = 0;
+                }
+
+                // Mettre à jour l'affichage immédiatement
+                updateRowDisplay(index, newStock);
+
+                // Mettre à jour dans la base de données
+                const pid = target.dataset.pid;
+                const vid = target.dataset.vid;
+                const isVar = target.dataset.isvar === 'true';
+                const prod = products.find(p => p.id === pid);
+                if (!prod) { showToast('Erreur: produit non trouvé'); return; }
+
+                try {
+                    if (!isVar && prod.type === 'simple') {
+                        prod.stock = newStock;
+                        await fetchSupabase(`products?id=eq.${pid}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ stock: newStock })
+                        });
+                    } else if (isVar && prod.variants) {
+                        const variant = prod.variants.find(v => v.id === vid);
+                        if (variant) {
+                            variant.stock = newStock;
                             await fetchSupabase(`products?id=eq.${pid}`, {
                                 method: 'PATCH',
-                                body: JSON.stringify({ stock: prod.stock })
+                                body: JSON.stringify({ variants: prod.variants })
                             });
-                        } else if (isVar && prod.variants) {
-                            const variant = prod.variants.find(v => v.id === vid);
-                            if (variant) {
-                                variant.stock = Math.max(0, (variant.stock || 0) + delta);
-                                await fetchSupabase(`products?id=eq.${pid}`, {
-                                    method: 'PATCH',
-                                    body: JSON.stringify({ variants: prod.variants })
-                                });
-                            }
+                        } else {
+                            showToast('Variante non trouvée');
+                            return;
                         }
-                        await loadProducts();
-                        await renderStock();
-                        showToast('✅ Stock mis à jour');
-                    } catch (e) {
-                        showToast('❌ Erreur: ' + e.message);
                     }
-                };
+                    showToast('✅ Stock mis à jour');
+                } catch (e) {
+                    showToast('❌ Erreur: ' + e.message);
+                    // Recharger la page pour restaurer l'ancienne valeur
+                    await loadProducts();
+                    await renderStock();
+                }
             });
+
+            // Appuyer sur Entrée dans l'input déclenche automatiquement "Appliquer"
+            tableBody.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const input = e.target.closest('.stock-input');
+                    if (input) {
+                        const setBtn = input.closest('td').querySelector('.stock-set-btn');
+                        if (setBtn) setBtn.click();
+                    }
+                }
+            });
+
             attachNavEvents();
         }
 
