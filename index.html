@@ -1,42 +1,3 @@
-Bonne question ! Commençons par ce qui est le plus simple et visible : le panier / index.html en premier, puis on enchaîne sur le panel admin.
-
-🎯 Plan d'attaque :
-
-1. Index.html (boutique) → corriger les erreurs pour que le panier fonctionne parfaitement
-2. Admin.html → une fois la boutique stable, on s'occupe du panel
-
----
-
-📍 Étape 1 : Diagnostic des erreurs
-
-Pour que je puisse vous aider efficacement, j'ai besoin de savoir exactement quelles erreurs vous voyez.
-
-🔍 Ouvrez la console (F12) sur votre boutique
-
-Quand vous êtes sur https://boutiqueflechy.vercel.app/ :
-
-1. Appuyez sur F12
-2. Allez dans l'onglet "Console"
-3. Copiez-moi toutes les erreurs rouges que vous voyez
-
----
-
-📝 Voici les erreurs possibles que je pourrais voir et leurs solutions :
-
-Erreur possible Solution
-Cannot read property 'map' of undefined Les produits ne sont pas chargés avant le rendu
-products is not defined La variable products n'est pas déclarée
-Failed to fetch Problème de connexion Supabase
-cart.reduce is not a function Le panier n'est pas un tableau
-navigateTo is not defined La fonction n'est pas exposée globalement
-
----
-
-🛠️ En attendant, voici une version "safe" de votre index.html
-
-Je vais vous donner une version avec des sécurités (vérifications) pour éviter les erreurs les plus courantes :
-
-```html
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -44,7 +5,7 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>StyleShop - Boutique en ligne</title>
     <style>
-        /* STYLES COMPLETS (inchangés) */
+        /* ===== STYLES COMPLETS (inchangés) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -138,15 +99,9 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
             font-size: 0.7rem;
             margin-top: 0.5rem;
         }
-        .stock-ok {
-            color: #15803d;
-        }
-        .stock-warning {
-            color: #b45309;
-        }
-        .stock-out {
-            color: #dc2626;
-        }
+        .stock-ok { color: #15803d; }
+        .stock-warning { color: #b45309; }
+        .stock-out { color: #dc2626; }
         button {
             background: #0f172a;
             color: white;
@@ -156,12 +111,8 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
             font-weight: 500;
             cursor: pointer;
         }
-        button.primary {
-            background: #3b82f6;
-        }
-        button.primary:hover {
-            background: #2563eb;
-        }
+        button.primary { background: #3b82f6; }
+        button.primary:hover { background: #2563eb; }
         button.outline {
             background: white;
             border: 1px solid #cbd5e1;
@@ -175,9 +126,7 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
             margin: 0 auto;
             border: 1px solid #e2e8f0;
         }
-        .variant-group {
-            margin: 1.2rem 0;
-        }
+        .variant-group { margin: 1.2rem 0; }
         .variant-options {
             display: flex;
             flex-wrap: wrap;
@@ -216,9 +165,7 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
             padding: 1rem 0;
             border-bottom: 1px solid #e2e8f0;
         }
-        .cart-item-info {
-            flex: 2;
-        }
+        .cart-item-info { flex: 2; }
         .cart-item-qty {
             display: flex;
             gap: 0.5rem;
@@ -266,13 +213,27 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
             border-radius: 32px;
             padding: 1.8rem;
         }
-        hr {
-            margin: 1rem 0;
+        hr { margin: 1rem 0; }
+        .promo-box {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 20px;
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .promo-box input {
+            padding: 0.5rem;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            flex: 1;
+            min-width: 150px;
         }
         @media (max-width: 700px) {
-            .container {
-                padding: 1rem;
-            }
+            .container { padding: 1rem; }
         }
     </style>
 </head>
@@ -324,7 +285,9 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
         // 3. VARIABLES GLOBALES
         // ============================================
         let products = [];
+        let promos = [];         // liste des codes promo actifs
         let cart = [];
+        let appliedPromo = null; // { code, type, value, discountAmount }
         let currentPage = 'catalogue';
         let selectedProductId = null;
         let selectedVariantCache = {};
@@ -335,9 +298,7 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
         function saveCart() {
             try {
                 localStorage.setItem('styleShopCart', JSON.stringify(cart));
-            } catch (e) {
-                console.warn('Impossible de sauvegarder le panier:', e);
-            }
+            } catch (e) {}
             updateCartCount();
         }
 
@@ -351,7 +312,6 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
                     cart = [];
                 }
             } catch (e) {
-                console.warn('Erreur chargement panier:', e);
                 cart = [];
             }
             updateCartCount();
@@ -364,7 +324,7 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
         }
 
         // ============================================
-        // 5. CHARGEMENT DES PRODUITS
+        // 5. CHARGEMENT DES DONNÉES
         // ============================================
         async function loadProducts() {
             try {
@@ -380,6 +340,23 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
                 console.error('Erreur chargement produits:', e);
                 products = [];
                 return products;
+            }
+        }
+
+        async function loadPromos() {
+            try {
+                const data = await fetchSupabase('promos?select=*');
+                if (Array.isArray(data)) {
+                    promos = data.filter(p => p.active === true);
+                    console.log('🏷️ Promos actives chargées:', promos.length);
+                } else {
+                    promos = [];
+                }
+                return promos;
+            } catch (e) {
+                console.error('Erreur chargement promos:', e);
+                promos = [];
+                return promos;
             }
         }
 
@@ -470,6 +447,8 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
             if (newQuantity <= 0) {
                 cart.splice(index, 1);
                 saveCart();
+                // Si on supprime le dernier article, on efface aussi le code promo appliqué
+                if (cart.length === 0) appliedPromo = null;
                 renderCurrentPage();
                 return;
             }
@@ -486,7 +465,54 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
         }
 
         // ============================================
-        // 9. NAVIGATION
+        // 9. GESTION DES CODES PROMO
+        // ============================================
+        function getSubtotal() {
+            return Array.isArray(cart) ? cart.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0) : 0;
+        }
+
+        function applyPromoCode(code) {
+            const promo = promos.find(p => p.code === code && p.active === true);
+            if (!promo) {
+                return { success: false, message: 'Code invalide ou expiré' };
+            }
+
+            const subtotal = getSubtotal();
+            if (subtotal <= 0) {
+                return { success: false, message: 'Panier vide' };
+            }
+
+            let discount = 0;
+            if (promo.type === 'fixed') {
+                discount = Math.min(promo.value, subtotal);
+            } else if (promo.type === 'percent') {
+                discount = subtotal * (promo.value / 100);
+            } else {
+                return { success: false, message: 'Type de promo inconnu' };
+            }
+            discount = parseFloat(discount.toFixed(2));
+
+            appliedPromo = {
+                code: promo.code,
+                type: promo.type,
+                value: promo.value,
+                discountAmount: discount
+            };
+            return { success: true, message: `Code ${code} appliqué : -${discount}€` };
+        }
+
+        function removePromo() {
+            appliedPromo = null;
+        }
+
+        function getTotal() {
+            const subtotal = getSubtotal();
+            const discount = appliedPromo ? appliedPromo.discountAmount : 0;
+            return subtotal - discount;
+        }
+
+        // ============================================
+        // 10. NAVIGATION
         // ============================================
         function navigateTo(page, productId = null) {
             if (page === 'product' && productId) {
@@ -507,7 +533,7 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
         }
 
         // ============================================
-        // 10. RENDU CATALOGUE
+        // 11. RENDU CATALOGUE
         // ============================================
         function renderCatalogue() {
             const app = document.getElementById('app');
@@ -549,7 +575,7 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
         }
 
         // ============================================
-        // 11. RENDU FICHE PRODUIT
+        // 12. RENDU FICHE PRODUIT
         // ============================================
         function renderProductDetail(productId) {
             const app = document.getElementById('app');
@@ -680,13 +706,14 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
         }
 
         // ============================================
-        // 12. RENDU PANIER
+        // 13. RENDU PANIER (avec code promo)
         // ============================================
         function renderCart() {
             const app = document.getElementById('app');
             if (!app) return;
 
             if (!Array.isArray(cart) || cart.length === 0) {
+                appliedPromo = null; // reset promo si panier vide
                 app.innerHTML = `
                     <div style="text-align:center; padding:2rem;">
                         <h2>Panier vide</h2>
@@ -696,10 +723,12 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
                 return;
             }
 
-            let subtotal = 0;
+            const subtotal = getSubtotal();
+            const discount = appliedPromo ? appliedPromo.discountAmount : 0;
+            const total = subtotal - discount;
+
             const itemsHtml = cart.map((item, idx) => {
                 const totalItem = (item.price || 0) * (item.quantity || 0);
-                subtotal += totalItem;
                 let variantStr = '';
                 if (item.attributes && item.attributes.taille) variantStr = ` ${item.attributes.taille}/${item.attributes.couleur}`;
                 return `
@@ -719,7 +748,20 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
                 `;
             }).join('');
 
-            const total = subtotal;
+            // Zone code promo
+            let promoHtml = `
+                <div class="promo-box">
+                    <input type="text" id="promoCodeInput" placeholder="Code promo (ex: PROMO10)" style="flex:1;">
+                    <button class="outline" id="applyPromoBtn">Appliquer</button>
+            `;
+            if (appliedPromo) {
+                promoHtml += `
+                    <button class="outline" id="removePromoBtn" style="background:#ef4444; color:white;">Supprimer</button>
+                    <span style="font-weight: 600; color: #15803d;">💰 ${appliedPromo.code} : -${appliedPromo.discountAmount}€</span>
+                `;
+            }
+            promoHtml += `</div>`;
+
             const html = `
                 <div class="cart-page">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -728,9 +770,11 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
                     </div>
                     <hr>
                     ${itemsHtml}
+                    <hr>
+                    ${promoHtml}
                     <div class="summary">
                         <p>Sous-total : ${subtotal.toFixed(2)} €</p>
-                        <p>Livraison : Gratuite</p>
+                        ${appliedPromo ? `<p>Réduction : -${discount.toFixed(2)} €</p>` : ''}
                         <h3>Total : ${total.toFixed(2)} €</h3>
                         <button class="primary" id="checkoutBtn" style="margin-top:1rem;">Procéder au paiement</button>
                         <p style="font-size:0.7rem; margin-top:0.5rem;">Le total sera re-calculé et validé par le backend</p>
@@ -739,6 +783,7 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
             `;
             app.innerHTML = html;
 
+            // Événements quantités
             document.querySelectorAll('.qty-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const idx = parseInt(btn.dataset.index);
@@ -753,18 +798,51 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
                 });
             });
 
-            document.getElementById('checkoutBtn')?.addEventListener('click', simulateCheckout);
+            // Événement application code promo
+            const applyBtn = document.getElementById('applyPromoBtn');
+            const inputCode = document.getElementById('promoCodeInput');
+            if (applyBtn && inputCode) {
+                applyBtn.addEventListener('click', () => {
+                    const code = inputCode.value.trim().toUpperCase();
+                    if (!code) {
+                        showToast('Veuillez saisir un code');
+                        return;
+                    }
+                    const result = applyPromoCode(code);
+                    showToast(result.message);
+                    if (result.success) renderCart();
+                });
+                // Permet l'action avec la touche Entrée
+                inputCode.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        applyBtn.click();
+                    }
+                });
+            }
+
+            // Événement suppression promo
+            const removeBtn = document.getElementById('removePromoBtn');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', () => {
+                    removePromo();
+                    renderCart();
+                });
+            }
+
+            // Paiement
+            document.getElementById('checkoutBtn')?.addEventListener('click', () => simulateCheckout(total));
         }
 
         // ============================================
-        // 13. SIMULATION PAIEMENT
+        // 14. SIMULATION PAIEMENT (avec promo)
         // ============================================
-        async function simulateCheckout() {
+        async function simulateCheckout(total) {
             if (!Array.isArray(cart) || cart.length === 0) {
                 showToast('Panier vide');
                 return;
             }
 
+            // Vérification des stocks
             for (const item of cart) {
                 const currentStock = getStock(item.productId, item.variantId);
                 if ((item.quantity || 0) > currentStock) {
@@ -777,7 +855,8 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
                 <div class="modal" id="paymentModal">
                     <div class="modal-content">
                         <h3>🔐 Paiement sécurisé (simulation)</h3>
-                        <p>Montant total : ${cart.reduce((s, i) => s + (i.price || 0) * (i.quantity || 0), 0).toFixed(2)} €</p>
+                        <p>Montant total : ${total.toFixed(2)} €</p>
+                        ${appliedPromo ? `<p style="color:#15803d;">Code promo ${appliedPromo.code} : -${appliedPromo.discountAmount}€</p>` : ''}
                         <p style="font-size:0.8rem;">Cette démo simule Stripe. Cliquez sur "Payer" pour confirmer.</p>
                         <div style="display: flex; gap: 1rem; justify-content: flex-end;">
                             <button class="outline" id="cancelPayment">Annuler</button>
@@ -827,11 +906,11 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
                     }
                 }
 
-                // Création commande
+                // Création de la commande
                 const orderId = 'ORD-' + Math.random().toString(36).substring(2, 8).toUpperCase();
                 const now = new Date();
                 const clientEmail = `client${Math.floor(Math.random() * 1000)}@email.com`;
-                const totalPaid = cart.reduce((s, i) => s + (i.price || 0) * (i.quantity || 0), 0);
+                const totalPaid = total; // total déjà réduit
 
                 const order = {
                     id: orderId,
@@ -847,8 +926,8 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
                     total: totalPaid,
                     status: 'Payée',
                     admin_followup: 'À traiter',
-                    promo_code: null,
-                    discount: 0
+                    promo_code: appliedPromo ? appliedPromo.code : null,
+                    discount: appliedPromo ? appliedPromo.discountAmount : 0
                 };
 
                 await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
@@ -865,6 +944,7 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
                     `${i.name} ${i.attributes?.taille ? `(${i.attributes.taille}/${i.attributes.couleur})` : ''} x${i.quantity}`
                 ).join(', ');
                 cart = [];
+                appliedPromo = null;
                 saveCart();
 
                 const confirmationHtml = `
@@ -873,6 +953,7 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
                         <p>Email de confirmation envoyé via EmailJS</p>
                         <p><strong>N° commande</strong><br>${orderId}</p>
                         <p><strong>Statut</strong><br>Payée</p>
+                        ${order.promo_code ? `<p><strong>Code promo</strong> ${order.promo_code} : -${order.discount}€</p>` : ''}
                         <p><strong>Articles</strong><br>${itemsList}</p>
                         <p><strong>Total payé</strong><br>${totalPaid.toFixed(2)} €</p>
                         <p style="font-size:0.8rem;">Email envoyé via EmailJS à ${clientEmail}</p>
@@ -884,7 +965,7 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
         }
 
         // ============================================
-        // 14. RENDU PAGE COURANTE
+        // 15. RENDU PAGE COURANTE
         // ============================================
         function renderCurrentPage() {
             if (currentPage === 'catalogue') renderCatalogue();
@@ -894,7 +975,7 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
         }
 
         // ============================================
-        // 15. EXPOSER LES FONCTIONS
+        // 16. EXPOSER LES FONCTIONS
         // ============================================
         window.navigateTo = navigateTo;
         window.addToCart = addToCart;
@@ -902,36 +983,30 @@ Je vais vous donner une version avec des sécurités (vérifications) pour évit
         window.simulateCheckout = simulateCheckout;
 
         // ============================================
-        // 16. INITIALISATION
+        // 17. INITIALISATION
         // ============================================
         async function init() {
             console.log('🚀 Initialisation...');
             await loadProducts();
+            await loadPromos();
             loadCart();
 
-            // Vérification que products est bien un tableau
-            if (!Array.isArray(products)) {
-                products = [];
-            }
-
+            if (!Array.isArray(products)) products = [];
             renderCurrentPage();
 
-            // Si aucun produit, afficher un message
             if (products.length === 0) {
                 document.getElementById('app').innerHTML = `
                     <div style="text-align:center; padding:3rem;">
                         <h2>📦 Aucun produit disponible</h2>
                         <p style="color: #475569;">Vérifiez votre base Supabase.</p>
-                        <p style="font-size:0.8rem; color:#94a3b8;">Assurez-vous que la table "products" contient des données.</p>
                     </div>
                 `;
             }
         }
 
-        // Lancer
         init();
     </script>
 
 </body>
 </html>
-```
+
