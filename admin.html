@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StyleShop - Administration</title>
     <style>
+        /* ===== STYLES ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', sans-serif; }
         body { background: #f1f5f9; display: flex; min-height: 100vh; }
         .sidebar { width: 260px; background: #0f172a; color: #e2e8f0; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 2rem; position: sticky; top: 0; height: 100vh; }
@@ -21,7 +22,6 @@
         .btn-outline { background: white; border: 1px solid #cbd5e1; color: #1e293b; }
         .btn-danger { background: #ef4444; }
         .btn-small { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
-        .btn-success { background: #22c55e; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         .stat-card { background: white; padding: 1rem 1.2rem; border-radius: 20px; border: 1px solid #e2e8f0; }
         .stat-title { font-size: 0.8rem; text-transform: uppercase; color: #475569; font-weight: 600; }
@@ -56,6 +56,8 @@
         .upload-area input[type="file"] { width: auto; padding: 0.4rem; }
         .upload-btn { background: #22c55e; color: white; border: none; padding: 0.4rem 1rem; border-radius: 30px; cursor: pointer; }
         .upload-btn:hover { background: #16a34a; }
+        .error-message { background: #fee2e2; color: #dc2626; padding: 1rem; border-radius: 12px; margin: 1rem 0; border: 1px solid #fecaca; }
+        .reload-btn { margin-top: 0.5rem; }
         @media (max-width: 700px) { .sidebar { width: 80px; padding: 1rem 0.5rem; } .sidebar .logo h2 { font-size: 1rem; } .sidebar .logo span, .footer-sidebar { display: none; } .nav-item { font-size: 0.8rem; text-align: center; padding: 0.5rem; } .main { padding: 1rem; } }
     </style>
 </head>
@@ -73,7 +75,9 @@
         <div class="footer-sidebar">Accès admin via Supabase</div>
     </div>
 
-    <div class="main" id="mainContent"></div>
+    <div class="main" id="mainContent">
+        <div style="text-align:center; padding:3rem;">Chargement...</div>
+    </div>
 
     <script>
         // ============================================
@@ -83,67 +87,81 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
 
         // ============================================
-        // 2. FONCTIONS FETCH
+        // 2. FONCTION FETCH AVEC LOGS ET GESTION DES ERREURS
         // ============================================
         async function fetchSupabase(endpoint, options = {}) {
             const defaultHeaders = {
                 'apikey': SUPABASE_KEY,
-                'Authorization': 'Bearer ' + SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
                 'Content-Type': 'application/json'
             };
             try {
-                const response = await fetch(SUPABASE_URL + '/rest/v1/' + endpoint, {
+                console.log(`📡 Appel à : ${SUPABASE_URL}/rest/v1/${endpoint}`);
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, {
                     ...options,
                     headers: { ...defaultHeaders, ...options.headers }
                 });
+                console.log(`📡 Statut HTTP : ${response.status}`);
 
-                if (response.status === 204 || response.status === 201) return null;
+                if (response.status === 204 || response.status === 201) {
+                    console.log('✅ Réponse 204/201 (pas de contenu)');
+                    return null;
+                }
                 if (!response.ok) {
                     const error = await response.text();
-                    throw new Error('HTTP ' + response.status + ': ' + error);
+                    console.error(`❌ Erreur HTTP ${response.status}:`, error);
+                    throw new Error(`HTTP ${response.status}: ${error}`);
                 }
                 const text = await response.text();
-                if (!text) return null;
-                return JSON.parse(text);
+                console.log(`📦 Réponse brute (${text.length} caractères) :`, text.substring(0, 200) + '...');
+                if (!text) {
+                    console.warn('⚠️ Réponse vide');
+                    return null;
+                }
+                const data = JSON.parse(text);
+                console.log(`✅ Données parsées (${data.length || 'objet'} éléments)`);
+                return data;
             } catch (e) {
-                console.error('Fetch error:', e);
-                return null;
+                console.error('❌ Erreur fetchSupabase:', e);
+                throw e; // On propage pour que le caller puisse gérer
             }
         }
 
         // ============================================
         // 3. VARIABLES GLOBALES
         // ============================================
-        var products = [];
-        var orders = [];
-        var promos = [];
-        var currentPage = 'dashboard';
+        let products = [];
+        let orders = [];
+        let promos = [];
+        let currentPage = 'dashboard';
 
         // ============================================
-        // 4. CHARGEMENT DES DONNÉES
+        // 4. CHARGEMENT DES DONNÉES AVEC LOGS
         // ============================================
         async function loadProducts() {
             try {
-                var data = await fetchSupabase('products?select=*');
+                const data = await fetchSupabase('products?select=*');
                 if (Array.isArray(data)) {
-                    data.forEach(function(p) {
+                    data.forEach(p => {
                         if (p.variants && Array.isArray(p.variants)) {
-                            p.variants.forEach(function(v) { v.stock = parseInt(v.stock) || 0; });
+                            p.variants.forEach(v => { v.stock = parseInt(v.stock) || 0; });
                         }
                         if (p.type === 'simple') p.stock = parseInt(p.stock) || 0;
                         if (typeof p.image_url !== 'string') p.image_url = null;
                         if (!Array.isArray(p.images)) p.images = [];
-                        if (p.image_url && p.images.indexOf(p.image_url) === -1) {
+                        if (p.image_url && !p.images.includes(p.image_url)) {
                             p.images.unshift(p.image_url);
                         }
                     });
                     products = data;
+                    console.log(`✅ Produits chargés : ${products.length}`);
                 } else {
                     products = [];
+                    console.warn('⚠️ Aucun produit reçu ou format incorrect');
                 }
                 return products;
             } catch (e) {
-                console.error('Erreur chargement produits:', e);
+                console.error('❌ Erreur loadProducts:', e);
                 products = [];
                 return products;
             }
@@ -151,15 +169,17 @@
 
         async function loadOrders() {
             try {
-                var data = await fetchSupabase('orders?select=*');
+                const data = await fetchSupabase('orders?select=*');
                 if (Array.isArray(data)) {
                     orders = data;
+                    console.log(`✅ Commandes chargées : ${orders.length}`);
                 } else {
                     orders = [];
+                    console.warn('⚠️ Aucune commande reçue');
                 }
                 return orders;
             } catch (e) {
-                console.error('Erreur chargement commandes:', e);
+                console.error('❌ Erreur loadOrders:', e);
                 orders = [];
                 return orders;
             }
@@ -167,15 +187,17 @@
 
         async function loadPromos() {
             try {
-                var data = await fetchSupabase('promos?select=*');
+                const data = await fetchSupabase('promos?select=*');
                 if (Array.isArray(data)) {
                     promos = data;
+                    console.log(`✅ Promos chargées : ${promos.length}`);
                 } else {
                     promos = [];
+                    console.warn('⚠️ Aucune promo reçue');
                 }
                 return promos;
             } catch (e) {
-                console.error('Erreur chargement promos:', e);
+                console.error('❌ Erreur loadPromos:', e);
                 promos = [];
                 return promos;
             }
@@ -185,27 +207,27 @@
         // 5. UTILITAIRES
         // ============================================
         function showToast(msg) {
-            var toast = document.createElement('div');
+            const toast = document.createElement('div');
             toast.className = 'toast';
             toast.innerText = msg;
             document.body.appendChild(toast);
-            setTimeout(function() { toast.remove(); }, 2500);
+            setTimeout(() => toast.remove(), 2500);
         }
 
         function getStockStats() {
-            var totalStock = 0, ruptures = 0, low = 0, stockValue = 0, productRuptures = 0;
-            products.forEach(function(p) {
+            let totalStock = 0, ruptures = 0, low = 0, stockValue = 0, productRuptures = 0;
+            products.forEach(p => {
                 if (p.type === 'simple') {
-                    var qty = p.stock || 0;
+                    const qty = p.stock || 0;
                     totalStock += qty;
                     if (qty === 0) ruptures++;
                     else if (qty <= 2) low++;
                     stockValue += qty * (p.price || 0);
                     if (qty === 0) productRuptures++;
                 } else if (p.variants) {
-                    var hasStock = false;
-                    p.variants.forEach(function(v) {
-                        var qty = v.stock || 0;
+                    let hasStock = false;
+                    p.variants.forEach(v => {
+                        const qty = v.stock || 0;
                         totalStock += qty;
                         if (qty === 0) ruptures++;
                         else if (qty <= 2) low++;
@@ -215,44 +237,34 @@
                     if (!hasStock) productRuptures++;
                 }
             });
-            return { totalStock: totalStock, ruptures: ruptures, lowStockItems: low, stockValue: stockValue, productRuptures: productRuptures };
-        }
-
-        function isValidImageUrl(url) {
-            if (!url || typeof url !== 'string') return false;
-            return url.startsWith('http') || url.startsWith('data:image');
+            return { totalStock, ruptures, lowStockItems: low, stockValue, productRuptures };
         }
 
         function getDisplayIcon(product) {
             if (product.images && product.images.length > 0) {
-                var imgUrl = product.images[0];
-                if (isValidImageUrl(imgUrl)) {
-                    return '<img src="' + imgUrl + '" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">';
-                }
+                return `<img src="${product.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+            } else if (product.image_url) {
+                return `<img src="${product.image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">`;
+            } else if (product.icon) {
+                return `<span style="font-size:28px;">${product.icon}</span>`;
+            } else {
+                return `<span style="font-size:28px;">📦</span>`;
             }
-            if (product.image_url && isValidImageUrl(product.image_url)) {
-                return '<img src="' + product.image_url + '" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">';
-            }
-            if (product.icon) {
-                return '<span style="font-size:28px;">' + product.icon + '</span>';
-            }
-            return '<span style="font-size:28px;">📦</span>';
         }
 
         // ============================================
         // 6. NAVIGATION
         // ============================================
         function attachNavEvents() {
-            document.querySelectorAll('.nav-item').forEach(function(item) {
-                item.onclick = function() { navigateTo(item.dataset.page); };
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.onclick = () => navigateTo(item.dataset.page);
             });
         }
 
         async function navigateTo(page) {
             currentPage = page;
-            document.querySelectorAll('.nav-item').forEach(function(el) { el.classList.remove('active'); });
-            var activeEl = document.querySelector('.nav-item[data-page="' + page + '"]');
-            if (activeEl) activeEl.classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
             if (page === 'dashboard') await renderDashboard();
             else if (page === 'products') await renderProducts();
             else if (page === 'stock') await renderStock();
@@ -265,14 +277,20 @@
         // ============================================
         async function renderDashboard() {
             await Promise.all([loadProducts(), loadOrders(), loadPromos()]);
-            var totalProducts = products.length;
-            var activeProducts = products.filter(function(p) { return p.active !== false; }).length;
-            var paidOrders = orders.filter(function(o) { return o.status === 'Payée'; });
-            var revenue = paidOrders.reduce(function(s, o) { return s + (o.total || 0); }, 0);
-            var stockStats = getStockStats();
+            const totalProducts = products.length;
+            const activeProducts = products.filter(p => p.active !== false).length;
+            const paidOrders = orders.filter(o => o.status === 'Payée');
+            const revenue = paidOrders.reduce((s, o) => s + (o.total || 0), 0);
+            const stockStats = getStockStats();
 
-            var html = `
+            const html = `
                 <div class="page-header"><h1>📊 Dashboard</h1></div>
+                ${products.length === 0 && orders.length === 0 ? `
+                    <div class="error-message">
+                        ⚠️ Aucune donnée chargée. Vérifiez la console (F12) pour les erreurs.
+                        <br><button class="btn btn-outline reload-btn" onclick="location.reload()">🔄 Recharger</button>
+                    </div>
+                ` : ''}
                 <div class="stats-grid">
                     <div class="stat-card"><div class="stat-title">📦 Produits</div><div class="stat-value">${totalProducts}</div><div class="stat-sub">${activeProducts} actifs</div></div>
                     <div class="stat-card"><div class="stat-title">🛒 Commandes</div><div class="stat-value">${orders.length}</div><div class="stat-sub">${paidOrders.length} payées</div></div>
@@ -288,9 +306,9 @@
                     <table>
                         <thead><tr><th>N°</th><th>Client</th><th>Total</th><th>Statut</th></tr></thead>
                         <tbody>
-                            ${orders.slice(0,5).map(function(o) {
-                                return '<tr><td><strong>' + o.id + '</strong></td><td>' + o.client + '</td><td>' + (o.total||0).toFixed(2) + ' €</td><td><span class="badge ' + (o.status === 'Payée' ? 'badge-success' : 'badge-warning') + '">' + o.status + '</span></td></tr>';
-                            }).join('')}
+                            ${orders.slice(0,5).map(o => `
+                                <tr><td><strong>${o.id}</strong></td><td>${o.client}</td><td>${(o.total||0).toFixed(2)} €</td><td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td></tr>
+                            `).join('')}
                             ${orders.length === 0 ? '<tr><td colspan="4" style="text-align:center;color:#94a3b8;">Aucune commande</td></tr>' : ''}
                         </tbody>
                     </table>
@@ -301,127 +319,159 @@
         }
 
         // ============================================
-        // 8. GESTION PRODUITS
+        // 8. GESTION PRODUITS (complète)
         // ============================================
         async function renderProducts() {
             await loadProducts();
-            var html = `
+            const html = `
                 <div class="page-header"><h1>👕 Produits</h1><button class="btn" id="addProductBtn">+ Ajouter</button></div>
+                ${products.length === 0 ? `
+                    <div class="error-message">⚠️ Aucun produit chargé. Vérifiez la console.</div>
+                ` : ''}
                 <div class="table-container">
                     <table>
                         <thead><tr><th>Icône</th><th>Nom</th><th>Type</th><th>Prix</th><th>Stock</th><th>Actif</th><th>Actions</th></tr></thead>
                         <tbody>
-                            ${products.map(function(p) {
-                                return '<tr><td><div class="product-img-list">' + getDisplayIcon(p) + '</div></td><td><strong>' + p.name + '</strong></td><td>' + (p.type === 'simple' ? 'Simple' : 'Variantes') + '</td><td>' + (p.type === 'simple' ? (p.price || 0) + ' €' : 'à partir de ' + (p.base_price || 0) + ' €') + '</td><td>' + (p.type === 'simple' ? (p.stock || 0) : (p.variants ? p.variants.reduce(function(s,v) { return s + (v.stock || 0); }, 0) : 0)) + '</td><td>' + (p.active !== false ? '✅' : '❌') + '</td><td><button class="btn-small btn-outline" onclick="editProduct(\'' + p.id + '\')">Modifier</button> <button class="btn-small btn-danger" onclick="deleteProduct(\'' + p.id + '\')">Supprimer</button></td></tr>';
-                            }).join('')}
+                            ${products.map(p => `
+                                <tr>
+                                    <td><div class="product-img-list">${getDisplayIcon(p)}</div></td>
+                                    <td><strong>${p.name}</strong></td>
+                                    <td>${p.type === 'simple' ? 'Simple' : 'Variantes'}</td>
+                                    <td>${p.type === 'simple' ? (p.price || 0) + ' €' : 'à partir de ' + (p.base_price || 0) + ' €'}</td>
+                                    <td>${p.type === 'simple' ? (p.stock || 0) : (p.variants?.reduce((s,v) => s + (v.stock || 0), 0) || 0)}</td>
+                                    <td>${p.active !== false ? '✅' : '❌'}</td>
+                                    <td>
+                                        <button class="btn-small btn-outline" onclick="editProduct('${p.id}')">Modifier</button>
+                                        <button class="btn-small btn-danger" onclick="deleteProduct('${p.id}')">Supprimer</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
                             ${products.length === 0 ? '<tr><td colspan="7" style="text-align:center;color:#94a3b8;">Aucun produit</td></tr>' : ''}
                         </tbody>
                     </table>
                 </div>
             `;
             document.getElementById('mainContent').innerHTML = html;
-            document.getElementById('addProductBtn').onclick = function() { showProductModal(); };
+            document.getElementById('addProductBtn').onclick = () => showProductModal();
             attachNavEvents();
         }
 
         // ============================================
-        // 9. MODALE PRODUIT
+        // 9. MODALE PRODUIT (avec images)
         // ============================================
-        var emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
+        const emojiList = ['👕','👖','👟','🧥','🧢','🧦','👗','👚','🎒','👔','🧣','👑','🧤','🕶️','👠'];
 
-        function showProductModal(product) {
-            product = product || null;
-            var isEdit = !!product;
-            var variantsArray = product && product.variants ? [...product.variants] : [];
-            var selectedEmoji = product && product.icon ? product.icon : '📦';
-            var imagesArray = product && product.images ? [...product.images] : [];
-            var uploadedImages = [];
+        function showProductModal(product = null) {
+            const isEdit = !!product;
+            let variantsArray = product?.variants ? [...product.variants] : [];
+            let selectedEmoji = product?.icon || '📦';
+            let imagesArray = product?.images ? [...product.images] : [];
+            let uploadedImages = [];
 
-            var modalDiv = document.createElement('div');
+            const modalDiv = document.createElement('div');
             modalDiv.className = 'modal';
             modalDiv.innerHTML = `
                 <div class="modal-content">
                     <h2>${isEdit ? 'Modifier' : 'Ajouter'} un produit</h2>
-                    <div class="form-group"><label>Nom</label><input id="prodName" value="${product ? product.name || '' : ''}"></div>
-                    <div class="form-group"><label>Description</label><textarea id="prodDesc" rows="2">${product ? product.description || '' : ''}</textarea></div>
+                    <div class="form-group"><label>Nom</label><input id="prodName" value="${product?.name || ''}"></div>
+                    <div class="form-group"><label>Description</label><textarea id="prodDesc" rows="2">${product?.description || ''}</textarea></div>
                     <div class="form-group"><label>Type</label>
                         <select id="prodType">
-                            <option value="simple" ${product && product.type === 'simple' ? 'selected' : ''}>Simple</option>
-                            <option value="variants" ${product && product.type === 'variants' ? 'selected' : ''}>Variantes</option>
+                            <option value="simple" ${product?.type === 'simple' ? 'selected' : ''}>Simple</option>
+                            <option value="variants" ${product?.type === 'variants' ? 'selected' : ''}>Variantes</option>
                         </select>
                     </div>
-                    <div id="simpleFields" style="${product && product.type === 'variants' ? 'display:none' : 'block'}">
-                        <div class="form-group"><label>Prix (€)</label><input id="simplePrice" type="number" step="0.01" value="${product ? product.price || '' : ''}"></div>
-                        <div class="form-group"><label>Stock</label><input id="simpleStock" type="number" value="${product ? product.stock || 0 : 0}"></div>
+                    <div id="simpleFields" style="${product?.type === 'variants' ? 'display:none' : 'block'}">
+                        <div class="form-group"><label>Prix (€)</label><input id="simplePrice" type="number" step="0.01" value="${product?.price || ''}"></div>
+                        <div class="form-group"><label>Stock</label><input id="simpleStock" type="number" value="${product?.stock || 0}"></div>
                     </div>
-                    <div id="variantsFields" style="${product && product.type === 'variants' ? 'block' : 'display:none'}">
-                        <div class="form-group"><label>Prix de base (€)</label><input id="basePrice" type="number" step="0.01" value="${product ? product.base_price || '' : ''}"></div>
+                    <div id="variantsFields" style="${product?.type === 'variants' ? 'block' : 'display:none'}">
+                        <div class="form-group"><label>Prix de base (€)</label><input id="basePrice" type="number" step="0.01" value="${product?.base_price || ''}"></div>
                         <div class="form-group"><label>Variantes</label><div id="variantsContainer"></div><button type="button" class="btn-small btn-outline" id="addVariantBtn">+ Ajouter variante</button></div>
                     </div>
                     <div class="form-group">
                         <label>Icône / Image</label>
                         <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:0.5rem;">
-                            <label><input type="radio" name="imgType" value="emoji" ${imagesArray.length === 0 ? 'checked' : ''}> Émoji</label>
-                            <label><input type="radio" name="imgType" value="upload" ${imagesArray.length > 0 ? 'checked' : ''}> Télécharger (PNG/JPG)</label>
-                            <label><input type="radio" name="imgType" value="none" ${(!imagesArray.length && !selectedEmoji) ? 'checked' : ''}> Pas d'icône</label>
+                            <label><input type="radio" name="imgType" value="emoji" ${!selectedImage && imagesArray.length === 0 ? 'checked' : ''}> Émoji</label>
+                            <label><input type="radio" name="imgType" value="upload" ${selectedImage || imagesArray.length > 0 ? 'checked' : ''}> Télécharger (PNG/JPG)</label>
+                            <label><input type="radio" name="imgType" value="none" ${(!selectedImage && imagesArray.length === 0 && !selectedEmoji) ? 'checked' : ''}> Pas d'icône</label>
                         </div>
-                        <div id="emojiSelector" style="${imagesArray.length > 0 ? 'display:none' : 'block'}">
+                        <div id="emojiSelector" style="${selectedImage || imagesArray.length > 0 ? 'display:none' : 'block'}">
                             <div class="emoji-grid" id="emojiGrid"></div>
                             <input type="text" id="customEmoji" placeholder="Ou saisis un émoji" maxlength="2" style="width:200px;">
                             <div>Aperçu : <span id="emojiPreview" style="font-size:2rem;">${selectedEmoji}</span></div>
                         </div>
-                        <div id="uploadArea" style="display:block; margin-top:0.5rem;">
-                            <input type="file" id="imageUpload" accept="image/png,image/jpeg,image/jpg,image/webp" multiple>
+                        <div id="uploadArea" style="${selectedImage || imagesArray.length > 0 ? 'block' : 'display:none'}; margin-top:0.5rem;">
+                            <input type="file" id="imageUpload" accept="image/png,image/jpeg,image/jpg" multiple>
                             <button type="button" class="upload-btn" id="addImageBtn">📤 Ajouter les images</button>
                             <button type="button" class="btn-small btn-outline" id="clearImagesBtn">Effacer toutes</button>
                             <div class="image-preview-grid" id="imagePreviewGrid">
-                                ${imagesArray.map(function(url) { return '<img src="' + url + '">'; }).join('')}
+                                ${imagesArray.map(url => `<img src="${url}">`).join('')}
+                                ${uploadedImages.map(url => `<img src="${url}">`).join('')}
                             </div>
                             <textarea id="imagesInput" rows="2" placeholder="Ou URLs séparées par des virgules">${imagesArray.join(', ')}</textarea>
                         </div>
                     </div>
-                    <div class="form-group"><label><input type="checkbox" id="activeCheck" ${product && product.active !== false ? 'checked' : ''}> Actif</label></div>
+                    <div class="form-group"><label><input type="checkbox" id="activeCheck" ${product?.active !== false ? 'checked' : ''}> Actif</label></div>
                     <div class="flex-between"><button class="btn-outline" id="cancelModal">Annuler</button><button class="btn" id="saveModal">Enregistrer</button></div>
                 </div>
             `;
             document.body.appendChild(modalDiv);
 
             // Grille émojis
-            var grid = modalDiv.querySelector('#emojiGrid');
-            emojiList.forEach(function(e) {
-                var div = document.createElement('div');
+            const grid = modalDiv.querySelector('#emojiGrid');
+            emojiList.forEach(e => {
+                const div = document.createElement('div');
                 div.className = 'emoji-option' + (e === selectedEmoji ? ' selected' : '');
                 div.textContent = e;
-                div.onclick = function() {
-                    modalDiv.querySelectorAll('.emoji-option').forEach(function(el) { el.classList.remove('selected'); });
+                div.onclick = () => {
+                    modalDiv.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
                     div.classList.add('selected');
                     modalDiv.querySelector('#customEmoji').value = '';
                     modalDiv.querySelector('#emojiPreview').textContent = e;
                     selectedEmoji = e;
                     document.querySelector('input[name="imgType"][value="upload"]').checked = false;
                     document.querySelector('input[name="imgType"][value="emoji"]').checked = true;
+                    document.getElementById('uploadArea').style.display = 'none';
+                    document.getElementById('emojiSelector').style.display = 'block';
+                    selectedImage = null;
                 };
                 grid.appendChild(div);
             });
-            modalDiv.querySelector('#customEmoji').addEventListener('input', function(e) {
-                var val = e.target.value.trim();
+            modalDiv.querySelector('#customEmoji').addEventListener('input', (e) => {
+                const val = e.target.value.trim();
                 if (val) {
-                    modalDiv.querySelectorAll('.emoji-option').forEach(function(el) { el.classList.remove('selected'); });
+                    modalDiv.querySelectorAll('.emoji-option').forEach(el => el.classList.remove('selected'));
                     modalDiv.querySelector('#emojiPreview').textContent = val;
                     selectedEmoji = val;
+                    document.querySelector('input[name="imgType"][value="upload"]').checked = false;
+                    document.querySelector('input[name="imgType"][value="emoji"]').checked = true;
+                    document.getElementById('uploadArea').style.display = 'none';
+                    document.getElementById('emojiSelector').style.display = 'block';
+                    selectedImage = null;
                 }
             });
 
             // Radios
-            var radioEmoji = modalDiv.querySelector('input[value="emoji"]');
-            var radioUpload = modalDiv.querySelector('input[value="upload"]');
-            var radioNone = modalDiv.querySelector('input[value="none"]');
-            var emojiDiv = modalDiv.querySelector('#emojiSelector');
-            var toggleFields = function() {
+            const radioEmoji = modalDiv.querySelector('input[value="emoji"]');
+            const radioUpload = modalDiv.querySelector('input[value="upload"]');
+            const radioNone = modalDiv.querySelector('input[value="none"]');
+            const emojiDiv = modalDiv.querySelector('#emojiSelector');
+            const uploadDiv = modalDiv.querySelector('#uploadArea');
+            const toggleFields = () => {
                 if (radioEmoji.checked) {
                     emojiDiv.style.display = 'block';
+                    uploadDiv.style.display = 'none';
+                    selectedImage = null;
+                } else if (radioUpload.checked) {
+                    emojiDiv.style.display = 'none';
+                    uploadDiv.style.display = 'block';
+                    selectedEmoji = null;
                 } else {
                     emojiDiv.style.display = 'none';
+                    uploadDiv.style.display = 'none';
+                    selectedEmoji = null;
+                    selectedImage = null;
                 }
             };
             radioEmoji.addEventListener('change', toggleFields);
@@ -430,161 +480,146 @@
             toggleFields();
 
             // Upload image
-            var fileInput = modalDiv.querySelector('#imageUpload');
-            var previewGrid = modalDiv.querySelector('#imagePreviewGrid');
-            var imagesInput = modalDiv.querySelector('#imagesInput');
+            const fileInput = modalDiv.querySelector('#imageUpload');
+            const previewGrid = modalDiv.querySelector('#imagePreviewGrid');
+            const imagesInput = modalDiv.querySelector('#imagesInput');
 
             function updatePreview() {
-                var urls = imagesInput.value.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
-                previewGrid.innerHTML = urls.map(function(url) { return '<img src="' + url + '">'; }).join('');
+                const urls = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
+                const all = [...uploadedImages, ...urls];
+                previewGrid.innerHTML = all.map(url => `<img src="${url}">`).join('');
+                imagesInput.value = all.join(', ');
             }
 
-            modalDiv.querySelector('#addImageBtn').addEventListener('click', function() {
-                var files = fileInput.files;
+            modalDiv.querySelector('#addImageBtn').addEventListener('click', () => {
+                const files = fileInput.files;
                 if (!files || files.length === 0) { showToast('Sélectionnez des images'); return; }
-                for (var i = 0; i < files.length; i++) {
-                    var f = files[i];
+                for (let f of files) {
                     if (f.type.startsWith('image/')) {
-                        var reader = new FileReader();
-                        reader.onload = function(e) {
-                            uploadedImages.push(e.target.result);
-                            var existing = imagesInput.value.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
-                            var all = existing.concat(uploadedImages);
-                            imagesInput.value = all.join(', ');
-                            updatePreview();
-                        };
+                        const reader = new FileReader();
+                        reader.onload = (e) => { uploadedImages.push(e.target.result); updatePreview(); };
                         reader.readAsDataURL(f);
                     }
                 }
                 fileInput.value = '';
-                showToast('Images ajoutées');
             });
 
-            modalDiv.querySelector('#clearImagesBtn').addEventListener('click', function() {
+            modalDiv.querySelector('#clearImagesBtn').addEventListener('click', () => {
                 uploadedImages = [];
                 imagesInput.value = '';
                 updatePreview();
-                showToast('Images effacées');
             });
             imagesInput.addEventListener('input', updatePreview);
 
             // Variantes
-            var variantsContainer = modalDiv.querySelector('#variantsContainer');
+            const variantsContainer = modalDiv.querySelector('#variantsContainer');
             function renderVariants() {
                 variantsContainer.innerHTML = '';
-                variantsArray.forEach(function(v, idx) {
-                    var div = document.createElement('div');
+                variantsArray.forEach((v, idx) => {
+                    const div = document.createElement('div');
                     div.className = 'variant-row';
                     div.innerHTML = `
-                        <input type="text" placeholder="Taille/Couleur" value="${v.attributes ? v.attributes.taille || '' : ''}/${v.attributes ? v.attributes.couleur || '' : ''}">
+                        <input type="text" placeholder="Taille/Couleur" value="${v.attributes?.taille || ''}/${v.attributes?.couleur || ''}">
                         <input type="number" placeholder="Stock" value="${v.stock || 0}" style="width:80px;">
                         <input type="number" placeholder="Prix €" step="0.01" value="${v.price || 0}" style="width:100px;">
                         <button class="btn-small btn-danger" data-idx="${idx}">✖</button>
                     `;
                     variantsContainer.appendChild(div);
                 });
-                variantsContainer.querySelectorAll('.btn-danger').forEach(function(btn) {
-                    btn.onclick = function() {
-                        var idx = parseInt(btn.dataset.idx);
+                variantsContainer.querySelectorAll('.btn-danger').forEach(btn => {
+                    btn.onclick = () => {
+                        const idx = parseInt(btn.dataset.idx);
                         variantsArray.splice(idx, 1);
                         renderVariants();
                     };
                 });
             }
-            if (product && product.type === 'variants') renderVariants();
-            modalDiv.querySelector('#addVariantBtn').addEventListener('click', function() {
+            if (product?.type === 'variants') renderVariants();
+            modalDiv.querySelector('#addVariantBtn')?.addEventListener('click', () => {
                 variantsArray.push({ attributes: { taille: '', couleur: '' }, stock: 0, price: 0 });
                 renderVariants();
             });
 
             // Toggle simple/variants
-            var typeSelect = modalDiv.querySelector('#prodType');
-            var simpleDiv = modalDiv.querySelector('#simpleFields');
-            var variantsDiv = modalDiv.querySelector('#variantsFields');
-            typeSelect.addEventListener('change', function() {
-                var isVar = typeSelect.value === 'variants';
+            const typeSelect = modalDiv.querySelector('#prodType');
+            const simpleDiv = modalDiv.querySelector('#simpleFields');
+            const variantsDiv = modalDiv.querySelector('#variantsFields');
+            typeSelect.addEventListener('change', () => {
+                const isVar = typeSelect.value === 'variants';
                 simpleDiv.style.display = isVar ? 'none' : 'block';
                 variantsDiv.style.display = isVar ? 'block' : 'none';
             });
 
             // Sauvegarde
-            modalDiv.querySelector('#saveModal').onclick = async function() {
-                var name = modalDiv.querySelector('#prodName').value.trim();
+            modalDiv.querySelector('#saveModal').onclick = async () => {
+                const name = modalDiv.querySelector('#prodName').value.trim();
                 if (!name) return alert('Nom requis');
-                var description = modalDiv.querySelector('#prodDesc').value;
-                var active = modalDiv.querySelector('#activeCheck').checked;
+                const description = modalDiv.querySelector('#prodDesc').value;
+                const active = modalDiv.querySelector('#activeCheck').checked;
 
-                var icon = null;
+                let image_url = null;
+                if (radioUpload.checked && uploadedImages.length > 0) {
+                    image_url = uploadedImages[0];
+                }
+                let icon = null;
                 if (radioEmoji.checked && selectedEmoji) {
                     icon = selectedEmoji;
                 }
 
-                var allImages = imagesInput.value.split(',').map(function(s) { return s.trim(); }).filter(function(s) { return s; });
+                const allImages = imagesInput.value.split(',').map(s => s.trim()).filter(Boolean);
 
                 if (typeSelect.value === 'simple') {
-                    var price = parseFloat(modalDiv.querySelector('#simplePrice').value);
-                    var stock = parseInt(modalDiv.querySelector('#simpleStock').value);
+                    const price = parseFloat(modalDiv.querySelector('#simplePrice').value);
+                    const stock = parseInt(modalDiv.querySelector('#simpleStock').value);
                     if (isNaN(price)) return alert('Prix invalide');
-                    var newProd = {
+                    const newProd = {
                         id: isEdit ? product.id : Date.now().toString(),
-                        name: name,
-                        description: description,
-                        type: 'simple',
-                        price: price,
-                        stock: stock,
-                        icon: icon,
-                        images: allImages,
-                        active: active
+                        name, description, type: 'simple',
+                        price, stock,
+                        icon, image_url, images: allImages, active
                     };
                     if (isEdit) {
-                        var idx = products.findIndex(function(p) { return p.id === product.id; });
+                        const idx = products.findIndex(p => p.id === product.id);
                         if (idx !== -1) products[idx] = newProd;
                     } else products.push(newProd);
                 } else {
-                    var basePrice = parseFloat(modalDiv.querySelector('#basePrice').value);
+                    const basePrice = parseFloat(modalDiv.querySelector('#basePrice').value);
                     if (isNaN(basePrice)) return alert('Prix de base requis');
-                    var finalVariants = [];
-                    var rows = variantsContainer.querySelectorAll('.variant-row');
-                    rows.forEach(function(row) {
-                        var inputs = row.querySelectorAll('input');
-                        var attrsStr = inputs[0] ? inputs[0].value || '' : '';
-                        var parts = attrsStr.split('/');
-                        var taille = parts[0] ? parts[0].trim() : '';
-                        var couleur = parts[1] ? parts[1].trim() : '';
-                        var stock = parseInt(inputs[1] ? inputs[1].value || 0 : 0);
-                        var price = parseFloat(inputs[2] ? inputs[2].value || 0 : 0) || basePrice;
-                        if (taille) {
+                    const finalVariants = [];
+                    const rows = variantsContainer.querySelectorAll('.variant-row');
+                    rows.forEach(row => {
+                        const inputs = row.querySelectorAll('input');
+                        const attrsStr = inputs[0]?.value || '';
+                        const [taille, couleur] = attrsStr.split('/');
+                        const stock = parseInt(inputs[1]?.value || 0);
+                        const price = parseFloat(inputs[2]?.value || 0) || basePrice;
+                        if (taille.trim()) {
                             finalVariants.push({
                                 id: Date.now() + Math.random().toString(36).substring(2,6),
-                                attributes: { taille: taille, couleur: couleur || '' },
-                                stock: stock,
-                                price: price
+                                attributes: { taille: taille.trim(), couleur: couleur.trim() || '' },
+                                stock, price
                             });
                         }
                     });
                     if (finalVariants.length === 0) return alert('Ajoutez au moins une variante');
-                    var newProd = {
+                    const newProd = {
                         id: isEdit ? product.id : Date.now().toString(),
-                        name: name,
-                        description: description,
-                        type: 'variants',
+                        name, description, type: 'variants',
                         base_price: basePrice,
                         variants: finalVariants,
-                        icon: icon,
-                        images: allImages,
-                        active: active
+                        icon, image_url, images: allImages, active
                     };
                     if (isEdit) {
-                        var idx = products.findIndex(function(p) { return p.id === product.id; });
+                        const idx = products.findIndex(p => p.id === product.id);
                         if (idx !== -1) products[idx] = newProd;
                     } else products.push(newProd);
                 }
 
                 try {
                     if (isEdit) {
-                        await fetchSupabase('products?id=eq.' + product.id, {
+                        await fetchSupabase(`products?id=eq.${product.id}`, {
                             method: 'PATCH',
-                            body: JSON.stringify(products.find(function(p) { return p.id === product.id; }))
+                            body: JSON.stringify(products.find(p => p.id === product.id))
                         });
                     } else {
                         await fetchSupabase('products', {
@@ -600,8 +635,8 @@
                     showToast('❌ Erreur: ' + e.message);
                 }
             };
-            modalDiv.querySelector('#cancelModal').onclick = function() { modalDiv.remove(); };
-            modalDiv.addEventListener('click', function(e) { if (e.target === modalDiv) modalDiv.remove(); });
+            modalDiv.querySelector('#cancelModal').onclick = () => modalDiv.remove();
+            modalDiv.addEventListener('click', (e) => { if (e.target === modalDiv) modalDiv.remove(); });
         }
 
         // ============================================
@@ -609,14 +644,14 @@
         // ============================================
         window.editProduct = async function(id) {
             await loadProducts();
-            var product = products.find(function(p) { return p.id === id; });
+            const product = products.find(p => p.id === id);
             if (product) showProductModal(product);
         };
 
         window.deleteProduct = async function(id) {
             if (!confirm('Supprimer ce produit ?')) return;
             try {
-                await fetchSupabase('products?id=eq.' + id, { method: 'DELETE' });
+                await fetchSupabase(`products?id=eq.${id}`, { method: 'DELETE' });
                 await loadProducts();
                 showToast('✅ Produit supprimé');
                 await renderProducts();
@@ -630,36 +665,44 @@
         // ============================================
         async function renderStock() {
             await loadProducts();
-            var rows = [];
-            products.forEach(function(p) {
+            let rows = [];
+            products.forEach(p => {
                 if (p.type === 'simple') {
-                    rows.push({ name: p.name, variant: 'Simple', stock: p.stock || 0, productId: p.id, variantId: null, isVariant: false, icon: p.icon, images: p.images || [] });
+                    rows.push({ name: p.name, variant: 'Simple', stock: p.stock || 0, productId: p.id, variantId: null, isVariant: false, images: p.images || [] });
                 } else if (p.variants) {
-                    p.variants.forEach(function(v) {
-                        rows.push({ name: p.name, variant: (v.attributes ? (v.attributes.taille || '') + ' / ' + (v.attributes.couleur || '') : ''), stock: v.stock || 0, productId: p.id, variantId: v.id, isVariant: true, icon: p.icon, images: p.images || [] });
+                    p.variants.forEach(v => {
+                        rows.push({ name: p.name, variant: `${v.attributes?.taille || ''} / ${v.attributes?.couleur || ''}`,
+                            stock: v.stock || 0, productId: p.id, variantId: v.id, isVariant: true, images: p.images || [] });
                     });
                 }
             });
 
-            var html = `
+            const html = `
                 <div class="page-header"><h1>📦 Gestion du stock</h1></div>
+                ${rows.length === 0 ? `
+                    <div class="error-message">⚠️ Aucun produit chargé pour le stock.</div>
+                ` : ''}
                 <div class="table-container">
                     <table>
                         <thead><tr><th>Icône</th><th>Produit</th><th>Variante</th><th>Stock</th><th>Ajuster</th></tr></thead>
                         <tbody>
-                            ${rows.map(function(r) {
-                                var iconHtml = '📦';
-                                if (r.images && r.images.length > 0) {
-                                    var imgUrl = r.images[0];
-                                    if (isValidImageUrl(imgUrl)) {
-                                        iconHtml = '<img src="' + imgUrl + '" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">';
-                                    } else if (r.icon) {
-                                        iconHtml = '<span style="font-size:28px;">' + r.icon + '</span>';
-                                    }
-                                } else if (r.icon) {
-                                    iconHtml = '<span style="font-size:28px;">' + r.icon + '</span>';
-                                }
-                                return '<tr><td><div class="product-img-list">' + iconHtml + '</div></td><td><strong>' + r.name + '</strong></td><td>' + r.variant + '</td><td>' + (r.stock === 0 ? '<span class="badge badge-danger">Rupture</span>' : r.stock <= 2 ? '<span class="badge badge-warning">Bas (' + r.stock + ')</span>' : '<span class="badge badge-success">' + r.stock + '</span>') + '</td><td><button class="btn-small btn-outline stock-down" data-pid="' + r.productId + '" data-vid="' + (r.variantId || '') + '" data-isvar="' + r.isVariant + '">-</button><span style="margin:0 8px;font-weight:600;">' + r.stock + '</span><button class="btn-small btn-outline stock-up" data-pid="' + r.productId + '" data-vid="' + (r.variantId || '') + '" data-isvar="' + r.isVariant + '">+</button></td></tr>';
+                            ${rows.map(r => {
+                                let iconHtml = (r.images && r.images.length > 0) ? `<img src="${r.images[0]}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">` : '📦';
+                                return `
+                                    <tr>
+                                        <td><div class="product-img-list">${iconHtml}</div></td>
+                                        <td><strong>${r.name}</strong></td>
+                                        <td>${r.variant}</td>
+                                        <td>${r.stock === 0 ? '<span class="badge badge-danger">Rupture</span>' :
+                                            r.stock <= 2 ? `<span class="badge badge-warning">Bas (${r.stock})</span>` :
+                                            `<span class="badge badge-success">${r.stock}</span>`}</td>
+                                        <td>
+                                            <button class="btn-small btn-outline stock-down" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">-</button>
+                                            <span style="margin:0 8px;font-weight:600;">${r.stock}</span>
+                                            <button class="btn-small btn-outline stock-up" data-pid="${r.productId}" data-vid="${r.variantId || ''}" data-isvar="${r.isVariant}">+</button>
+                                        </td>
+                                    </tr>
+                                `;
                             }).join('')}
                             ${rows.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Aucun produit</td></tr>' : ''}
                         </tbody>
@@ -668,26 +711,26 @@
             `;
             document.getElementById('mainContent').innerHTML = html;
 
-            document.querySelectorAll('.stock-down, .stock-up').forEach(function(btn) {
-                btn.onclick = async function() {
-                    var delta = btn.classList.contains('stock-up') ? 1 : -1;
-                    var pid = btn.dataset.pid;
-                    var vid = btn.dataset.vid;
-                    var isVar = btn.dataset.isvar === 'true';
-                    var prod = products.find(function(p) { return p.id === pid; });
+            document.querySelectorAll('.stock-down, .stock-up').forEach(btn => {
+                btn.onclick = async () => {
+                    const delta = btn.classList.contains('stock-up') ? 1 : -1;
+                    const pid = btn.dataset.pid;
+                    const vid = btn.dataset.vid;
+                    const isVar = btn.dataset.isvar === 'true';
+                    const prod = products.find(p => p.id === pid);
                     if (!prod) { showToast('Erreur'); return; }
                     try {
                         if (!isVar && prod.type === 'simple') {
                             prod.stock = Math.max(0, (prod.stock || 0) + delta);
-                            await fetchSupabase('products?id=eq.' + pid, {
+                            await fetchSupabase(`products?id=eq.${pid}`, {
                                 method: 'PATCH',
                                 body: JSON.stringify({ stock: prod.stock })
                             });
                         } else if (isVar && prod.variants) {
-                            var variant = prod.variants.find(function(v) { return v.id === vid; });
+                            const variant = prod.variants.find(v => v.id === vid);
                             if (variant) {
                                 variant.stock = Math.max(0, (variant.stock || 0) + delta);
-                                await fetchSupabase('products?id=eq.' + pid, {
+                                await fetchSupabase(`products?id=eq.${pid}`, {
                                     method: 'PATCH',
                                     body: JSON.stringify({ variants: prod.variants })
                                 });
@@ -709,139 +752,82 @@
         // ============================================
         async function renderOrders() {
             await loadOrders();
-            var html = `
+            const html = `
                 <div class="page-header"><h1>📋 Commandes (${orders.length})</h1></div>
+                ${orders.length === 0 ? `
+                    <div class="error-message">⚠️ Aucune commande chargée.</div>
+                ` : ''}
                 <div class="table-container">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>N°</th><th>Client</th><th>Prix original</th><th>Remise</th><th>Total payé</th><th>Code promo</th><th>Statut</th><th>Suivi admin</th><th>Actions</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>N°</th><th>Client</th><th>Total</th><th>Statut</th><th>Actions</th></tr></thead>
                         <tbody>
-                            ${orders.map(function(o) {
-                                var originalTotal = o.total + (o.discount || 0);
-                                return '<tr><td><strong>' + o.id + '</strong></td><td>' + o.client + '</td><td>' + originalTotal.toFixed(2) + ' €</td><td>' + (o.discount || 0).toFixed(2) + ' €</td><td>' + (o.total || 0).toFixed(2) + ' €</td><td>' + (o.promo_code ? '<span class="badge badge-success">' + o.promo_code + '</span>' : '—') + '</td><td><span class="badge ' + (o.status === 'Payée' ? 'badge-success' : 'badge-warning') + '">' + o.status + '</span></td><td><select class="admin-followup" data-id="' + o.id + '">' + ['À traiter','En cours','Expédié','Terminé'].map(function(s) { return '<option ' + (o.admin_followup === s ? 'selected' : '') + '>' + s + '</option>'; }).join('') + '</select></td><td><button class="btn-small btn-outline" onclick="viewOrder(\'' + o.id + '\')">👁️ Voir</button> <button class="btn-small btn-danger" onclick="deleteOrder(\'' + o.id + '\')">🗑️</button></td></tr>';
-                            }).join('')}
-                            ${orders.length === 0 ? '<tr><td colspan="9" style="text-align:center;color:#94a3b8;">Aucune commande</td></tr>' : ''}
+                            ${orders.map(o => `
+                                <tr>
+                                    <td><strong>${o.id}</strong></td>
+                                    <td>${o.client}</td>
+                                    <td>${(o.total||0).toFixed(2)} €</td>
+                                    <td><span class="badge ${o.status === 'Payée' ? 'badge-success' : 'badge-warning'}">${o.status}</span></td>
+                                    <td>
+                                        <button class="btn-small btn-outline" onclick="viewOrder('${o.id}')">👁️</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                            ${orders.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Aucune commande</td></tr>' : ''}
                         </tbody>
                     </table>
                 </div>
             `;
             document.getElementById('mainContent').innerHTML = html;
-
-            document.querySelectorAll('.admin-followup').forEach(function(sel) {
-                sel.onchange = async function() {
-                    var order = orders.find(function(o) { return o.id === sel.dataset.id; });
-                    if (order) {
-                        order.admin_followup = sel.value;
-                        await fetchSupabase('orders?id=eq.' + order.id, {
-                            method: 'PATCH',
-                            body: JSON.stringify({ admin_followup: sel.value })
-                        });
-                    }
-                };
-            });
             attachNavEvents();
         }
 
-        // ============================================
-        // 13. VUE DÉTAILLÉE D'UNE COMMANDE
-        // ============================================
         window.viewOrder = function(id) {
-            var order = orders.find(function(o) { return o.id === id; });
+            const order = orders.find(o => o.id === id);
             if (!order) return;
-
-            var subtotal = order.items.reduce(function(sum, item) { return sum + (item.price * item.qty); }, 0);
-            var reduction = order.discount || 0;
-            var totalPaye = order.total || 0;
-
-            var itemsList = order.items.map(function(item) {
-                var product = products.find(function(p) { return p.id === item.productId; });
-                var name = product ? product.name : 'Produit inconnu';
-                var variantStr = '';
-                if (item.variantId && product && product.variants) {
-                    var variant = product.variants.find(function(v) { return v.id === item.variantId; });
-                    if (variant) {
-                        variantStr = ' (' + (variant.attributes ? variant.attributes.taille || '' : '') + '/' + (variant.attributes ? variant.attributes.couleur || '' : '') + ')';
-                    }
-                }
-                return name + variantStr + ' × ' + item.qty + ' = ' + (item.price * item.qty).toFixed(2) + ' €';
-            }).join('<br>');
-
-            var modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h2>📋 Détail de la commande</h2>
-                    <p><strong>N° :</strong> ${order.id}</p>
-                    <p><strong>Client :</strong> ${order.client}</p>
-                    <p><strong>Date :</strong> ${order.date || 'non renseignée'} ${order.time ? 'à ' + order.time : ''}</p>
-                    <p><strong>Statut :</strong> ${order.status}</p>
-                    <p><strong>Suivi admin :</strong> ${order.admin_followup || 'À traiter'}</p>
-                    <p><strong>Code promo :</strong> ${order.promo_code ? '<span class="badge badge-success">' + order.promo_code + '</span>' : 'Aucun'}</p>
-                    <hr>
-                    <p><strong>Articles :</strong></p>
-                    <div style="background:#f8fafc;padding:0.5rem;border-radius:8px;margin:0.5rem 0;">${itemsList}</div>
-                    <hr>
-                    <p><strong>Sous-total :</strong> ${subtotal.toFixed(2)} €</p>
-                    ${reduction > 0 ? '<p><strong>Réduction :</strong> -' + reduction.toFixed(2) + ' €</p>' : ''}
-                    <p><strong>Total payé :</strong> ${totalPaye.toFixed(2)} €</p>
-                    <div style="margin-top:1.5rem;text-align:right;">
-                        <button class="btn-outline" id="closeOrderModal">Fermer</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            document.getElementById('closeOrderModal').onclick = function() { modal.remove(); };
-            modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+            alert(`Détail commande ${id}\nClient: ${order.client}\nTotal: ${order.total} €`);
         };
 
         // ============================================
-        // 14. SUPPRIMER UNE COMMANDE
-        // ============================================
-        window.deleteOrder = async function(id) {
-            if (!confirm('Supprimer cette commande ?')) return;
-            try {
-                await fetchSupabase('orders?id=eq.' + id, { method: 'DELETE' });
-                await loadOrders();
-                showToast('✅ Commande supprimée');
-                await renderOrders();
-            } catch (e) {
-                showToast('❌ Erreur: ' + e.message);
-            }
-        };
-
-        // ============================================
-        // 15. GESTION PROMOS
+        // 13. GESTION PROMOS
         // ============================================
         async function renderPromos() {
             await loadPromos();
-            var html = `
+            const html = `
                 <div class="page-header"><h1>🏷️ Codes promo</h1><button class="btn" id="addPromoBtn">+ Créer</button></div>
+                ${promos.length === 0 ? `
+                    <div class="error-message">⚠️ Aucune promo chargée.</div>
+                ` : ''}
                 <div class="table-container">
                     <table>
                         <thead><tr><th>Code</th><th>Type</th><th>Valeur</th><th>Actif</th><th>Actions</th></tr></thead>
                         <tbody>
-                            ${promos.map(function(p) {
-                                return '<tr><td><strong>' + p.code + '</strong></td><td>' + (p.type === 'fixed' ? '€ fixe' : '%') + '</td><td>' + (p.type === 'fixed' ? p.value + ' €' : p.value + ' %') + '</td><td>' + (p.active ? '✅' : '❌') + '</td><td><button class="btn-small btn-outline" onclick="togglePromo(\'' + p.code + '\')">' + (p.active ? 'Désactiver' : 'Activer') + '</button> <button class="btn-small btn-danger" onclick="deletePromo(\'' + p.code + '\')">Supprimer</button></td></tr>';
-                            }).join('')}
+                            ${promos.map(p => `
+                                <tr>
+                                    <td><strong>${p.code}</strong></td>
+                                    <td>${p.type === 'fixed' ? '€ fixe' : '%'}</td>
+                                    <td>${p.type === 'fixed' ? p.value + ' €' : p.value + ' %'}</td>
+                                    <td>${p.active ? '✅' : '❌'}</td>
+                                    <td>
+                                        <button class="btn-small btn-outline" onclick="togglePromo('${p.code}')">Toggle</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
                             ${promos.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">Aucun code promo</td></tr>' : ''}
                         </tbody>
                     </table>
                 </div>
             `;
             document.getElementById('mainContent').innerHTML = html;
-            document.getElementById('addPromoBtn').onclick = async function() {
-                var code = prompt('Code promo (ex: SOLDES20)');
+            document.getElementById('addPromoBtn').onclick = async () => {
+                const code = prompt('Code promo (ex: SOLDES20)');
                 if (!code) return;
-                var type = confirm('Type : OK = Pourcentage (%) / Annuler = Montant fixe (€)') ? 'percent' : 'fixed';
-                var value = parseFloat(prompt('Valeur (ex: 15 pour 15% ou 10€)'));
+                const type = confirm('Type : OK = Pourcentage (%) / Annuler = Montant fixe (€)') ? 'percent' : 'fixed';
+                const value = parseFloat(prompt('Valeur (ex: 15 pour 15% ou 10€)'));
                 if (isNaN(value) || value <= 0) return alert('Valeur invalide');
                 try {
                     await fetchSupabase('promos', {
                         method: 'POST',
-                        body: JSON.stringify({ code: code.toUpperCase(), type: type, value: value, active: true })
+                        body: JSON.stringify({ code: code.toUpperCase(), type, value, active: true })
                     });
                     await loadPromos();
                     showToast('✅ Code promo créé');
@@ -854,11 +840,11 @@
         }
 
         window.togglePromo = async function(code) {
-            var promo = promos.find(function(p) { return p.code === code; });
+            const promo = promos.find(p => p.code === code);
             if (!promo) return;
             promo.active = !promo.active;
             try {
-                await fetchSupabase('promos?code=eq.' + code, {
+                await fetchSupabase(`promos?code=eq.${code}`, {
                     method: 'PATCH',
                     body: JSON.stringify({ active: promo.active })
                 });
@@ -870,20 +856,8 @@
             }
         };
 
-        window.deletePromo = async function(code) {
-            if (!confirm('Supprimer ce code promo ?')) return;
-            try {
-                await fetchSupabase('promos?code=eq.' + code, { method: 'DELETE' });
-                await loadPromos();
-                showToast('✅ Code promo supprimé');
-                await renderPromos();
-            } catch (e) {
-                showToast('❌ Erreur: ' + e.message);
-            }
-        };
-
         // ============================================
-        // 16. SYNCHRONISATION INTER-ONGLETS
+        // 14. SYNCHRONISATION INTER-ONGLETS
         // ============================================
         window.addEventListener('storage', function(e) {
             if (e.key === 'shop_products' || e.key === 'shop_promos' || e.key === 'shop_orders' || e.key === 'shop_cart') {
@@ -897,9 +871,10 @@
         });
 
         // ============================================
-        // 17. INITIALISATION
+        // 15. INITIALISATION
         // ============================================
         async function init() {
+            console.log('🚀 Admin initialisation...');
             await renderDashboard();
             attachNavEvents();
         }
