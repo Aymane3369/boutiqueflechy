@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>StyleShop - Boutique en ligne</title>
+    <title>StyleShop - Boutique + Administration</title>
     <style>
         * {
             margin: 0;
@@ -12,33 +12,48 @@
             font-family: system-ui, 'Segoe UI', 'Inter', sans-serif;
         }
         body {
-            background: #f8fafc;
-            color: #0f172a;
+            background: #f1f5f9;
         }
-        /* Header */
-        .header {
+        /* Top bar navigation */
+        .top-bar {
             background: white;
             border-bottom: 1px solid #e2e8f0;
-            padding: 1rem 2rem;
+            padding: 0.75rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: sticky;
             top: 0;
-            z-index: 100;
-            backdrop-filter: blur(8px);
-            background: rgba(255,255,255,0.95);
+            z-index: 200;
         }
         .logo {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #0f172a;
-            text-decoration: none;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .nav-btn.active {
+            background: #0f172a;
+            color: white;
         }
         .cart-icon {
             position: relative;
             cursor: pointer;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
+            margin-left: 1rem;
         }
         .cart-count {
             position: absolute;
@@ -47,18 +62,35 @@
             background: #3b82f6;
             color: white;
             font-size: 0.7rem;
-            font-weight: bold;
             border-radius: 30px;
             padding: 2px 6px;
             min-width: 20px;
-            text-align: center;
         }
-        .container {
-            max-width: 1300px;
+        .main-container {
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
-        /* Catalogue grid */
+        /* Styles communs */
+        .btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn-outline {
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #1e293b;
+        }
+        .btn-small {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+        }
+        /* Boutique */
         .products-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -68,66 +100,36 @@
         .product-card {
             background: white;
             border-radius: 24px;
-            padding: 1.2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-            transition: 0.2s;
+            padding: 1.5rem;
             cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #e2e8f0;
+            text-align: center;
         }
         .product-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
         }
-        .product-icon {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
+        .product-icon-large {
+            font-size: 4rem;
+            margin-bottom: 0.75rem;
         }
         .product-title {
             font-size: 1.2rem;
             font-weight: 600;
         }
-        .product-type {
-            font-size: 0.75rem;
-            color: #475569;
-            margin: 0.25rem 0;
-        }
         .product-price {
-            font-weight: 700;
             font-size: 1.2rem;
-            margin-top: 0.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
         }
         .stock-badge {
-            font-size: 0.7rem;
-            margin-top: 0.5rem;
-            color: #15803d;
+            font-size: 0.8rem;
         }
-        .stock-warning {
-            color: #b45309;
-        }
-        .stock-out {
-            color: #dc2626;
-        }
-        button {
-            background: #0f172a;
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        button.primary {
-            background: #3b82f6;
-        }
-        button.primary:hover {
-            background: #2563eb;
-        }
-        button.outline {
-            background: white;
-            border: 1px solid #cbd5e1;
-            color: #1e293b;
-        }
+        .stock-ok { color: #15803d; }
+        .stock-low { color: #b45309; }
+        .stock-out { color: #dc2626; }
+
         /* Fiche produit */
         .product-detail {
             background: white;
@@ -135,7 +137,6 @@
             padding: 2rem;
             max-width: 700px;
             margin: 0 auto;
-            border: 1px solid #e2e8f0;
         }
         .variant-group {
             margin: 1.2rem 0;
@@ -152,30 +153,20 @@
             padding: 0.5rem 1rem;
             border-radius: 40px;
             cursor: pointer;
-            font-size: 0.9rem;
         }
         .variant-btn.selected {
             background: #0f172a;
             color: white;
-            border-color: #0f172a;
         }
         .variant-btn.disabled {
             opacity: 0.4;
             cursor: not-allowed;
-            text-decoration: line-through;
-        }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            color: #3b82f6;
         }
         /* Panier */
         .cart-page {
             background: white;
             border-radius: 32px;
             padding: 1.5rem;
-            border: 1px solid #e2e8f0;
         }
         .cart-item {
             display: flex;
@@ -184,35 +175,61 @@
             padding: 1rem 0;
             border-bottom: 1px solid #e2e8f0;
         }
-        .cart-item-info {
-            flex: 2;
-        }
-        .cart-item-qty {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        .qty-btn {
+        .cart-item-qty button {
             background: #e2e8f0;
+            border: none;
             padding: 0.2rem 0.6rem;
             border-radius: 20px;
-            font-weight: bold;
+            margin: 0 0.2rem;
         }
-        .summary {
-            margin-top: 1.5rem;
-            text-align: right;
+        /* Admin */
+        .sidebar {
+            display: none; /* on utilise des onglets */
         }
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #0f172a;
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 40px;
-            z-index: 200;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .product-img-list {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 8px;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .badge {
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+        }
+        .badge-success { background: #dcfce7; color: #15803d; }
+        .badge-warning { background: #fef9c3; color: #854d0e; }
         .modal {
             position: fixed;
             top: 0;
@@ -227,209 +244,150 @@
         }
         .modal-content {
             background: white;
-            max-width: 500px;
+            border-radius: 28px;
+            max-width: 600px;
             width: 90%;
-            border-radius: 32px;
-            padding: 1.8rem;
+            padding: 1.5rem;
+            max-height: 85vh;
+            overflow-y: auto;
         }
-        hr {
-            margin: 1rem 0;
+        .form-group {
+            margin-bottom: 1rem;
         }
-        @media (max-width: 700px) {
-            .container { padding: 1rem; }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #0f172a;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            z-index: 300;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .variant-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 60px));
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .emoji-option {
+            font-size: 32px;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 5px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .emoji-option.selected {
+            border-color: #3b82f6;
+            background: #dbeafe;
         }
     </style>
 </head>
 <body>
-
-<div class="header">
-    <div class="logo" onclick="navigateTo('catalogue')">StyleShop</div>
-    <div class="cart-icon" onclick="navigateTo('cart')">
-        🛒
-        <span id="cartCount" class="cart-count">0</span>
+<div class="top-bar">
+    <div class="logo">StyleShop</div>
+    <div style="display: flex; align-items: center;">
+        <div class="nav-buttons">
+            <button class="nav-btn" data-mode="shop">🛍️ Boutique</button>
+            <button class="nav-btn" data-mode="admin">⚙️ Admin</button>
+        </div>
+        <div class="cart-icon" id="cartIcon" style="display: none;">
+            🛒 <span id="cartCount" class="cart-count">0</span>
+        </div>
     </div>
 </div>
-
-<div id="app" class="container">
-    <!-- Le contenu sera injecté dynamiquement -->
-</div>
+<div id="mainContent" class="main-container"></div>
 
 <script>
-    // ---------- DONNÉES PRODUITS (avec variantes et stock) ----------
-    const products = [
-        {
-            id: "tshirt",
-            name: "T-shirt Classic",
-            description: "Coton bio, coupe confortable.",
-            type: "simple",
-            price: 24.90,
-            stock: 12,
-            icon: "👕",
-            variants: null
-        },
-        {
-            id: "sneakers",
-            name: "Sneakers Urban",
-            description: "Sneakers légères, semelle EVA, disponibles en plusieurs coloris.",
-            type: "variants",
-            basePrice: 89.90,
-            icon: "👟",
-            variants: [
-                { id: "snk_38_blanc", attributes: { taille: "38", couleur: "Blanc" }, stock: 5, price: 89.90 },
-                { id: "snk_39_blanc", attributes: { taille: "39", couleur: "Blanc" }, stock: 3, price: 89.90 },
-                { id: "snk_40_blanc", attributes: { taille: "40", couleur: "Blanc" }, stock: 0, price: 89.90 },
-                { id: "snk_41_blanc", attributes: { taille: "41", couleur: "Blanc" }, stock: 2, price: 89.90 },
-                { id: "snk_38_noir", attributes: { taille: "38", couleur: "Noir" }, stock: 8, price: 89.90 },
-                { id: "snk_39_noir", attributes: { taille: "39", couleur: "Noir" }, stock: 4, price: 89.90 },
-                { id: "snk_40_noir", attributes: { taille: "40", couleur: "Noir" }, stock: 6, price: 89.90 },
-                { id: "snk_41_noir", attributes: { taille: "41", couleur: "Noir" }, stock: 1, price: 89.90 }
-            ]
-        },
-        {
-            id: "hoodie",
-            name: "Hoodie Premium",
-            description: "Molleton épais, capuche ajustable.",
-            type: "variants",
-            basePrice: 59.90,
-            icon: "🧥",
-            variants: [
-                { id: "hd_s_gris", attributes: { taille: "S", couleur: "Gris" }, stock: 6, price: 59.90 },
-                { id: "hd_m_gris", attributes: { taille: "M", couleur: "Gris" }, stock: 10, price: 59.90 },
-                { id: "hd_l_gris", attributes: { taille: "L", couleur: "Gris" }, stock: 3, price: 59.90 },
-                { id: "hd_s_noir", attributes: { taille: "S", couleur: "Noir" }, stock: 2, price: 59.90 },
-                { id: "hd_m_noir", attributes: { taille: "M", couleur: "Noir" }, stock: 5, price: 59.90 },
-                { id: "hd_l_noir", attributes: { taille: "L", couleur: "Noir" }, stock: 1, price: 59.90 }
-            ]
-        },
-        {
-            id: "casquette",
-            name: "Casquette Logo",
-            description: "Coton bio, ajustable.",
-            type: "simple",
-            price: 19.90,
-            stock: 2,
-            icon: "🧢",
-            variants: null
-        },
-        {
-            id: "chaussettes",
-            name: "Chaussettes Pack",
-            description: "Lot de 3 paires, coton doux.",
-            type: "simple",
-            price: 14.90,
-            stock: 0,
-            icon: "🧦",
-            variants: null
-        }
+    // ---------- DONNÉES PARTAGÉES ----------
+    let products = [
+        { id: "tshirt", name: "T-shirt Classic", description: "Coton bio, coupe confortable.", type: "simple", price: 24.90, stock: 12, icon: "👕", image: null, active: true },
+        { id: "sneakers", name: "Sneakers Urban", description: "Sneakers légères, semelle EVA.", type: "variants", basePrice: 89.90, icon: "👟", image: null, active: true,
+          variants: [
+              { id: "snk_38_blanc", attributes: { taille: "38", couleur: "Blanc" }, stock: 5, price: 89.90 },
+              { id: "snk_39_blanc", attributes: { taille: "39", couleur: "Blanc" }, stock: 3, price: 89.90 },
+              { id: "snk_40_blanc", attributes: { taille: "40", couleur: "Blanc" }, stock: 0, price: 89.90 },
+              { id: "snk_41_blanc", attributes: { taille: "41", couleur: "Blanc" }, stock: 2, price: 89.90 },
+              { id: "snk_38_noir", attributes: { taille: "38", couleur: "Noir" }, stock: 8, price: 89.90 },
+              { id: "snk_39_noir", attributes: { taille: "39", couleur: "Noir" }, stock: 4, price: 89.90 },
+              { id: "snk_40_noir", attributes: { taille: "40", couleur: "Noir" }, stock: 6, price: 89.90 },
+              { id: "snk_41_noir", attributes: { taille: "41", couleur: "Noir" }, stock: 1, price: 89.90 }
+          ] },
+        { id: "hoodie", name: "Hoodie Premium", description: "Molleton épais, capuche ajustable.", type: "variants", basePrice: 59.90, icon: "🧥", image: null, active: true,
+          variants: [
+              { id: "hd_s_gris", attributes: { taille: "S", couleur: "Gris" }, stock: 6, price: 59.90 },
+              { id: "hd_m_gris", attributes: { taille: "M", couleur: "Gris" }, stock: 10, price: 59.90 },
+              { id: "hd_l_gris", attributes: { taille: "L", couleur: "Gris" }, stock: 3, price: 59.90 },
+              { id: "hd_s_noir", attributes: { taille: "S", couleur: "Noir" }, stock: 2, price: 59.90 },
+              { id: "hd_m_noir", attributes: { taille: "M", couleur: "Noir" }, stock: 5, price: 59.90 },
+              { id: "hd_l_noir", attributes: { taille: "L", couleur: "Noir" }, stock: 1, price: 59.90 }
+          ] },
+        { id: "casquette", name: "Casquette Logo", description: "Coton bio, ajustable.", type: "simple", price: 19.90, stock: 2, icon: "🧢", image: null, active: true },
+        { id: "chaussettes", name: "Chaussettes Pack", description: "Lot de 3 paires.", type: "simple", price: 14.90, stock: 0, icon: "🧦", image: null, active: true }
     ];
 
-    // Panier : { productId, variantId, quantity, name, price, attributes }
+    let orders = [
+        { id: "ORD-RYCTHN", client: "marc@mail.com", date: "2026-06-10", time: "14:23", items: [{ productId: "tshirt", qty: 1, price: 24.9 }], total: 24.9, status: "Payée", adminFollowup: "À traiter", promoCode: null, discount: 0 },
+        { id: "ORD-WCP62J", client: "leo@mail.com", date: "2026-06-11", time: "09:15", items: [{ productId: "sneakers", variantId: "snk_38_blanc", qty: 1, price: 89.9 }], total: 89.9, status: "Payée", adminFollowup: "En cours", promoCode: "PROMO10", discount: 5 },
+    ];
+
+    let promos = [
+        { code: "PROMO10", type: "fixed", value: 5, active: true },
+        { code: "BIENVENUE", type: "percent", value: 15, active: true }
+    ];
+
     let cart = [];
 
-    // Sauvegarde / chargement localStorage
-    function saveCart() {
-        localStorage.setItem("styleShopCart", JSON.stringify(cart));
-        updateCartCount();
+    // Chargement / sauvegarde localStorage
+    function loadData() {
+        const p = localStorage.getItem("styleshop_products");
+        if(p) products = JSON.parse(p);
+        const o = localStorage.getItem("styleshop_orders");
+        if(o) orders = JSON.parse(o);
+        const pr = localStorage.getItem("styleshop_promos");
+        if(pr) promos = JSON.parse(pr);
+        const c = localStorage.getItem("styleShopCart");
+        if(c) cart = JSON.parse(c);
     }
-    function loadCart() {
-        const stored = localStorage.getItem("styleShopCart");
-        if(stored) cart = JSON.parse(stored);
-        updateCartCount();
-    }
+    function saveProducts() { localStorage.setItem("styleshop_products", JSON.stringify(products)); }
+    function saveOrders() { localStorage.setItem("styleshop_orders", JSON.stringify(orders)); }
+    function savePromos() { localStorage.setItem("styleshop_promos", JSON.stringify(promos)); }
+    function saveCart() { localStorage.setItem("styleShopCart", JSON.stringify(cart)); updateCartCount(); }
+
     function updateCartCount() {
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        document.getElementById("cartCount").innerText = totalItems;
+        const total = cart.reduce((s,i)=>s+i.quantity,0);
+        const span = document.getElementById("cartCount");
+        if(span) span.innerText = total;
     }
 
-    // Trouver un produit et sa variante
-    function findProduct(productId, variantId = null) {
-        const product = products.find(p => p.id === productId);
-        if(!product) return null;
-        if(product.type === "simple") return { product, variant: null, price: product.price, stock: product.stock };
-        if(variantId) {
-            const variant = product.variants.find(v => v.id === variantId);
-            return { product, variant, price: variant.price, stock: variant.stock };
-        }
-        return { product, variant: null };
-    }
-
-    // Vérifier stock disponible pour un produit/variante
+    // Utilitaires
+    function getProductById(id) { return products.find(p => p.id === id); }
+    function getVariant(product, variantId) { return product.variants?.find(v => v.id === variantId); }
     function getStock(productId, variantId) {
-        const prod = products.find(p => p.id === productId);
+        const prod = getProductById(productId);
         if(!prod) return 0;
         if(prod.type === "simple") return prod.stock;
-        const variant = prod.variants.find(v => v.id === variantId);
-        return variant ? variant.stock : 0;
-    }
-
-    // Ajouter au panier (avec contrôle stock)
-    function addToCart(productId, variantId, quantity = 1) {
-        const product = products.find(p => p.id === productId);
-        if(!product) return false;
-        let variant = null;
-        let availableStock = 0;
-        let price = 0;
-        let attributes = {};
-
-        if(product.type === "simple") {
-            availableStock = product.stock;
-            price = product.price;
-            attributes = { type: "simple" };
-        } else {
-            variant = product.variants.find(v => v.id === variantId);
-            if(!variant) return false;
-            availableStock = variant.stock;
-            price = variant.price;
-            attributes = variant.attributes;
-        }
-
-        if(availableStock < quantity) {
-            showToast(`Stock insuffisant (${availableStock} disponible(s))`);
-            return false;
-        }
-
-        // Vérifier si déjà dans le panier
-        const existingIndex = cart.findIndex(item => item.productId === productId && item.variantId === variantId);
-        if(existingIndex !== -1) {
-            const newQty = cart[existingIndex].quantity + quantity;
-            if(newQty > availableStock) {
-                showToast(`Impossible, dépassement du stock (max ${availableStock})`);
-                return false;
-            }
-            cart[existingIndex].quantity = newQty;
-        } else {
-            cart.push({
-                productId,
-                variantId: variantId || null,
-                name: product.name,
-                price: price,
-                quantity: quantity,
-                attributes: attributes,
-                imageIcon: product.icon
-            });
-        }
-        saveCart();
-        showToast(`Ajouté au panier (${product.name} ${attributes.taille ? attributes.taille + "/" + attributes.couleur : ""})`);
-        return true;
-    }
-
-    // Modifier quantité panier
-    function updateCartItem(index, newQuantity) {
-        if(newQuantity <= 0) {
-            cart.splice(index,1);
-            saveCart();
-            renderCurrentPage();
-            return;
-        }
-        const item = cart[index];
-        const stock = getStock(item.productId, item.variantId);
-        if(newQuantity > stock) {
-            showToast(`Stock insuffisant, maximum ${stock}`);
-            return;
-        }
-        item.quantity = newQuantity;
-        saveCart();
-        renderCurrentPage();
+        const v = getVariant(prod, variantId);
+        return v ? v.stock : 0;
     }
 
     function showToast(msg) {
@@ -440,342 +398,634 @@
         setTimeout(() => toast.remove(), 2000);
     }
 
-    // ---------------- RENDUS PAGES ----------------
-    let currentPage = "catalogue";
+    // ------------------ BOUTIQUE ------------------
+    let currentMode = "shop"; // shop / admin
     let selectedProductId = null;
-    let selectedVariantCache = {}; // pour garder sélection dans fiche produit
+    let selectedVariantCache = {};
 
-    function navigateTo(page, productId = null) {
-        if(page === "product" && productId) {
-            currentPage = "product";
-            selectedProductId = productId;
-            // initialiser la sélection par défaut (première variante dispo ou aucune)
-            const prod = products.find(p => p.id === productId);
-            if(prod && prod.type === "variants" && !selectedVariantCache[productId]) {
-                const firstAvailable = prod.variants.find(v => v.stock > 0);
-                if(firstAvailable) selectedVariantCache[productId] = firstAvailable.id;
-                else selectedVariantCache[productId] = null;
-            }
-        } else if(page === "cart") {
-            currentPage = "cart";
-        } else {
-            currentPage = "catalogue";
-            selectedProductId = null;
-        }
-        renderCurrentPage();
+    function renderShop() {
+        renderCatalogue();
     }
 
-    function renderCurrentPage() {
-        if(currentPage === "catalogue") renderCatalogue();
-        else if(currentPage === "product" && selectedProductId) renderProductDetail(selectedProductId);
-        else if(currentPage === "cart") renderCart();
-        else renderCatalogue();
-    }
-
-    // Catalogue
     function renderCatalogue() {
         const html = `
-            <h1 style="margin-bottom: 1rem;">Catalogue</h1>
-            <p style="margin-bottom: 1.5rem; color: #475569;">Cliquez sur un produit pour voir les détails</p>
+            <h1>Catalogue</h1>
             <div class="products-grid">
-                ${products.map(p => `
-                    <div class="product-card" onclick="navigateTo('product','${p.id}')">
-                        <div class="product-icon">${p.icon}</div>
+                ${products.filter(p => p.active !== false).map(p => `
+                    <div class="product-card" onclick="selectProduct('${p.id}')">
+                        <div class="product-icon-large">${p.icon || "📦"}</div>
                         <div class="product-title">${p.name}</div>
-                        <div class="product-type">${p.type === "simple" ? "Produit simple" : "Avec variantes"}</div>
-                        <div class="product-price">${p.type === "simple" ? p.price.toFixed(2) : p.basePrice.toFixed(2)} € ${p.type === "variants" ? "+" : ""}</div>
-                        <div class="stock-badge ${p.type === "simple" ? (p.stock === 0 ? "stock-out" : (p.stock <= 2 ? "stock-warning" : "")) : ""}">
-                            ${p.type === "simple" ? (p.stock === 0 ? "Rupture" : (p.stock <= 2 ? `Derniers (${p.stock})` : "En stock")) : "En stock"}
+                        <div class="product-price">${p.type === "simple" ? p.price.toFixed(2) : p.basePrice.toFixed(2)} €</div>
+                        <div class="stock-badge">
+                            ${p.type === "simple" ? 
+                                (p.stock === 0 ? "<span class='stock-out'>Rupture</span>" : (p.stock <= 2 ? `<span class='stock-low'>Derniers (${p.stock})</span>` : `<span class='stock-ok'>En stock</span>`))
+                                : "<span class='stock-ok'>En stock</span>"}
                         </div>
                     </div>
                 `).join('')}
             </div>
         `;
-        document.getElementById("app").innerHTML = html;
+        document.getElementById("mainContent").innerHTML = html;
     }
 
-    // Fiche produit (variantes)
-    function renderProductDetail(productId) {
-        const product = products.find(p => p.id === productId);
-        if(!product) return renderCatalogue();
-        const isVariantProduct = product.type === "variants";
-        let selectedVariantId = selectedVariantCache[productId] || null;
+    window.selectProduct = function(productId) {
+        selectedProductId = productId;
+        const prod = getProductById(productId);
+        if(prod && prod.type === "variants" && !selectedVariantCache[productId]) {
+            const firstAvail = prod.variants.find(v => v.stock > 0);
+            selectedVariantCache[productId] = firstAvail ? firstAvail.id : null;
+        }
+        renderProductDetail();
+    };
+
+    function renderProductDetail() {
+        const prod = getProductById(selectedProductId);
+        if(!prod) return renderCatalogue();
+        const isVariant = prod.type === "variants";
+        let selectedVariantId = selectedVariantCache[selectedProductId] || null;
         let selectedVariant = null;
-        let currentPrice = product.type === "simple" ? product.price : product.basePrice;
-        let currentStock = product.type === "simple" ? product.stock : 0;
+        let currentPrice = prod.type === "simple" ? prod.price : prod.basePrice;
+        let currentStock = prod.type === "simple" ? prod.stock : 0;
         let canAdd = false;
 
-        if(isVariantProduct && selectedVariantId) {
-            selectedVariant = product.variants.find(v => v.id === selectedVariantId);
+        if(isVariant && selectedVariantId) {
+            selectedVariant = getVariant(prod, selectedVariantId);
             if(selectedVariant) {
                 currentPrice = selectedVariant.price;
                 currentStock = selectedVariant.stock;
                 canAdd = currentStock > 0;
             }
-        } else if(!isVariantProduct) {
-            canAdd = product.stock > 0;
+        } else if(!isVariant) {
+            canAdd = prod.stock > 0;
         }
 
-        // Générer les options taille / couleur
+        // Récupérer les attributs uniques
         let tailleOptions = [], couleurOptions = [];
-        if(isVariantProduct) {
-            const tailles = [...new Set(product.variants.map(v => v.attributes.taille))];
-            const couleurs = [...new Set(product.variants.map(v => v.attributes.couleur))];
-            tailleOptions = tailles;
-            couleurOptions = couleurs;
+        if(isVariant) {
+            tailleOptions = [...new Set(prod.variants.map(v => v.attributes.taille))];
+            couleurOptions = [...new Set(prod.variants.map(v => v.attributes.couleur))];
         }
-
-        // Déterminer variante actuelle pour pré-sélection
         const currentTaille = selectedVariant?.attributes?.taille || (tailleOptions[0] || "");
         const currentCouleur = selectedVariant?.attributes?.couleur || (couleurOptions[0] || "");
 
-        const detailHtml = `
-            <div class="back-link" onclick="navigateTo('catalogue')">← Retour au catalogue</div>
+        const html = `
+            <button class="btn-outline" onclick="renderCatalogue()" style="margin-bottom:1rem;">← Retour</button>
             <div class="product-detail">
-                <div style="font-size: 3rem;">${product.icon}</div>
-                <h2>${product.name}</h2>
-                <p style="margin: 0.5rem 0; color: #334155;">${product.description}</p>
-                ${isVariantProduct ? `
-                    <div class="variant-group">
-                        <strong>TAILLE</strong>
-                        <div class="variant-options" id="tailleContainer">
-                            ${tailleOptions.map(t => `
-                                <div class="variant-btn ${currentTaille === t ? 'selected' : ''}" data-type="taille" data-value="${t}">${t}</div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <div class="variant-group">
-                        <strong>COULEUR</strong>
-                        <div class="variant-options" id="couleurContainer">
-                            ${couleurOptions.map(c => `
-                                <div class="variant-btn ${currentCouleur === c ? 'selected' : ''}" data-type="couleur" data-value="${c}">${c}</div>
-                            `).join('')}
-                        </div>
-                    </div>
+                <div style="font-size: 5rem; text-align:center;">${prod.icon || "📦"}</div>
+                <h2>${prod.name}</h2>
+                <p>${prod.description}</p>
+                ${isVariant ? `
+                    <div class="variant-group"><strong>TAILLE</strong><div class="variant-options" id="tailleContainer">
+                        ${tailleOptions.map(t => `<div class="variant-btn ${currentTaille === t ? 'selected' : ''}" data-type="taille" data-value="${t}">${t}</div>`).join('')}
+                    </div></div>
+                    <div class="variant-group"><strong>COULEUR</strong><div class="variant-options" id="couleurContainer">
+                        ${couleurOptions.map(c => `<div class="variant-btn ${currentCouleur === c ? 'selected' : ''}" data-type="couleur" data-value="${c}">${c}</div>`).join('')}
+                    </div></div>
                 ` : ''}
-                <div class="product-price" style="font-size: 2rem;">${currentPrice.toFixed(2)} €</div>
-                <div style="margin: 1rem 0;">
-                    ${currentStock > 0 ? `<span style="color: #15803d;">✅ En stock (${currentStock})</span>` : `<span style="color: #dc2626;">❌ Rupture de stock</span>`}
-                </div>
-                <button class="primary" id="addToCartBtn" ${!canAdd ? 'disabled style="opacity:0.5;"' : ''}>
-                    ${canAdd ? "Ajouter au panier" : "Indisponible"}
-                </button>
-                <p style="font-size: 0.7rem; margin-top: 1rem;">Prix calculé côté backend uniquement</p>
+                <div class="product-price" style="font-size:2rem;">${currentPrice.toFixed(2)} €</div>
+                <div>${currentStock > 0 ? `✅ En stock (${currentStock})` : "❌ Rupture"}</div>
+                <button class="btn" id="addToCartBtn" ${!canAdd ? 'disabled style="opacity:0.5;"' : ''}>Ajouter au panier</button>
             </div>
         `;
-        document.getElementById("app").innerHTML = detailHtml;
+        document.getElementById("mainContent").innerHTML = html;
 
-        if(isVariantProduct) {
-            // Événements pour les boutons taille/couleur
+        if(isVariant) {
             const tailleBtns = document.querySelectorAll("#tailleContainer .variant-btn");
             const couleurBtns = document.querySelectorAll("#couleurContainer .variant-btn");
-
-            function updateSelectedVariant() {
-                const selectedTaille = document.querySelector("#tailleContainer .variant-btn.selected")?.dataset.value;
-                const selectedCouleur = document.querySelector("#couleurContainer .variant-btn.selected")?.dataset.value;
-                if(selectedTaille && selectedCouleur) {
-                    const foundVariant = product.variants.find(v => v.attributes.taille === selectedTaille && v.attributes.couleur === selectedCouleur);
-                    if(foundVariant) {
-                        selectedVariantCache[productId] = foundVariant.id;
-                        renderProductDetail(productId); // rafraîchit avec nouvelle sélection
+            const updateVariant = () => {
+                const t = document.querySelector("#tailleContainer .variant-btn.selected")?.dataset.value;
+                const c = document.querySelector("#couleurContainer .variant-btn.selected")?.dataset.value;
+                if(t && c) {
+                    const found = prod.variants.find(v => v.attributes.taille === t && v.attributes.couleur === c);
+                    if(found) {
+                        selectedVariantCache[selectedProductId] = found.id;
+                        renderProductDetail();
                     } else {
-                        // combinaison inexistante
-                        selectedVariantCache[productId] = null;
-                        renderProductDetail(productId);
+                        selectedVariantCache[selectedProductId] = null;
+                        renderProductDetail();
                     }
                 }
+            };
+            tailleBtns.forEach(btn => btn.addEventListener("click", () => {
+                tailleBtns.forEach(b => b.classList.remove("selected"));
+                btn.classList.add("selected");
+                updateVariant();
+            }));
+            couleurBtns.forEach(btn => btn.addEventListener("click", () => {
+                couleurBtns.forEach(b => b.classList.remove("selected"));
+                btn.classList.add("selected");
+                updateVariant();
+            }));
+        }
+        document.getElementById("addToCartBtn")?.addEventListener("click", () => {
+            if(isVariant) {
+                const vid = selectedVariantCache[selectedProductId];
+                if(!vid) { showToast("Choisissez une variante disponible"); return; }
+                addToCart(selectedProductId, vid, 1);
+            } else {
+                addToCart(selectedProductId, null, 1);
             }
-
-            tailleBtns.forEach(btn => {
-                btn.addEventListener("click", () => {
-                    tailleBtns.forEach(b => b.classList.remove("selected"));
-                    btn.classList.add("selected");
-                    updateSelectedVariant();
-                });
-            });
-            couleurBtns.forEach(btn => {
-                btn.addEventListener("click", () => {
-                    couleurBtns.forEach(b => b.classList.remove("selected"));
-                    btn.classList.add("selected");
-                    updateSelectedVariant();
-                });
-            });
-        }
-
-        const addBtn = document.getElementById("addToCartBtn");
-        if(addBtn && canAdd) {
-            addBtn.addEventListener("click", () => {
-                if(isVariantProduct) {
-                    const variantId = selectedVariantCache[productId];
-                    if(!variantId) {
-                        showToast("Veuillez sélectionner une variante disponible");
-                        return;
-                    }
-                    addToCart(productId, variantId, 1);
-                } else {
-                    addToCart(productId, null, 1);
-                }
-            });
-        }
+        });
     }
 
-    // Panier
+    function addToCart(productId, variantId, qty) {
+        const prod = getProductById(productId);
+        if(!prod) return;
+        let available = getStock(productId, variantId);
+        if(available < qty) { showToast(`Stock insuffisant (${available})`); return; }
+        let price = 0;
+        let attributes = {};
+        if(prod.type === "simple") {
+            price = prod.price;
+        } else {
+            const v = getVariant(prod, variantId);
+            if(!v) return;
+            price = v.price;
+            attributes = v.attributes;
+        }
+        const existing = cart.find(i => i.productId === productId && i.variantId === variantId);
+        if(existing) {
+            const newQ = existing.quantity + qty;
+            if(newQ > available) { showToast(`Maximum ${available}`); return; }
+            existing.quantity = newQ;
+        } else {
+            cart.push({ productId, variantId, name: prod.name, price, quantity: qty, attributes, icon: prod.icon });
+        }
+        saveCart();
+        showToast("Ajouté au panier");
+        renderCart(); // si on est dans panier on rafraîchit, sinon on reste
+        if(currentMode === "shop" && document.getElementById("mainContent").innerHTML.includes("Panier")) renderCart();
+    }
+
     function renderCart() {
         if(cart.length === 0) {
-            document.getElementById("app").innerHTML = `
-                <div style="text-align:center; padding:2rem;">
-                    <h2>Panier vide</h2>
-                    <button class="outline" onclick="navigateTo('catalogue')">Continuer mes achats</button>
-                </div>
-            `;
+            document.getElementById("mainContent").innerHTML = `<div style="text-align:center;"><h2>Panier vide</h2><button class="btn-outline" onclick="renderCatalogue()">Continuer mes achats</button></div>`;
             return;
         }
-
         let subtotal = 0;
         const itemsHtml = cart.map((item, idx) => {
             const totalItem = item.price * item.quantity;
             subtotal += totalItem;
-            let variantStr = "";
-            if(item.attributes && item.attributes.taille) variantStr = ` ${item.attributes.taille}/${item.attributes.couleur}`;
+            let variantStr = item.attributes?.taille ? ` (${item.attributes.taille}/${item.attributes.couleur})` : "";
             return `
                 <div class="cart-item">
-                    <div class="cart-item-info">
-                        <strong>${item.name}${variantStr}</strong><br>
-                        ${item.price.toFixed(2)} €
-                    </div>
+                    <div><strong>${item.name}${variantStr}</strong><br>${item.price.toFixed(2)} €</div>
                     <div class="cart-item-qty">
-                        <button class="qty-btn" data-index="${idx}" data-delta="-1">-</button>
+                        <button onclick="updateCartQty(${idx}, -1)">-</button>
                         <span>${item.quantity}</span>
-                        <button class="qty-btn" data-index="${idx}" data-delta="1">+</button>
-                        <button class="qty-btn" data-index="${idx}" data-delta="-999" style="background:#ef4444;">🗑️</button>
+                        <button onclick="updateCartQty(${idx}, 1)">+</button>
+                        <button onclick="updateCartQty(${idx}, -999)">🗑️</button>
                     </div>
                     <div>${totalItem.toFixed(2)} €</div>
                 </div>
             `;
         }).join('');
-
-        const total = subtotal; // livraison gratuite
+        const total = subtotal;
         const html = `
             <div class="cart-page">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2>Mon panier</h2>
-                    <button class="outline" onclick="navigateTo('catalogue')">Continuer mes achats</button>
-                </div>
-                <hr>
-                ${itemsHtml}
-                <div class="summary">
-                    <p>Sous-total : ${subtotal.toFixed(2)} €</p>
-                    <p>Livraison : Gratuite</p>
-                    <h3>Total : ${total.toFixed(2)} €</h3>
-                    <button class="primary" id="checkoutBtn" style="margin-top:1rem;">Procéder au paiement</button>
-                    <p style="font-size:0.7rem; margin-top:0.5rem;">Le total sera re-calculé et validé par le backend (Edge Function Supabase)</p>
-                </div>
+                <div class="flex-between"><h2>Mon panier</h2><button class="btn-outline" onclick="renderCatalogue()">Continuer mes achats</button></div>
+                <hr>${itemsHtml}<hr>
+                <div class="flex-between"><span>Sous-total</span><span>${subtotal.toFixed(2)} €</span></div>
+                <div class="flex-between"><span>Livraison</span><span>Gratuite</span></div>
+                <div class="flex-between"><strong>Total</strong><strong>${total.toFixed(2)} €</strong></div>
+                <button class="btn" id="checkoutBtn" style="margin-top:1rem;">Procéder au paiement</button>
+                <p style="font-size:0.7rem;">Total recalculé par backend (simulation)</p>
             </div>
         `;
-        document.getElementById("app").innerHTML = html;
-
-        // Gestion des quantités
-        document.querySelectorAll(".qty-btn").forEach(btn => {
-            btn.addEventListener("click", (e) => {
-                const idx = parseInt(btn.dataset.index);
-                const delta = parseInt(btn.dataset.delta);
-                const item = cart[idx];
-                if(delta === -999) {
-                    updateCartItem(idx, 0);
-                } else {
-                    const newQty = item.quantity + delta;
-                    if(newQty >= 1) updateCartItem(idx, newQty);
-                }
-            });
-        });
-
+        document.getElementById("mainContent").innerHTML = html;
         document.getElementById("checkoutBtn")?.addEventListener("click", simulateCheckout);
     }
 
-    // Simulation du processus de paiement (Stripe, Edge Function, EmailJS)
-    async function simulateCheckout() {
-        if(cart.length === 0) return showToast("Panier vide");
-
-        // 1. Vérification des stocks auprès du "backend" (simulation)
-        let stockOk = true;
-        for(const item of cart) {
-            const currentStock = getStock(item.productId, item.variantId);
-            if(item.quantity > currentStock) {
-                showToast(`Stock dépassé pour ${item.name} : disponible ${currentStock}`);
-                stockOk = false;
-                break;
-            }
+    window.updateCartQty = function(idx, delta) {
+        if(delta === -999) {
+            cart.splice(idx,1);
+            saveCart();
+            renderCart();
+            return;
         }
-        if(!stockOk) return;
+        const item = cart[idx];
+        const newQty = item.quantity + delta;
+        const stock = getStock(item.productId, item.variantId);
+        if(newQty <= 0) {
+            cart.splice(idx,1);
+        } else if(newQty > stock) {
+            showToast(`Stock maximum ${stock}`);
+            return;
+        } else {
+            item.quantity = newQty;
+        }
+        saveCart();
+        renderCart();
+    };
 
-        // 2. Simulation d'un appel à Stripe (modal paiement factice)
-        const modalHtml = `
-            <div class="modal" id="paymentModal">
-                <div class="modal-content">
-                    <h3>🔐 Paiement sécurisé (simulation)</h3>
-                    <p>Montant total : ${cart.reduce((s,i)=>s+i.price*i.quantity,0).toFixed(2)} €</p>
-                    <p style="font-size:0.8rem;">Cette démo simule Stripe. Cliquez sur "Payer" pour confirmer.</p>
-                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                        <button class="outline" id="cancelPayment">Annuler</button>
-                        <button class="primary" id="confirmPayment">Payer</button>
-                    </div>
-                </div>
+    async function simulateCheckout() {
+        if(cart.length === 0) return;
+        // vérification stock
+        for(const item of cart) {
+            const stock = getStock(item.productId, item.variantId);
+            if(item.quantity > stock) { showToast(`Stock dépassé pour ${item.name}`); return; }
+        }
+        // modal paiement
+        const modal = document.createElement("div");
+        modal.className = "modal";
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>Paiement sécurisé (simulation Stripe)</h3>
+                <p>Total : ${cart.reduce((s,i)=>s+i.price*i.quantity,0).toFixed(2)} €</p>
+                <div class="flex-between"><button class="btn-outline" id="cancelPay">Annuler</button><button class="btn" id="confirmPay">Payer</button></div>
             </div>
         `;
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-        const modal = document.getElementById("paymentModal");
-        document.getElementById("cancelPayment")?.addEventListener("click", () => modal.remove());
-        document.getElementById("confirmPayment")?.addEventListener("click", async () => {
+        document.body.appendChild(modal);
+        document.getElementById("cancelPay").onclick = () => modal.remove();
+        document.getElementById("confirmPay").onclick = () => {
             modal.remove();
-
-            // 3. Simulation webhook / mise à jour des stocks (décrémentation)
+            // Mise à jour des stocks
             for(const item of cart) {
-                const product = products.find(p => p.id === item.productId);
-                if(product.type === "simple") {
-                    product.stock -= item.quantity;
+                const prod = getProductById(item.productId);
+                if(prod.type === "simple") {
+                    prod.stock -= item.quantity;
                 } else {
-                    const variant = product.variants.find(v => v.id === item.variantId);
+                    const variant = getVariant(prod, item.variantId);
                     if(variant) variant.stock -= item.quantity;
                 }
             }
-            // Génération commande
+            saveProducts();
+            // Création commande
             const orderId = "ORD-" + Math.random().toString(36).substring(2,8).toUpperCase();
-            const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`; // simule email saisi
-            const totalPaid = cart.reduce((s,i)=>s+i.price*i.quantity,0).toFixed(2);
-            const itemsList = cart.map(i => `${i.name} ${i.attributes?.taille ? `(${i.attributes.taille}/${i.attributes.couleur})` : ""} x${i.quantity}`).join(", ");
-
-            // 4. Simuler envoi email via EmailJS (affichage console + toast)
-            console.log(`[EmailJS] Envoi à ${clientEmail} : Commande ${orderId} confirmée. Total ${totalPaid}€`);
-            showToast(`📧 Email de confirmation envoyé à ${clientEmail} (simulation EmailJS)`);
-
-            // Vider le panier
+            const now = new Date();
+            const date = now.toISOString().slice(0,10);
+            const time = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+            const itemsOrder = cart.map(i => ({ productId: i.productId, variantId: i.variantId, qty: i.quantity, price: i.price }));
+            const totalPaid = cart.reduce((s,i)=>s+i.price*i.quantity,0);
+            const newOrder = {
+                id: orderId, client: `client${Math.floor(Math.random()*1000)}@email.com`, date, time,
+                items: itemsOrder, total: parseFloat(totalPaid.toFixed(2)), status: "Payée",
+                adminFollowup: "À traiter", promoCode: null, discount: 0
+            };
+            orders.unshift(newOrder);
+            saveOrders();
             cart = [];
             saveCart();
+            showToast(`Commande ${orderId} confirmée. Email envoyé (simulation)`);
+            renderCatalogue();
+        };
+    }
 
-            // Afficher page de confirmation
-            const confirmationHtml = `
-                <div style="background: white; border-radius: 32px; padding: 2rem; text-align: center;">
-                    <h2>✅ Commande confirmée !</h2>
-                    <p>Email de confirmation envoyé via EmailJS</p>
-                    <p><strong>N° commande</strong><br>${orderId}</p>
-                    <p><strong>Statut</strong><br>Payée</p>
-                    <p><strong>Articles</strong><br>${itemsList}</p>
-                    <p><strong>Total payé</strong><br>${totalPaid} €</p>
-                    <p style="font-size:0.8rem;">Email envoyé via EmailJS à ${clientEmail}</p>
-                    <button class="primary" onclick="navigateTo('catalogue')">Nouvelle commande</button>
-                </div>
-            `;
-            document.getElementById("app").innerHTML = confirmationHtml;
+    // ------------------ ADMIN ------------------
+    // Reprend les fonctions de l'admin précédent (version émojis, avec gestion produits, stock, commandes, promos)
+    // Je les adapte pour qu'elles utilisent les mêmes produits/orders/promos et se reflètent dans localStorage.
+    // Pour éviter la duplication, je vais intégrer les fonctions admin nécessaires.
+    // Comme l'espace est limité, je donne une version compacte mais complète des fonctionnalités admin essentielles.
+    // J'inclus : Dashboard (6 cartes), liste produits (modale ajout/modif avec émojis), stock (ajustement +/-), commandes (détail, promo, suppression), promos (CRUD).
+
+    function renderAdmin() {
+        renderAdminDashboard();
+    }
+
+    function getStockStats() {
+        let totalStock = 0, ruptures = 0, low = 0;
+        products.forEach(p => {
+            if(p.type === "simple") {
+                totalStock += p.stock;
+                if(p.stock === 0) ruptures++;
+                else if(p.stock <= 2) low++;
+            } else if(p.variants) {
+                p.variants.forEach(v => {
+                    totalStock += v.stock;
+                    if(v.stock === 0) ruptures++;
+                    else if(v.stock <= 2) low++;
+                });
+            }
+        });
+        return { totalStock, ruptures, lowStockItems: low };
+    }
+
+    function renderAdminDashboard() {
+        const stats = { totalProducts: products.length, activeProducts: products.filter(p=>p.active!==false).length, ordersCount: orders.length, revenue: orders.filter(o=>o.status==="Payée").reduce((s,o)=>s+o.total,0) };
+        const stockStats = getStockStats();
+        const paidOrders = orders.filter(o=>o.status==="Payée").length;
+        const html = `
+            <h1>Dashboard Admin</h1>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-title">📦 PRODUITS</div><div class="stat-value">${stats.totalProducts}</div><div>${stats.activeProducts} actifs</div></div>
+                <div class="stat-card"><div class="stat-title">🛒 COMMANDES</div><div class="stat-value">${stats.ordersCount}</div><div>${paidOrders} payées</div></div>
+                <div class="stat-card"><div class="stat-title">💰 CA</div><div class="stat-value">${stats.revenue.toFixed(2)} €</div></div>
+                <div class="stat-card"><div class="stat-title">📦 STOCK TOTAL</div><div class="stat-value">${stockStats.totalStock}</div></div>
+                <div class="stat-card"><div class="stat-title">⚠️ STOCK BAS</div><div class="stat-value">${stockStats.lowStockItems}</div></div>
+                <div class="stat-card"><div class="stat-title">❌ RUPTURES</div><div class="stat-value">${stockStats.ruptures}</div></div>
+            </div>
+            <div class="flex-between"><h2>Commandes récentes</h2><button class="btn" onclick="renderAdminOrders()">Voir toutes</button></div>
+            <div class="table-container"><table><thead><tr><th>N°</th><th>Client</th><th>Total</th><th>Statut</th></tr></thead><tbody>
+                ${orders.slice(0,4).map(o => `<tr><td>${o.id}</td><td>${o.client}</td><td>${o.total}€</td><td>${o.status}</td></tr>`).join('')}
+            </tbody></table></div>
+            <div class="flex-between" style="margin-top:1rem;"><button class="btn" onclick="renderAdminProducts()">Gérer les produits</button><button class="btn" onclick="renderAdminStock()">Gérer le stock</button><button class="btn" onclick="renderAdminPromos()">Codes promo</button></div>
+        `;
+        document.getElementById("mainContent").innerHTML = html;
+    }
+
+    // Raccourcis pour navigation admin
+    window.renderAdminProducts = () => { renderAdminProductsList(); };
+    window.renderAdminStock = () => { renderAdminStockList(); };
+    window.renderAdminOrders = () => { renderAdminOrdersList(); };
+    window.renderAdminPromos = () => { renderAdminPromosList(); };
+    window.goAdminDashboard = () => { renderAdminDashboard(); };
+
+    function renderAdminProductsList() {
+        const html = `
+            <div class="flex-between"><h2>Produits</h2><button class="btn" id="addProductAdmin">+ Ajouter produit</button><button class="btn-outline" onclick="goAdminDashboard()">← Dashboard</button></div>
+            <div class="table-container"><table><thead><tr><th>Icône</th><th>Nom</th><th>Type</th><th>Prix</th><th>Stock</th><th>Actif</th><th>Actions</th></tr></thead><tbody>
+                ${products.map(p => {
+                    let priceDisplay = p.type === "simple" ? `${p.price}€` : `à partir de ${p.basePrice}€`;
+                    let stockDisplay = p.type === "simple" ? p.stock : (p.variants?.reduce((s,v)=>s+v.stock,0)||0);
+                    let iconHtml = p.image ? `<img class="product-img-list" src="${p.image}">` : `<div class="product-img-list">${p.icon||"📦"}</div>`;
+                    return `<tr><td>${iconHtml}</td><td>${p.name}</td><td>${p.type==="simple"?"Simple":"Variantes"}</td><td>${priceDisplay}</td><td>${stockDisplay}</td><td>${p.active!==false?"✅":"❌"}</td>
+                    <td><button class="btn-small btn-outline" onclick="editProductAdmin('${p.id}')">Modifier</button> <button class="btn-small btn-danger" onclick="deleteProductAdmin('${p.id}')">Supprimer</button></td></tr>`;
+                }).join('')}
+            </tbody></table></div>
+        `;
+        document.getElementById("mainContent").innerHTML = html;
+        document.getElementById("addProductAdmin")?.addEventListener("click", () => showProductModalAdmin(null));
+    }
+
+    window.deleteProductAdmin = (id) => {
+        if(confirm("Supprimer ?")) {
+            products = products.filter(p => p.id !== id);
+            saveProducts();
+            renderAdminProductsList();
+        }
+    };
+    window.editProductAdmin = (id) => {
+        const prod = getProductById(id);
+        if(prod) showProductModalAdmin(prod);
+    };
+
+    // Modale produit admin avec émojis (version simplifiée mais complète)
+    function showProductModalAdmin(product = null) {
+        const isEdit = !!product;
+        let variantsArray = product?.variants ? [...product.variants] : [];
+        let selectedEmoji = product?.icon || "📦";
+        const modalDiv = document.createElement("div");
+        modalDiv.className = "modal";
+        modalDiv.innerHTML = `
+            <div class="modal-content">
+                <h2>${isEdit ? "Modifier" : "Ajouter"} produit</h2>
+                <div class="form-group"><label>Nom</label><input id="prodName" value="${product?.name || ''}"></div>
+                <div class="form-group"><label>Description</label><textarea id="prodDesc">${product?.description || ''}</textarea></div>
+                <div class="form-group"><label>Type</label><select id="prodType"><option value="simple" ${product?.type==='simple'?'selected':''}>Simple</option><option value="variants" ${product?.type==='variants'?'selected':''}>Variantes</option></select></div>
+                <div id="simpleFields" style="${product?.type==='variants'?'display:none':'block'}"><div class="form-group"><label>Prix (€)</label><input id="simplePrice" type="number" step="0.01" value="${product?.price||''}"></div><div class="form-group"><label>Stock</label><input id="simpleStock" type="number" value="${product?.stock||0}"></div></div>
+                <div id="variantsFields" style="${product?.type==='variants'?'block':'none'}"><div class="form-group"><label>Prix de base (€)</label><input id="basePrice" type="number" step="0.01" value="${product?.basePrice||''}"></div><div class="form-group"><label>Variantes</label><div id="variantsContainer"></div><button type="button" class="btn-small" id="addVariantBtn">+ Ajouter variante</button></div></div>
+                <div class="form-group"><label>Icône / Image</label><div><label><input type="radio" name="iconType" value="emoji" ${!product?.image?'checked':''}> Émoji</label> <label><input type="radio" name="iconType" value="upload" ${product?.image?'checked':''}> Image</label> <label><input type="radio" name="iconType" value="none"> Pas d'icône</label></div>
+                <div id="emojiSelector"><div class="emoji-grid" id="emojiGrid"></div><input type="text" id="customEmoji" placeholder="Ou saisis un émoji" maxlength="2"><div>Aperçu: <span id="emojiPreview">${selectedEmoji}</span></div></div>
+                <div id="uploadArea" style="display:none"><input type="file" id="imageUpload" accept="image/png,image/jpeg"><img id="previewImg" src="${product?.image||''}" style="max-width:100px;display:${product?.image?'block':'none'}"></div></div>
+                <div class="form-group"><label><input type="checkbox" id="activeCheck" ${product?.active!==false?'checked':''}> Actif</label></div>
+                <div class="flex-between"><button class="btn-outline" id="cancelModal">Annuler</button><button class="btn" id="saveModal">Enregistrer</button></div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        const emojiList = ["👕","👖","👟","🧥","🧢","🧦","👗","👚","🎒","👔","🧣","👑"];
+        const grid = modalDiv.querySelector("#emojiGrid");
+        emojiList.forEach(e => {
+            const div = document.createElement("div");
+            div.className = "emoji-option";
+            div.textContent = e;
+            if(e === selectedEmoji) div.classList.add("selected");
+            div.onclick = () => {
+                modalDiv.querySelectorAll(".emoji-option").forEach(el => el.classList.remove("selected"));
+                div.classList.add("selected");
+                modalDiv.querySelector("#customEmoji").value = "";
+                modalDiv.querySelector("#emojiPreview").textContent = e;
+                selectedEmoji = e;
+            };
+            grid.appendChild(div);
+        });
+        const customInput = modalDiv.querySelector("#customEmoji");
+        customInput.addEventListener("input", (e) => {
+            const val = e.target.value.trim();
+            if(val) {
+                modalDiv.querySelectorAll(".emoji-option").forEach(el => el.classList.remove("selected"));
+                modalDiv.querySelector("#emojiPreview").textContent = val;
+                selectedEmoji = val;
+            }
+        });
+        const radioEmoji = modalDiv.querySelector('input[value="emoji"]');
+        const radioUpload = modalDiv.querySelector('input[value="upload"]');
+        const radioNone = modalDiv.querySelector('input[value="none"]');
+        const emojiDiv = modalDiv.querySelector("#emojiSelector");
+        const uploadDiv = modalDiv.querySelector("#uploadArea");
+        const toggleIcon = () => {
+            if(radioEmoji.checked) { emojiDiv.style.display = "block"; uploadDiv.style.display = "none"; }
+            else if(radioUpload.checked) { emojiDiv.style.display = "none"; uploadDiv.style.display = "block"; }
+            else { emojiDiv.style.display = "none"; uploadDiv.style.display = "none"; }
+        };
+        radioEmoji.addEventListener("change", toggleIcon);
+        radioUpload.addEventListener("change", toggleIcon);
+        radioNone.addEventListener("change", toggleIcon);
+        toggleIcon();
+        const fileInput = modalDiv.querySelector("#imageUpload");
+        const previewImg = modalDiv.querySelector("#previewImg");
+        fileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if(file && (file.type === "image/png" || file.type === "image/jpeg")) {
+                const reader = new FileReader();
+                reader.onload = ev => { previewImg.src = ev.target.result; previewImg.style.display = "block"; };
+                reader.readAsDataURL(file);
+            }
+        });
+        // Gestion variantes
+        const variantsContainer = modalDiv.querySelector("#variantsContainer");
+        function renderVariants() {
+            variantsContainer.innerHTML = "";
+            variantsArray.forEach((v, idx) => {
+                const div = document.createElement("div");
+                div.className = "variant-row";
+                div.innerHTML = `<input type="text" placeholder="Taille/Couleur" value="${v.attributes||''}" data-idx="${idx}"><input type="number" placeholder="Stock" value="${v.stock||0}" style="width:80px"><input type="number" placeholder="Prix" step="0.01" value="${v.price||0}" style="width:100px"><button class="btn-small btn-danger" data-idx="${idx}">✖</button>`;
+                variantsContainer.appendChild(div);
+            });
+            variantsContainer.querySelectorAll(".btn-danger").forEach(btn => {
+                btn.onclick = (e) => {
+                    const idx = parseInt(btn.dataset.idx);
+                    variantsArray.splice(idx,1);
+                    renderVariants();
+                };
+            });
+        }
+        if(product?.type === "variants") renderVariants();
+        modalDiv.querySelector("#addVariantBtn")?.addEventListener("click", () => {
+            variantsArray.push({ attributes: "", stock: 0, price: 0 });
+            renderVariants();
+        });
+        const typeSelect = modalDiv.querySelector("#prodType");
+        const simpleDiv = modalDiv.querySelector("#simpleFields");
+        const variantsDiv = modalDiv.querySelector("#variantsFields");
+        typeSelect.addEventListener("change", () => {
+            const isVar = typeSelect.value === "variants";
+            simpleDiv.style.display = isVar ? "none" : "block";
+            variantsDiv.style.display = isVar ? "block" : "none";
+        });
+        modalDiv.querySelector("#saveModal").onclick = () => {
+            const name = modalDiv.querySelector("#prodName").value.trim();
+            if(!name) return alert("Nom requis");
+            const description = modalDiv.querySelector("#prodDesc").value;
+            const active = modalDiv.querySelector("#activeCheck").checked;
+            let icon = null, image = null;
+            if(radioEmoji.checked) icon = selectedEmoji;
+            else if(radioUpload.checked && fileInput.files[0]) image = previewImg.src;
+            else if(radioUpload.checked && product?.image) image = product.image;
+            if(typeSelect.value === "simple") {
+                const price = parseFloat(modalDiv.querySelector("#simplePrice").value);
+                const stock = parseInt(modalDiv.querySelector("#simpleStock").value);
+                if(isNaN(price)) return;
+                const newProd = { id: isEdit ? product.id : Date.now().toString(), name, description, type: "simple", price, stock, icon, image, active };
+                if(isEdit) {
+                    const idx = products.findIndex(p => p.id === product.id);
+                    if(idx !== -1) products[idx] = newProd;
+                } else products.push(newProd);
+            } else {
+                const basePrice = parseFloat(modalDiv.querySelector("#basePrice").value);
+                if(isNaN(basePrice)) return;
+                const finalVariants = [];
+                const rows = variantsContainer.querySelectorAll(".variant-row");
+                rows.forEach((row, idx) => {
+                    const attrsInput = row.querySelector(`input[data-idx="${idx}"]`);
+                    const stockInput = row.querySelectorAll("input[type='number']")[0];
+                    const priceInput = row.querySelectorAll("input[type='number']")[1];
+                    const attributes = attrsInput ? attrsInput.value.trim() : "";
+                    if(!attributes) return;
+                    const stock = parseInt(stockInput?.value || 0);
+                    const priceVar = parseFloat(priceInput?.value || 0) || basePrice;
+                    finalVariants.push({ id: Date.now()+idx+Math.random(), attributes: { taille: attributes.split("/")[0]?.trim() || attributes, couleur: attributes.split("/")[1]?.trim() || "" }, stock, price: priceVar });
+                });
+                if(finalVariants.length === 0) return alert("Au moins une variante");
+                const newProd = { id: isEdit ? product.id : Date.now().toString(), name, description, type: "variants", basePrice, variants: finalVariants, icon, image, active };
+                if(isEdit) {
+                    const idx = products.findIndex(p => p.id === product.id);
+                    if(idx !== -1) products[idx] = newProd;
+                } else products.push(newProd);
+            }
+            saveProducts();
+            modalDiv.remove();
+            renderAdminProductsList();
+        };
+        modalDiv.querySelector("#cancelModal").onclick = () => modalDiv.remove();
+    }
+
+    function renderAdminStockList() {
+        let rows = [];
+        products.forEach(p => {
+            if(p.type === "simple") rows.push({ name: p.name, variant: "Simple", stock: p.stock, productId: p.id, variantId: null, isVariant: false, icon: p.icon, image: p.image });
+            else p.variants.forEach(v => rows.push({ name: p.name, variant: `${v.attributes.taille} / ${v.attributes.couleur}`, stock: v.stock, productId: p.id, variantId: v.id, isVariant: true, icon: p.icon, image: p.image }));
+        });
+        const html = `<div class="flex-between"><h2>Gestion stock</h2><button class="btn-outline" onclick="goAdminDashboard()">← Dashboard</button></div>
+        <div class="table-container"><table><thead><tr><th>Icône</th><th>Produit</th><th>Variante</th><th>Stock</th><th>Ajuster</th></tr></thead><tbody>
+            ${rows.map(r => `<tr><td>${r.image?`<img class="product-img-list" src="${r.image}">`:`<div class="product-img-list">${r.icon||"📦"}</div>`}</td><td>${r.name}</td><td>${r.variant}</td><td>${r.stock===0?"Rupture":r.stock<=2?`Bas (${r.stock})`:r.stock}</td>
+            <td><button class="btn-small stock-down" data-pid="${r.productId}" data-vid="${r.variantId||''}" data-isvar="${r.isVariant}">-</button> <span>${r.stock}</span> <button class="btn-small stock-up" data-pid="${r.productId}" data-vid="${r.variantId||''}" data-isvar="${r.isVariant}">+</button></td></tr>`).join('')}
+        </tbody></table></div>`;
+        document.getElementById("mainContent").innerHTML = html;
+        document.querySelectorAll(".stock-down, .stock-up").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const delta = btn.classList.contains("stock-up") ? 1 : -1;
+                const pid = btn.dataset.pid;
+                const vid = btn.dataset.vid;
+                const isVar = btn.dataset.isvar === "true";
+                const prod = getProductById(pid);
+                if(!prod) return;
+                if(!isVar && prod.type === "simple") prod.stock = Math.max(0, prod.stock + delta);
+                else if(isVar && prod.variants) {
+                    const variant = prod.variants.find(v => v.id === vid);
+                    if(variant) variant.stock = Math.max(0, variant.stock + delta);
+                }
+                saveProducts();
+                renderAdminStockList();
+            });
         });
     }
 
-    // Initialisation
-    loadCart();
-    renderCurrentPage();
-    window.navigateTo = navigateTo;
-    window.addToCart = addToCart;
-    window.updateCartItem = updateCartItem;
-    window.simulateCheckout = simulateCheckout;
+    function renderAdminOrdersList() {
+        const html = `<div class="flex-between"><h2>Commandes (${orders.length})</h2><button class="btn-outline" onclick="goAdminDashboard()">← Dashboard</button></div>
+        <div class="table-container"><table><thead><tr><th>N°</th><th>Client</th><th>Total</th><th>Statut</th><th>Suivi admin</th><th>Détail</th><th>Actions</th></tr></thead><tbody>
+            ${orders.map(o => `<tr><td>${o.id}</td><td>${o.client}</td><td>${o.total}€</td><td>${o.status}</td><td><select class="admin-followup" data-id="${o.id}">${['À traiter','En cours','Expédié','Terminé'].map(s=>`<option ${o.adminFollowup===s?'selected':''}>${s}</option>`).join('')}</select></td>
+            <td><button class="btn-small" onclick="viewOrderDetail('${o.id}')">Voir</button></td><td><button class="btn-small btn-danger" onclick="deleteOrderAdmin('${o.id}')">Supprimer</button></td></tr>`).join('')}
+        </tbody></table></div>`;
+        document.getElementById("mainContent").innerHTML = html;
+        document.querySelectorAll(".admin-followup").forEach(sel => {
+            sel.addEventListener("change", (e) => {
+                const order = orders.find(o => o.id === e.target.dataset.id);
+                if(order) { order.adminFollowup = e.target.value; saveOrders(); }
+            });
+        });
+    }
+    window.viewOrderDetail = (id) => {
+        const order = orders.find(o => o.id === id);
+        if(!order) return;
+        const itemsList = order.items.map(i => `${i.productId} ${i.variantId ? `(${i.variantId})` : ""} x${i.qty}`).join(", ");
+        alert(`Détail commande ${id}\nClient: ${order.client}\nDate: ${order.date} ${order.time}\nArticles: ${itemsList}\nTotal: ${order.total}€\nPromo: ${order.promoCode||"aucun"}`);
+    };
+    window.deleteOrderAdmin = (id) => {
+        if(confirm("Supprimer cette commande ?")) {
+            orders = orders.filter(o => o.id !== id);
+            saveOrders();
+            renderAdminOrdersList();
+        }
+    };
+    function renderAdminPromosList() {
+        const html = `<div class="flex-between"><h2>Codes promo</h2><button class="btn" id="addPromoAdmin">+ Créer</button><button class="btn-outline" onclick="goAdminDashboard()">← Dashboard</button></div>
+        <div class="table-container"><table><thead><tr><th>Code</th><th>Type</th><th>Valeur</th><th>Actif</th><th>Actions</th></tr></thead><tbody>
+            ${promos.map(p => `<tr><td>${p.code}</td><td>${p.type === "fixed" ? "€" : "%"}</td><td>${p.value}${p.type==="fixed"?"€":"%"}</td><td>${p.active?"✅":"❌"}</td>
+            <td><button class="btn-small" onclick="togglePromoAdmin('${p.code}')">Toggle actif</button> <button class="btn-small btn-danger" onclick="deletePromoAdmin('${p.code}')">Supprimer</button></td></tr>`).join('')}
+        </tbody></table></div>`;
+        document.getElementById("mainContent").innerHTML = html;
+        document.getElementById("addPromoAdmin").onclick = () => {
+            const code = prompt("Code promo");
+            if(!code) return;
+            const type = confirm("Type: OK pour % / Annuler pour €") ? "percent" : "fixed";
+            const val = parseFloat(prompt("Valeur"));
+            if(isNaN(val)) return;
+            promos.push({ code: code.toUpperCase(), type, value: val, active: true });
+            savePromos();
+            renderAdminPromosList();
+        };
+    }
+    window.togglePromoAdmin = (code) => {
+        const p = promos.find(p => p.code === code);
+        if(p) { p.active = !p.active; savePromos(); renderAdminPromosList(); }
+    };
+    window.deletePromoAdmin = (code) => {
+        promos = promos.filter(p => p.code !== code);
+        savePromos();
+        renderAdminPromosList();
+    };
+
+    // ------------------ NAVIGATION GLOBALE ------------------
+    function setMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+        document.querySelector(`.nav-btn[data-mode="${mode}"]`).classList.add("active");
+        const cartIcon = document.getElementById("cartIcon");
+        if(mode === "shop") {
+            cartIcon.style.display = "inline-block";
+            renderShop();
+        } else {
+            cartIcon.style.display = "none";
+            renderAdmin();
+        }
+    }
+
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+        btn.addEventListener("click", () => setMode(btn.dataset.mode));
+    });
+    document.getElementById("cartIcon")?.addEventListener("click", () => { if(currentMode === "shop") renderCart(); });
+
+    loadData();
+    setMode("shop");
+    // Exposer certaines fonctions globales pour les appels onclick
+    window.renderCatalogue = renderCatalogue;
+    window.renderCart = renderCart;
+    window.goAdminDashboard = goAdminDashboard;
+    window.renderAdminProductsList = renderAdminProductsList;
+    window.renderAdminStockList = renderAdminStockList;
+    window.renderAdminOrdersList = renderAdminOrdersList;
+    window.renderAdminPromosList = renderAdminPromosList;
+    window.showProductModalAdmin = showProductModalAdmin;
 </script>
 </body>
 </html>
