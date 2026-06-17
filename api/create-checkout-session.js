@@ -31,6 +31,21 @@ module.exports = async (req, res) => {
       ],
       success_url: `${baseUrl}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/?cancel=true`,
+
+      // === COLLECTE AUTOMATIQUE DES INFORMATIONS CLIENT ===
+      // 1. Email du client (pré-rempli ou demandé par Stripe)
+      customer_email: clientEmail,
+
+      // 2. Adresse de livraison (Stripe affiche les champs)
+      shipping_address_collection: {
+        allowed_countries: ['FR', 'BE', 'CH', 'LU', 'DE', 'IT', 'ES', 'GB']
+      },
+
+      // 3. Téléphone (optionnel)
+      phone_number_collection: {
+        enabled: true
+      },
+
       metadata: {
         order_id: orderId || `ORD-${Date.now().toString(36).toUpperCase()}`,
         client_email: clientEmail,
