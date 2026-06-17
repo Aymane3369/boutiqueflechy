@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>StyleShop - Boutique en ligne</title>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', 'Inter', sans-serif; }
         body { background: #f8fafc; color: #0f172a; }
@@ -38,25 +39,8 @@
             border: 1px solid #e2e8f0;
             box-shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
-        .product-gallery {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        .product-gallery .main-image {
-            width: 100%;
-            max-width: 500px;
-            aspect-ratio: 1 / 1;
-            background: #f8fafc;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-            position: relative;
-        }
+        .product-gallery { display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5rem; }
+        .product-gallery .main-image { width: 100%; max-width: 500px; aspect-ratio: 1 / 1; background: #f8fafc; border-radius: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); position: relative; }
         .product-gallery .main-image img { width: 100%; height: 100%; object-fit: contain; padding: 20px; }
         .product-gallery .main-image span { font-size: 8rem; opacity: 0.3; }
         .product-gallery .thumbnails { display: flex; gap: 0.8rem; margin-top: 1rem; flex-wrap: wrap; justify-content: center; }
@@ -124,7 +108,7 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
 
         // ============================================
-        // 2. FONCTION FETCH (avec gestion des réponses vides)
+        // 2. FONCTION FETCH
         // ============================================
         async function fetchSupabase(endpoint, options = {}) {
             const defaultHeaders = {
@@ -646,18 +630,12 @@
         }
 
         // ============================================
-        // 13. PAIEMENT (avec Stripe)
+        // 13. PAIEMENT STRIPE RÉEL
         // ============================================
-      async function stripeCheckout() {
-    const res = await fetch("https://ton-backend.com/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cart })
-    });
-
-    const data = await res.json();
-    window.location.href = data.url;
-}
+        async function stripeCheckout() {
+            if (!Array.isArray(cart) || cart.length === 0) {
+                showToast('Panier vide');
+                return;
             }
 
             // Vérifier les stocks
@@ -670,116 +648,57 @@
             }
 
             const total = getTotal();
-            
-            // Affichage d'une modale Stripe simulée
-            const modalHtml = `
-                <div class="modal" id="stripeModal">
-                    <div class="modal-content">
-                        <h3>💳 Paiement sécurisé (simulation Stripe)</h3>
-                        <p>Montant total : <strong>${total.toFixed(2)} €</strong></p>
-                        ${appliedPromo ? `<p style="color:#15803d;">💰 Code promo ${appliedPromo.code} : -${appliedPromo.discountAmount}€</p>` : ''}
-                        <div style="background:#f8fafc;padding:1rem;border-radius:12px;margin:1rem 0;">
-                            <p style="font-size:0.8rem;">🔒 Paiement sécurisé - Testez avec :</p>
-                            <p style="font-size:0.7rem;">Carte : 4242 4242 4242 4242 | Date : 12/26 | CVC : 123</p>
-                        </div>
-                        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top:1rem;">
-                            <button class="outline" id="cancelStripe">Annuler</button>
-                            <button class="primary" id="confirmStripe">💰 Payer ${total.toFixed(2)} €</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-            document.getElementById('cancelStripe').onclick = () => {
-                document.getElementById('stripeModal').remove();
-                showToast('Paiement annulé ❌');
-            };
-
-            document.getElementById('confirmStripe').onclick = async () => {
-                document.getElementById('stripeModal').remove();
-                await finalizeOrder(total);
-            };
-        }
-
-        // ============================================
-        // 14. FINALISATION DE LA COMMANDE
-        // ============================================
-        async function finalizeOrder(total) {
             const orderId = 'ORD-' + Math.random().toString(36).substring(2,8).toUpperCase();
-            const now = new Date();
             const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`;
 
-            const order = {
-                id: orderId,
-                client: clientEmail,
-                date: now.toISOString().slice(0,10),
-                time: now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-                items: cart.map(i => ({
-                    productId: i.productId,
-                    variantId: i.variantId,
-                    qty: i.quantity,
-                    price: i.price
-                })),
-                total: total,
-                status: 'Payée',
-                admin_followup: 'À traiter',
-                promo_code: appliedPromo?.code || null,
-                discount: appliedPromo?.discountAmount || 0
-            };
+            // Préparer les données pour la fonction Vercel
+            const itemsData = cart.map(i => ({
+                productId: i.productId,
+                variantId: i.variantId || null,
+                qty: i.quantity,
+                price: i.price,
+                name: i.name
+            }));
 
-            // Sauvegarder la commande
-            await fetchSupabase('orders', { method: 'POST', body: JSON.stringify(order) });
+            try {
+                showToast('⏳ Préparation du paiement...');
 
-            // Mettre à jour les stocks
-            for (const item of cart) {
-                const prod = products.find(p => p.id === item.productId);
-                if (!prod) continue;
-                if (prod.type === 'simple') {
-                    prod.stock = Math.max(0, (prod.stock || 0) - (item.quantity || 0));
-                    await fetchSupabase(`products?id=eq.${prod.id}`, {
-                        method: 'PATCH',
-                        body: JSON.stringify({ stock: prod.stock })
-                    });
-                } else {
-                    const variant = prod.variants?.find(v => v.id === item.variantId);
-                    if (variant) {
-                        variant.stock = Math.max(0, (variant.stock || 0) - (item.quantity || 0));
-                        await fetchSupabase(`products?id=eq.${prod.id}`, {
-                            method: 'PATCH',
-                            body: JSON.stringify({ variants: prod.variants })
-                        });
-                    }
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        items: itemsData,
+                        total: total,
+                        clientEmail: clientEmail,
+                        promoCode: appliedPromo?.code || null,
+                        discount: appliedPromo?.discountAmount || 0,
+                        orderId: orderId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    showToast('❌ Erreur: ' + data.error);
+                    return;
                 }
+
+                if (data.url) {
+                    // Rediriger vers Stripe Checkout
+                    window.location.href = data.url;
+                } else {
+                    showToast('❌ Erreur: URL de paiement non reçue');
+                }
+            } catch (error) {
+                console.error('❌ Erreur Stripe:', error);
+                showToast('❌ Erreur lors du paiement');
             }
-
-            const itemsList = cart.map(i => 
-                `${i.name} ${i.attributes?.taille ? `(${i.attributes.taille}/${i.attributes.couleur})` : ''} x${i.quantity}`
-            ).join(', ');
-
-            // Vider le panier
-            cart = []; 
-            appliedPromo = null; 
-            saveCart();
-
-            // Afficher la confirmation
-            document.getElementById('app').innerHTML = `
-                <div style="background:white;border-radius:32px;padding:2rem;text-align:center;">
-                    <h2>✅ Commande confirmée !</h2>
-                    <p>Email de confirmation envoyé à <strong>${clientEmail}</strong> (simulation)</p>
-                    <p>N° commande : <strong>${orderId}</strong></p>
-                    <p>Total payé : <strong>${total.toFixed(2)} €</strong></p>
-                    <p>Articles : ${itemsList}</p>
-                    <button class="primary" onclick="navigateTo('catalogue')" style="margin-top:1.5rem;">Nouvelle commande</button>
-                </div>
-            `;
-            
-            showToast(`✅ Commande ${orderId} confirmée !`);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // ============================================
-        // 15. RENDU PAGE COURANTE
+        // 14. RENDU PAGE COURANTE
         // ============================================
         function renderCurrentPage() {
             if (currentPage === 'catalogue') renderCatalogue();
@@ -789,7 +708,7 @@
         }
 
         // ============================================
-        // 16. SYNCHRONISATION INTER-ONGLETS
+        // 15. SYNCHRONISATION INTER-ONGLETS
         // ============================================
         window.addEventListener('storage', function(e) {
             if (e.key === 'shop_products' || e.key === 'shop_promos' || e.key === 'shop_cart' || e.key === 'shop_orders') {
@@ -809,7 +728,7 @@
         });
 
         // ============================================
-        // 17. EXPOSER LES FONCTIONS
+        // 16. EXPOSER LES FONCTIONS
         // ============================================
         window.navigateTo = navigateTo;
         window.addToCart = addToCart;
@@ -817,14 +736,14 @@
         window.stripeCheckout = stripeCheckout;
 
         // ============================================
-        // 18. INITIALISATION
+        // 17. INITIALISATION
         // ============================================
         async function init() {
             console.log('🚀 Initialisation...');
             await loadProducts();
             await loadPromos();
             loadCart();
-            
+
             // Vérifier les paramètres Stripe (retour de paiement)
             const params = new URLSearchParams(window.location.search);
             if (params.get('success')) {
