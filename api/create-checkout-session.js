@@ -14,62 +14,33 @@ module.exports = async (req, res) => {
       : 'https://boutiqueflechy.vercel.app';
 
     const session = await stripe.checkout.sessions.create({
-  payment_method_types: ['card'],
-  mode: 'payment',
-  line_items: [
-    {
-      price_data: {
-        currency: 'eur',
-        product_data: {
-          name: 'Commande StyleShop',
-          description: items.map(i => `${i.name} x${i.qty}`).join(', '),
-        },
-        unit_amount: Math.round(total * 100),
-      },
-      quantity: 1,
-    }
-  ],
-  success_url: `${baseUrl}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
-  cancel_url: `${baseUrl}/?cancel=true`,
-
-  // ✅ SUPPRIMEZ OU COMMENTEZ CETTE LIGNE
-  // customer_email: '',
-
-  shipping_address_collection: {
-    allowed_countries: ['FR', 'BE', 'CH', 'LU', 'DE', 'IT', 'ES', 'GB']
-  },
-  phone_number_collection: {
-    enabled: true
-  },
-
-  metadata: {
-    order_id: orderId || `ORD-${Date.now().toString(36).toUpperCase()}`,
-    client_email: clientEmail,
-    promo_code: promoCode || '',
-    discount: String(discount || 0),
-    items: JSON.stringify(items.map(i => ({
-      productId: i.productId,
-      variantId: i.variantId || null,
-      qty: i.qty,
-      price: i.price,
-      name: i.name
-    }))),
-  },
-});
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: 'Commande StyleShop',
+              description: items.map(i => `${i.name} x${i.qty}`).join(', '),
+            },
+            unit_amount: Math.round(total * 100),
+          },
+          quantity: 1,
+        }
       ],
       success_url: `${baseUrl}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/?cancel=true`,
 
       // === COLLECTE AUTOMATIQUE DES INFORMATIONS CLIENT ===
-      // 1. Email du client (pré-rempli ou demandé par Stripe)
+      // Stripe demandera lui-même l'email sur sa page de paiement
 
-
-      // 2. Adresse de livraison (Stripe affiche les champs)
+      // Adresse de livraison (Stripe affiche les champs)
       shipping_address_collection: {
         allowed_countries: ['FR', 'BE', 'CH', 'LU', 'DE', 'IT', 'ES', 'GB']
       },
 
-      // 3. Téléphone (optionnel)
+      // Téléphone (optionnel)
       phone_number_collection: {
         enabled: true
       },
