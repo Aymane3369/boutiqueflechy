@@ -649,8 +649,7 @@
 
             const total = getTotal();
             const orderId = 'ORD-' + Math.random().toString(36).substring(2,8).toUpperCase();
-            const clientEmail = ''; // Stripe le demandera automatiquement
-
+            const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`;
             // Préparer les données pour la fonction Vercel
             const itemsData = cart.map(i => ({
                 productId: i.productId,
