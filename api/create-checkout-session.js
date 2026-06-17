@@ -1,31 +1,18 @@
 const Stripe = require('stripe');
-
-// Initialiser Stripe avec la clé secrète
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 module.exports = async (req, res) => {
-  // Autoriser uniquement les requêtes POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // Récupérer les données du panier envoyées par le frontend
     const { items, total, clientEmail, promoCode, discount, orderId } = req.body;
 
-    // Vérifier que les données sont valides
-    if (!items || !total || !clientEmail) {
-      return res.status(400).json({ 
-        error: 'Données manquantes. Merci de fournir items, total et clientEmail.' 
-      });
-    }
-
-    // Déterminer l'URL de base (pour les redirections)
     const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}`
       : 'https://boutiqueflechy.vercel.app';
 
-    // Créer la session Stripe Checkout
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
@@ -37,7 +24,7 @@ module.exports = async (req, res) => {
               name: 'Commande StyleShop',
               description: items.map(i => `${i.name} x${i.qty}`).join(', '),
             },
-            unit_amount: Math.round(total * 100), // Stripe utilise les centimes
+            unit_amount: Math.round(total * 100),
           },
           quantity: 1,
         }
@@ -59,16 +46,10 @@ module.exports = async (req, res) => {
       },
     });
 
-    // Retourner l'URL de redirection vers Stripe
-    return res.status(200).json({ 
-      url: session.url,
-      sessionId: session.id
-    });
+    return res.status(200).json({ url: session.url });
 
   } catch (error) {
-    console.error('❌ Erreur création session Stripe:', error);
-    return res.status(500).json({ 
-      error: error.message || 'Erreur lors de la création de la session de paiement' 
-    });
+    console.error('❌ Erreur:', error);
+    return res.status(500).json({ error: error.message });
   }
 };
