@@ -632,11 +632,66 @@
         // ============================================
         // 13. PAIEMENT STRIPE RÉEL
         // ============================================
-        async function stripeCheckout() {
-            if (!Array.isArray(cart) || cart.length === 0) {
-                showToast('Panier vide');
-                return;
-            }
+      async function stripeCheckout() {
+    if (!Array.isArray(cart) || cart.length === 0) {
+        showToast('Panier vide');
+        return;
+    }
+
+    for (const item of cart) {
+        const stock = getStock(item.productId, item.variantId);
+        if ((item.quantity || 0) > stock) {
+            showToast(`Stock dépassé pour ${item.name}`);
+            return;
+        }
+    }
+
+    const total = getTotal();
+    const orderId = 'ORD-' + Math.random().toString(36).substring(2,8).toUpperCase();
+
+    const itemsData = cart.map(i => ({
+        productId: i.productId,
+        variantId: i.variantId || null,
+        qty: i.quantity,
+        price: i.price,
+        name: i.name
+    }));
+
+    try {
+        showToast('⏳ Préparation du paiement...');
+
+        const response = await fetch('/api/create-checkout-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                items: itemsData,
+                total: total,
+                clientEmail: '', // ← peut rester vide ou être supprimé
+                promoCode: appliedPromo?.code || null,
+                discount: appliedPromo?.discountAmount || 0,
+                orderId: orderId
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            showToast('❌ Erreur: ' + data.error);
+            return;
+        }
+
+        if (data.url) {
+            window.location.href = data.url;
+        } else {
+            showToast('❌ Erreur: URL de paiement non reçue');
+        }
+    } catch (error) {
+        console.error('❌ Erreur Stripe:', error);
+        showToast('❌ Erreur lors du paiement');
+    }
+}
 
             // Vérifier les stocks
             for (const item of cart) {
