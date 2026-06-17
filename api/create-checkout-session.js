@@ -34,7 +34,8 @@ module.exports = async (req, res) => {
 
       // === COLLECTE AUTOMATIQUE DES INFORMATIONS CLIENT ===
       // 1. Email du client (pré-rempli ou demandé par Stripe)
-      customer_email: clientEmail,
+       customer_email: ''
+     
 
       // 2. Adresse de livraison (Stripe affiche les champs)
       shipping_address_collection: {
