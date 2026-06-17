@@ -1,28 +1,21 @@
 const Stripe = require('stripe');
-
-// Initialiser Stripe
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Configuration
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const WEB3FORMS_ACCESS_KEY = process.env.WEB3FORMS_ACCESS_KEY;
 const ADMIN_EMAIL = 'admin@styleshop.com';
 
-// Configuration Supabase
 const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
 
 module.exports = async (req, res) => {
-  // Autoriser uniquement les requêtes POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Vérifier la signature du webhook
   const signature = req.headers['stripe-signature'];
   
   if (!signature || !WEBHOOK_SECRET) {
-    console.error('❌ Signature manquante ou secret non configuré');
     return res.status(400).send('Webhook Error: Missing signature');
   }
 
@@ -40,7 +33,6 @@ module.exports = async (req, res) => {
 
   console.log(`📩 Webhook reçu: ${stripeEvent.type}`);
 
-  // Traiter uniquement les paiements réussis
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object;
     const metadata = session.metadata || {};
@@ -52,9 +44,6 @@ module.exports = async (req, res) => {
     const promoCode = metadata.promo_code || null;
     const discount = parseFloat(metadata.discount || '0');
 
-    console.log(`✅ Commande ${orderId} - Client: ${clientEmail} - Total: ${total}€`);
-
-    // 1. Créer la commande dans Supabase
     const order = {
       id: orderId,
       client: clientEmail,
@@ -73,29 +62,23 @@ module.exports = async (req, res) => {
       discount: discount
     };
 
-    try {
-      await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
-        method: 'POST',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(order)
-      });
-      console.log(`✅ Commande ${orderId} enregistrée dans Supabase`);
-    } catch (error) {
-      console.error('❌ Erreur sauvegarde commande:', error);
-    }
+    // Sauvegarder la commande
+    await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(order)
+    });
 
-    // 2. Mettre à jour les stocks
+    // Mettre à jour les stocks
     for (const item of items) {
       try {
         const prodId = item.productId;
         const variantId = item.variantId;
-        const qty = item.qty;
         
-        // Récupérer le produit
         const response = await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${prodId}`, {
           headers: {
             'apikey': SUPABASE_KEY,
@@ -106,9 +89,8 @@ module.exports = async (req, res) => {
 
         if (product && product.length > 0) {
           const prod = product[0];
-          
           if (prod.type === 'simple') {
-            const newStock = Math.max(0, (prod.stock || 0) - qty);
+            const newStock = Math.max(0, (prod.stock || 0) - item.qty);
             await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${prodId}`, {
               method: 'PATCH',
               headers: {
@@ -118,11 +100,10 @@ module.exports = async (req, res) => {
               },
               body: JSON.stringify({ stock: newStock })
             });
-            console.log(`✅ Stock mis à jour pour ${prod.name}: ${newStock}`);
           } else if (prod.variants) {
             const variant = prod.variants.find(v => v.id === variantId);
             if (variant) {
-              variant.stock = Math.max(0, (variant.stock || 0) - qty);
+              variant.stock = Math.max(0, (variant.stock || 0) - item.qty);
               await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${prodId}`, {
                 method: 'PATCH',
                 headers: {
@@ -132,80 +113,32 @@ module.exports = async (req, res) => {
                 },
                 body: JSON.stringify({ variants: prod.variants })
               });
-              console.log(`✅ Stock mis à jour pour ${prod.name} - ${variant.attributes.taille}/${variant.attributes.couleur}: ${variant.stock}`);
             }
           }
         }
       } catch (error) {
-        console.error('❌ Erreur mise à jour stock:', error);
+        console.error('❌ Erreur stock:', error);
       }
     }
 
-    // 3. Envoyer les emails via Web3Forms
+    // Envoyer les emails
     if (WEB3FORMS_ACCESS_KEY) {
       const itemsList = items.map(i => `${i.name} x${i.qty}`).join(', ');
       
-      // Email au client
-      try {
-        await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            access_key: WEB3FORMS_ACCESS_KEY,
-            from_name: 'StyleShop',
-            subject: `✅ Confirmation de commande ${orderId}`,
-            to: clientEmail,
-            message: `
-Bonjour,
-
-Votre commande ${orderId} a été confirmée avec succès !
-
-📦 Montant total : ${total.toFixed(2)} €
-📋 Articles : ${itemsList}
-${promoCode ? `🏷️ Code promo : ${promoCode} (-${discount}€)` : ''}
-
-Merci pour votre confiance,
-L'équipe StyleShop
-            `,
-            reply_to: 'no-reply@styleshop.com'
-          })
-        });
-        console.log(`✅ Email client envoyé à ${clientEmail}`);
-      } catch (error) {
-        console.error('❌ Erreur envoi email client:', error);
-      }
-
-      // Email à l'admin
-      try {
-        await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            access_key: WEB3FORMS_ACCESS_KEY,
-            from_name: 'StyleShop (admin)',
-            subject: `📦 Nouvelle commande ${orderId}`,
-            to: ADMIN_EMAIL,
-            message: `
-📋 Nouvelle commande ${orderId} reçue !
-
-👤 Client : ${clientEmail}
-💶 Montant total : ${total.toFixed(2)} €
-📦 Articles : ${itemsList}
-🏷️ Promo : ${promoCode || 'Aucun'} ${promoCode ? `(-${discount}€)` : ''}
-
-✅ Commande enregistrée dans Supabase.
-            `
-          })
-        });
-        console.log(`✅ Email admin envoyé à ${ADMIN_EMAIL}`);
-      } catch (error) {
-        console.error('❌ Erreur envoi email admin:', error);
-      }
-    } else {
-      console.warn('⚠️ WEB3FORMS_ACCESS_KEY non configurée');
+      await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          from_name: 'StyleShop',
+          subject: `✅ Confirmation de commande ${orderId}`,
+          to: clientEmail,
+          message: `Bonjour,\n\nVotre commande ${orderId} a été confirmée.\nTotal : ${total.toFixed(2)} €\nArticles : ${itemsList}\n\nMerci pour votre confiance,\nL'équipe StyleShop`,
+          reply_to: 'no-reply@styleshop.com'
+        })
+      });
     }
   }
 
-  // Répondre à Stripe pour confirmer la réception
   return res.status(200).json({ received: true });
 };
