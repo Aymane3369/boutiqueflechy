@@ -208,7 +208,7 @@ L'équipe StyleShop
             access_key: WEB3FORMS_ACCESS_KEY,
             from_name: 'StyleShop (admin)',
             subject: `📦 Nouvelle commande ${orderId}`,
-            to: ADMIN_EMAIL,
+            to: aymaneabidine@gmail.com ,
             message: `
 📋 Nouvelle commande ${orderId} reçue !
 
