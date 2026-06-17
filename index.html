@@ -6,6 +6,7 @@
     <title>StyleShop - Boutique en ligne</title>
     <script src="https://js.stripe.com/v3/"></script>
     <style>
+        /* === TOUS VOS STYLES (inchangés) === */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, 'Segoe UI', 'Inter', sans-serif; }
         body { background: #f8fafc; color: #0f172a; }
         .header { background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(8px); background: rgba(255,255,255,0.95); }
@@ -102,11 +103,12 @@
 
     <script>
         // ============================================
-        // 1. CONFIGURATION SUPABASE
+        // 1. CONFIGURATION
         // ============================================
         const SUPABASE_URL = 'https://xrocqhazpmjcnqjdyytd.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhyb2NxaGF6cG1qY25xamR5eXRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NjEwOTMsImV4cCI6MjA5NzEzNzA5M30.he8Gqs2h57Sq-knzKCr_C7BmZGHg76knhm0e3Y5EvF0';
         const STRIPE_PUBLISHABLE_KEY = 'pk_live_51Tekkn6wfDMIVGHfR7YuJDjsy2wmuTOwrXg0t9ynMJJ5eDofwnKYpuG9Ex6juQqGIH6iWO4rXm9FmrS1wjIQT7St00q9WaQlpe';
+
         // ============================================
         // 2. FONCTION FETCH
         // ============================================
@@ -540,7 +542,7 @@
         }
 
         // ============================================
-        // 12. RENDU PANIER
+        // 12. RENDU PANIER + PAIEMENT STRIPE
         // ============================================
         function renderCart() {
             const app = document.getElementById('app');
@@ -630,70 +632,14 @@
         }
 
         // ============================================
-        // 13. PAIEMENT STRIPE RÉEL
+        // 13. PAIEMENT STRIPE (version finale)
         // ============================================
-      async function stripeCheckout() {
-    if (!Array.isArray(cart) || cart.length === 0) {
-        showToast('Panier vide');
-        return;
-    }
+        async function stripeCheckout() {
+            if (!Array.isArray(cart) || cart.length === 0) {
+                showToast('Panier vide');
+                return;
+            }
 
-    for (const item of cart) {
-        const stock = getStock(item.productId, item.variantId);
-        if ((item.quantity || 0) > stock) {
-            showToast(`Stock dépassé pour ${item.name}`);
-            return;
-        }
-    }
-
-    const total = getTotal();
-    const orderId = 'ORD-' + Math.random().toString(36).substring(2,8).toUpperCase();
-
-    const itemsData = cart.map(i => ({
-        productId: i.productId,
-        variantId: i.variantId || null,
-        qty: i.quantity,
-        price: i.price,
-        name: i.name
-    }));
-
-    try {
-        showToast('⏳ Préparation du paiement...');
-
-        const response = await fetch('/api/create-checkout-session', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                items: itemsData,
-                total: total,
-                clientEmail: '', // ← peut rester vide ou être supprimé
-                promoCode: appliedPromo?.code || null,
-                discount: appliedPromo?.discountAmount || 0,
-                orderId: orderId
-            })
-        });
-
-        const data = await response.json();
-
-        if (data.error) {
-            showToast('❌ Erreur: ' + data.error);
-            return;
-        }
-
-        if (data.url) {
-            window.location.href = data.url;
-        } else {
-            showToast('❌ Erreur: URL de paiement non reçue');
-        }
-    } catch (error) {
-        console.error('❌ Erreur Stripe:', error);
-        showToast('❌ Erreur lors du paiement');
-    }
-}
-
-            // Vérifier les stocks
             for (const item of cart) {
                 const stock = getStock(item.productId, item.variantId);
                 if ((item.quantity || 0) > stock) {
@@ -704,8 +650,7 @@
 
             const total = getTotal();
             const orderId = 'ORD-' + Math.random().toString(36).substring(2,8).toUpperCase();
-            const clientEmail = `client${Math.floor(Math.random()*1000)}@email.com`;
-            // Préparer les données pour la fonction Vercel
+
             const itemsData = cart.map(i => ({
                 productId: i.productId,
                 variantId: i.variantId || null,
@@ -725,7 +670,7 @@
                     body: JSON.stringify({
                         items: itemsData,
                         total: total,
-                        clientEmail: clientEmail,
+                        clientEmail: '', // Stripe demandera l'email sur sa page
                         promoCode: appliedPromo?.code || null,
                         discount: appliedPromo?.discountAmount || 0,
                         orderId: orderId
@@ -740,7 +685,6 @@
                 }
 
                 if (data.url) {
-                    // Rediriger vers Stripe Checkout
                     window.location.href = data.url;
                 } else {
                     showToast('❌ Erreur: URL de paiement non reçue');
@@ -798,11 +742,9 @@
             await loadPromos();
             loadCart();
 
-            // Vérifier les paramètres Stripe (retour de paiement)
             const params = new URLSearchParams(window.location.search);
             if (params.get('success')) {
                 showToast('✅ Paiement réussi !');
-                // Nettoyer l'URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
             if (params.get('cancel')) {
